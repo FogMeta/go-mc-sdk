@@ -66,8 +66,8 @@ func (m *MetaClient) UploadFile(filePath string) (string, error) {
 
 func (m *MetaClient) DownloadFile(hash, filePath string) error {
 	url := ""
-	outDir := ""
-	outFilename := ""
+	outDir := filepath.Dir(filePath)
+	outFilename := filepath.Base(filePath)
 	if !DownloadByAria2(url, outDir, outFilename) {
 		fmt.Printf("Download Hash (%s) failed\n", hash)
 		return errors.New("download files failed")
