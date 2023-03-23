@@ -1,139 +1,184 @@
 package client
 
 import (
-	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
-	web "github.com/filswan/go-swan-lib/client/web"
-	utils "github.com/filswan/go-swan-lib/utils"
+	"github.com/filswan/go-swan-lib/client"
+	"github.com/filswan/go-swan-lib/logs"
+	"github.com/filswan/go-swan-lib/utils"
 	shell "github.com/ipfs/go-ipfs-api"
-	"os"
-	"path/filepath"
 )
 
 type MetaClient struct {
-	ApiKey string
-	ApiSec string
-	sh     *shell.Shell
+	ApiKey          string
+	ApiToken        string
+	IpfsUploadUrl   string
+	IpfsDownloadUrl string
+	MetaUrl         string
+
+	sh    *shell.Shell
+	aria2 *client.Aria2Client
 }
 
-func NewAPIClient() *MetaClient {
-	c := &MetaClient{}
+func NewAPIClient(key, token, ipfsUploadUrl, ipfsDownloadUrl, metaUrl string) *MetaClient {
+
+	c := &MetaClient{
+		ApiKey:          key,
+		ApiToken:        token,
+		IpfsUploadUrl:   ipfsUploadUrl,
+		IpfsDownloadUrl: ipfsDownloadUrl,
+		MetaUrl:         metaUrl,
+	}
+	// TODO: check key and token ,need meta server api
 
 	return c
 }
 
-func (m *MetaClient) UploadFile(filePath string) (string, error) {
+func (m *MetaClient) UploadFile(targetPath string) (dataCid string, err error) {
 	// Creates an IPFS Shell client.
-	sh := shell.NewShell("localhost:5001")
+	sh := shell.NewShell(m.IpfsUploadUrl)
 
-	// Iterates through the specified directory and uploads all files to IPFS.
-	dirIter := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		// If the current path points to a file, upload the file to IPFS.
-		if !info.IsDir() {
-			fmt.Printf("Uploading %s...", path)
-			cid, err := sh.Add(context.Background(), path)
-			fmt.Printf("Done\n")
-			if err != nil {
-				return err
-			}
-			fmt.Printf("Added to IPFS: %s\n", cid)
-		}
-		return nil
-	})
-
-	// Start the iteration.
-	if err := filepath.Walk(dirPath, dirIter); err != nil {
-		return "", err
-	}
-
-	// Finally, upload the whole directory to IPFS.
-	fmt.Printf("Uploading %s...", dirPath)
-	dirCid, err := sh.AddDir(dirPath)
-	fmt.Printf("Done\n")
+	isInputFile, err := isFile(targetPath)
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("Added to IPFS: %s\n", dirCid)
 
-	// Returns the CID for the uploaded directory.
-	return dirCid, nil
+	if *isInputFile {
+		dataCid, err = uploadFileToIpfs(sh, targetPath)
+	} else {
+		dataCid, err = uploadDirToIpfs(sh, targetPath)
+	}
+	if err != nil {
+		return "", err
+	}
+
+	// TODO: notify meta server the result
+	sourceSize := walkDirSize(targetPath)
+	err = m.NotifyMetaServer(targetPath, sourceSize, dataCid)
+	if err != nil {
+		return "", err
+	}
+
+	return dataCid, nil
 }
 
-func (m *MetaClient) DownloadFile(hash, filePath string) error {
-	url := ""
-	outDir := filepath.Dir(filePath)
-	outFilename := filepath.Base(filePath)
-	if !DownloadByAria2(url, outDir, outFilename) {
-		fmt.Printf("Download Hash (%s) failed\n", hash)
-		return errors.New("download files failed")
+func (m *MetaClient) NotifyMetaServer(sourceName string, sourceSize int64, dataCid string) error {
+
+	var params []interface{}
+	params = append(params, SourceFileReq{sourceName, sourceSize, dataCid, m.IpfsDownloadUrl})
+	jsonRpcParams := JsonRpcParams{
+		JsonRpc: "",
+		Method:  "",
+		Params:  params,
+		Id:      1,
 	}
+
+	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
+	if err != nil {
+		fmt.Printf("Get Response Error: %s \n", err)
+		return err
+	}
+
+	res := JsonRpcResponse{}
+	err = json.Unmarshal(response, res)
+	if err != nil {
+		fmt.Printf("Parse Response (%s) Error: %s \n", response, err)
+		return err
+	}
+
 	return nil
 }
 
-func (m *MetaClient) GetFileLists(page, limit uint64, showStorageInfo bool) ([]FileDetails, error) {
-	params := FileListsParams{page, limit, showStorageInfo}
+func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) error {
+	// Creates an IPFS Shell client.
+	sh := shell.NewShell(m.IpfsDownloadUrl)
 
-	// TODO:
-	targetUrl := utils.UrlJoin("", "file_lists")
-	response, err := web.HttpGetNoToken(targetUrl, params)
+	isDir, err := dataCidIsDir(sh, dataCid)
+	if err != nil || isDir == nil {
+		return err
+	}
+
+	// aria2 download file
+	if !(*isDir) && (conf != nil) {
+		downUrl := utils.UrlJoin(m.IpfsDownloadUrl, dataCid)
+		return downloadFileByAria2(conf, downUrl, outPath)
+	}
+
+	return downloadFromIpfs(sh, dataCid, outPath)
+}
+
+func (m *MetaClient) GetFileLists(page, limit uint64, showStorageInfo bool) ([]FileDetails, error) {
+
+	var params []interface{}
+	params = append(params, FileListsParams{page, limit, showStorageInfo})
+	jsonRpcParams := JsonRpcParams{
+		JsonRpc: "",
+		Method:  "",
+		Params:  params,
+		Id:      1,
+	}
+	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
 	if err != nil {
-		fmt.Printf("Get Response Error: %s \n", err)
+		logs.GetLogger().Errorf("Get Response Error: %s \n", err)
 		return nil, err
 	}
 
 	res := FileListsResponse{}
 	err = json.Unmarshal(response, res)
 	if err != nil {
-		fmt.Printf("Parse Response (%s) Error: %s \n", response, err)
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
 		return nil, err
 	}
 
 	return res.FileLists, nil
 }
 
-func (m *MetaClient) GetFileDataCID(fileName string) (string, error) {
-	params := FileDataCIDParams{fileName}
-
-	// TODO:
-	targetUrl := utils.UrlJoin("", "file_data_cid")
-	response, err := web.HttpGetNoToken(targetUrl, params)
-	if err != nil {
-		fmt.Printf("Get Response Error: %s \n", err)
-		return "", err
+func (m *MetaClient) GetFileDataCID(fileName string) ([]string, error) {
+	var params []interface{}
+	params = append(params, FileDataCIDParams{fileName})
+	jsonRpcParams := JsonRpcParams{
+		JsonRpc: "",
+		Method:  "",
+		Params:  params,
+		Id:      1,
 	}
-
+	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Errorf("Get Response Error: %s \n", err)
+		return nil, err
+	}
 	res := FileDataCIDResponse{}
 	err = json.Unmarshal(response, res)
 	if err != nil {
-		fmt.Printf("Parse Response (%s) Error: %s \n", response, err)
-		return "", err
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
+		return nil, err
 	}
 
-	return res.DataCid, nil
+	return res.DataCids, nil
 }
 
-func (m *MetaClient) GetFileStatus(fileName string) (*FileDetails, error) {
-	params := FileStatusParams{fileName}
+func (m *MetaClient) GetFileInfo(fileName string) (*FileDetails, error) {
 
-	// TODO:
-	targetUrl := utils.UrlJoin("", "file_status")
-	response, err := web.HttpGetNoToken(targetUrl, params)
+	var params []interface{}
+	params = append(params, FileInfoParams{fileName})
+	jsonRpcParams := JsonRpcParams{
+		JsonRpc: "",
+		Method:  "",
+		Params:  params,
+		Id:      1,
+	}
+	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
 	if err != nil {
-		fmt.Printf("Get Response Error: %s \n", err)
+		logs.GetLogger().Errorf("Get Response Error: %s \n", err)
 		return nil, err
 	}
 
-	res := FileStatusResponse{}
+	res := FileInfoResponse{}
 	err = json.Unmarshal(response, res)
 	if err != nil {
-		fmt.Printf("Parse Response (%s) Error: %s \n", response, err)
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
 		return nil, err
 	}
 
-	return &(res.Status), nil
+	return &res.Info, nil
 }

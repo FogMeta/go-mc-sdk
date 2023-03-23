@@ -1,5 +1,47 @@
 package client
 
+type Aria2Conf struct {
+	Host   string
+	Port   int
+	Secret string
+}
+
+type JsonRpcParams struct {
+	JsonRpc string        `json:"jsonrpc"`
+	Method  string        `json:"method"`
+	Params  []interface{} `json:"params"`
+	Id      int           `json:"id"`
+}
+
+type JsonRpcResponse struct {
+	JsonRpc string        `json:"jsonrpc"`
+	result  []interface{} `json:"result"`
+}
+
+type SourceFileReq struct {
+	SourceName  string `json:"source_name"`
+	SourceSize  int64  `json:"source_size"`
+	DataCid     string `json:"data_cid"`
+	DownloadUrl string `json:"download_url"`
+}
+
+type SourceFile struct {
+	SourceName   string      `json:"source_name"`
+	DataCid      string      `json:"data_cid"`
+	DownloadLink string      `json:"download_link"`
+	StorageList  []SplitFile `json:"storage_list"`
+	SourceSize   int64       `json:"source_size"`
+}
+
+type SplitFile struct {
+	DataCid           string `json:"data_cid"`
+	FileSize          int64  `json:"file_size"`
+	StorageProviderId string `json:"storage_provider_id"`
+	StorageStatus     string `json:"storage_status"`
+	DealId            int64  `json:"deal_id"`
+	DealCid           string `json:"deal_cid"` // proposalcid or uuid
+}
+
 type FileDetails struct {
 	FileName     string           `json:"file_name"`
 	DataCID      string           `json:"data_cid"`
@@ -8,12 +50,15 @@ type FileDetails struct {
 	StorageInfo  []StorageDetails `json:"storage_info"`
 }
 
+type SpDetail struct {
+	StorageProviderId string `json:"storage_provider_id"`
+	StorageStatus     string `json:"storage_status"`
+}
+
 type StorageDetails struct {
-	BlockNumber   int    `json:"block_number"`
-	DataCID       string `json:"data_cid"`
-	Size          int    `json:"size"`
-	MinerHash     string `json:"miner_hash"`
-	StorageStatus string `json:"storage_status"`
+	DataCID  string     `json:"data_cid"`
+	Size     int        `json:"size"`
+	SpDetail []SpDetail `json:"sp_detail"`
 }
 
 type FileListsParams struct {
@@ -31,13 +76,13 @@ type FileDataCIDParams struct {
 }
 
 type FileDataCIDResponse struct {
-	DataCid string `json:"data_cid"`
+	DataCids []string `json:"data_cids"`
 }
 
-type FileStatusParams struct {
+type FileInfoParams struct {
 	FileName string `json:"file_name"`
 }
 
-type FileStatusResponse struct {
-	Status FileDetails `json:"status"`
+type FileInfoResponse struct {
+	Info FileDetails `json:"info"`
 }
