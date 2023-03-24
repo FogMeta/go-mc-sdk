@@ -100,10 +100,14 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) erro
 	}
 
 	// aria2 download file
-	if !(*isDir) && (conf != nil) {
-
+	if conf != nil {
 		downUrl := utils.UrlJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
-		return downloadFileByAria2(conf, downUrl, PathJoin(outPath, dataCid))
+		outFile := PathJoin(outPath, dataCid)
+		if *isDir {
+			downUrl = downUrl + "?format=tar"
+			outFile = outFile + ".tar"
+		}
+		return downloadFileByAria2(conf, downUrl, outFile)
 	}
 
 	return downloadFromIpfs(sh, dataCid, outPath)

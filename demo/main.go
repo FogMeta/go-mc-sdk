@@ -22,7 +22,9 @@ func main() {
 
 	// testUpDownFile(metaClient)
 
-	testAria2File(metaClient)
+	// testAria2File(metaClient)
+
+	testAria2Dir(metaClient)
 
 }
 
@@ -60,6 +62,23 @@ func testUpDownFile(c *sdk.MetaClient) {
 
 func testAria2File(c *sdk.MetaClient) {
 	dataCid, err := c.UploadFile("./testdata/help")
+	if err != nil {
+		logs.GetLogger().Error("upload file error:", err)
+		return
+	}
+	logs.GetLogger().Infoln("upload file success, and data cid: ", dataCid)
+
+	conf := &sdk.Aria2Conf{Host: "127.0.0.1", Port: 6800, Secret: "secret123"}
+	err = c.DownloadFile(dataCid, "output", conf)
+	if err != nil {
+		logs.GetLogger().Error("download file error:", err)
+		return
+	}
+	logs.GetLogger().Infoln("download file by aria2 success")
+}
+
+func testAria2Dir(c *sdk.MetaClient) {
+	dataCid, err := c.UploadFile("./testdata")
 	if err != nil {
 		logs.GetLogger().Error("upload file error:", err)
 		return
