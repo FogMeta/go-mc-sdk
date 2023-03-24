@@ -12,7 +12,19 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 )
+
+func PathJoin(root string, parts ...string) string {
+	url := root
+
+	for _, part := range parts {
+		url = strings.TrimRight(url, "/") + "/" + strings.TrimLeft(part, "/")
+	}
+	url = strings.TrimRight(url, "/")
+
+	return url
+}
 
 func downloadFileByAria2(conf *Aria2Conf, downUrl, outPath string) error {
 	aria2 := client.GetAria2Client(conf.Host, conf.Secret, conf.Port)
@@ -135,11 +147,13 @@ func uploadDirToIpfs(sh *shell.Shell, dirName string) (string, error) {
 
 func dataCidIsDir(sh *shell.Shell, dataCid string) (*bool, error) {
 
-	stat, err := sh.FilesStat(context.Background(), dataCid)
+	path := PathJoin("/ipfs/", dataCid)
+	stat, err := sh.FilesStat(context.Background(), path)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
+	logs.GetLogger().Debug("FileStat:", stat)
 
 	isFile := false
 	if stat.Type == "directory" {

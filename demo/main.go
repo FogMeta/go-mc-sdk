@@ -8,17 +8,17 @@ import (
 func main() {
 	key := ""
 	token := ""
-	ipfsUploadUrl := ""
-	ipfsDownloadUrl := ""
+	uploadUrl := "localhost:5001"
+	downloadUrl := "localhost:5001"
 	metaUrl := ""
 
-	metaClient := sdk.NewAPIClient(key, token, ipfsUploadUrl, ipfsDownloadUrl, metaUrl)
+	metaClient := sdk.NewAPIClient(key, token, uploadUrl, downloadUrl, metaUrl)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 		return
 	}
 
-	dataCid, err := metaClient.UploadFile("./testdata")
+	dataCid, err := metaClient.UploadFile("./testdata/about")
 	if err != nil {
 		logs.GetLogger().Error("upload file error:", err)
 		return
@@ -32,5 +32,4 @@ func main() {
 	}
 	logs.GetLogger().Infoln("download file success")
 
-	logs.GetLogger().Infoln("Demo Test Over ...")
 }

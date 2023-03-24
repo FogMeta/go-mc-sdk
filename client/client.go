@@ -54,15 +54,16 @@ func (m *MetaClient) UploadFile(targetPath string) (dataCid string, err error) {
 
 	// TODO: notify meta server the result
 	sourceSize := walkDirSize(targetPath)
-	err = m.NotifyMetaServer(targetPath, sourceSize, dataCid)
-	if err != nil {
-		return "", err
-	}
+	logs.GetLogger().Infoln("upload total size is:", sourceSize)
+	//err = m.notifyMetaServer(targetPath, sourceSize, dataCid)
+	//if err != nil {
+	//	return "", err
+	//}
 
 	return dataCid, nil
 }
 
-func (m *MetaClient) NotifyMetaServer(sourceName string, sourceSize int64, dataCid string) error {
+func (m *MetaClient) notifyMetaServer(sourceName string, sourceSize int64, dataCid string) error {
 
 	var params []interface{}
 	params = append(params, SourceFileReq{sourceName, sourceSize, dataCid, m.IpfsDownloadUrl})

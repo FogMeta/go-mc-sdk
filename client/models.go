@@ -1,9 +1,9 @@
 package client
 
 type Aria2Conf struct {
-	Host   string
-	Port   int
-	Secret string
+	Host   string `json:"host"`
+	Port   int    `json:"port"`
+	Secret string `json:"secret"`
 }
 
 type JsonRpcParams struct {
