@@ -93,7 +93,6 @@ func (m *MetaClient) notifyMetaServer(sourceName string, sourceSize int64, dataC
 func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) error {
 	// Creates an IPFS Shell client.
 	sh := shell.NewShell(m.IpfsApiUrl)
-
 	isDir, err := dataCidIsDir(sh, dataCid)
 	if err != nil || isDir == nil {
 		return err
@@ -103,11 +102,17 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) erro
 	if conf != nil {
 		downUrl := utils.UrlJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
 		outFile := PathJoin(outPath, dataCid)
+
 		if *isDir {
 			downUrl = downUrl + "?format=tar"
 			outFile = outFile + ".tar"
 		}
-		return downloadFileByAria2(conf, downUrl, outFile)
+
+		err = downloadFileByAria2(conf, downUrl, outFile)
+		if err == nil {
+			return nil
+		}
+		logs.GetLogger().Warnln("download ", dataCid, "by aria2 error:", err)
 	}
 
 	return downloadFromIpfs(sh, dataCid, outPath)
