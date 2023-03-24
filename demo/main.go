@@ -9,10 +9,10 @@ func main() {
 	key := ""
 	token := ""
 	ipfsApiUrl := "http://127.0.0.1:5001"
-	gatewatUrl := "http://127.0.0.1:8080"
+	gatewayUrl := "http://127.0.0.1:8080"
 	metaUrl := ""
 
-	metaClient := sdk.NewAPIClient(key, token, ipfsApiUrl, gatewatUrl, metaUrl)
+	metaClient := sdk.NewAPIClient(key, token, ipfsApiUrl, gatewayUrl, metaUrl)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 		return
@@ -22,26 +22,26 @@ func main() {
 
 	UpDownFileDemo(metaClient)
 
-	Aria2FileDemo(metaClient)
+	Aria2DownFileDemo(metaClient)
 
-	Aria2DirDemo(metaClient)
+	Aria2DownDirDemo(metaClient)
 
 }
 
 func UpDownDirDemo(c *sdk.MetaClient) {
 	dataCid, err := c.UploadFile("./testdata/about")
 	if err != nil {
-		logs.GetLogger().Error("upload file error:", err)
+		logs.GetLogger().Error("upload dir error:", err)
 		return
 	}
-	logs.GetLogger().Infoln("upload file success, and data cid: ", dataCid)
+	logs.GetLogger().Infoln("upload dir success, and data cid: ", dataCid)
 
 	err = c.DownloadFile(dataCid, "./output", nil)
 	if err != nil {
-		logs.GetLogger().Error("download file error:", err)
+		logs.GetLogger().Error("download dir error:", err)
 		return
 	}
-	logs.GetLogger().Infoln("download file success")
+	logs.GetLogger().Infoln("download dir success")
 }
 
 func UpDownFileDemo(c *sdk.MetaClient) {
@@ -60,7 +60,7 @@ func UpDownFileDemo(c *sdk.MetaClient) {
 	logs.GetLogger().Infoln("download file success")
 }
 
-func Aria2FileDemo(c *sdk.MetaClient) {
+func Aria2DownFileDemo(c *sdk.MetaClient) {
 	dataCid, err := c.UploadFile("./testdata/help")
 	if err != nil {
 		logs.GetLogger().Error("upload file error:", err)
@@ -77,20 +77,20 @@ func Aria2FileDemo(c *sdk.MetaClient) {
 	logs.GetLogger().Infoln("download file by aria2 success")
 }
 
-func Aria2DirDemo(c *sdk.MetaClient) {
+func Aria2DownDirDemo(c *sdk.MetaClient) {
 	dataCid, err := c.UploadFile("./testdata")
 	if err != nil {
-		logs.GetLogger().Error("upload file error:", err)
+		logs.GetLogger().Error("upload dir error:", err)
 		return
 	}
-	logs.GetLogger().Infoln("upload file success, and data cid: ", dataCid)
+	logs.GetLogger().Infoln("upload dir success, and data cid: ", dataCid)
 
 	conf := &sdk.Aria2Conf{Host: "127.0.0.1", Port: 6800, Secret: "secret123"}
 
 	err = c.DownloadFile(dataCid, "output", conf)
 	if err != nil {
-		logs.GetLogger().Error("download file error:", err)
+		logs.GetLogger().Error("download dir error:", err)
 		return
 	}
-	logs.GetLogger().Infoln("download file by aria2 success")
+	logs.GetLogger().Infoln("download dir by aria2 success")
 }
