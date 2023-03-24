@@ -10,24 +10,24 @@ import (
 )
 
 type MetaClient struct {
-	ApiKey          string
-	ApiToken        string
-	IpfsUploadUrl   string
-	IpfsDownloadUrl string
-	MetaUrl         string
+	ApiKey         string
+	ApiToken       string
+	IpfsApiUrl     string
+	IpfsGatewayUrl string
+	MetaUrl        string
 
 	sh    *shell.Shell
 	aria2 *client.Aria2Client
 }
 
-func NewAPIClient(key, token, ipfsUploadUrl, ipfsDownloadUrl, metaUrl string) *MetaClient {
+func NewAPIClient(key, token, ipfsApiUrl, ipfsGatewayUrl, metaUrl string) *MetaClient {
 
 	c := &MetaClient{
-		ApiKey:          key,
-		ApiToken:        token,
-		IpfsUploadUrl:   ipfsUploadUrl,
-		IpfsDownloadUrl: ipfsDownloadUrl,
-		MetaUrl:         metaUrl,
+		ApiKey:         key,
+		ApiToken:       token,
+		IpfsApiUrl:     ipfsApiUrl,
+		IpfsGatewayUrl: ipfsGatewayUrl,
+		MetaUrl:        metaUrl,
 	}
 	// TODO: check key and token ,need meta server api
 
@@ -36,7 +36,7 @@ func NewAPIClient(key, token, ipfsUploadUrl, ipfsDownloadUrl, metaUrl string) *M
 
 func (m *MetaClient) UploadFile(targetPath string) (dataCid string, err error) {
 	// Creates an IPFS Shell client.
-	sh := shell.NewShell(m.IpfsUploadUrl)
+	sh := shell.NewShell(m.IpfsApiUrl)
 
 	isInputFile, err := isFile(targetPath)
 	if err != nil {
@@ -66,7 +66,7 @@ func (m *MetaClient) UploadFile(targetPath string) (dataCid string, err error) {
 func (m *MetaClient) notifyMetaServer(sourceName string, sourceSize int64, dataCid string) error {
 
 	var params []interface{}
-	params = append(params, SourceFileReq{sourceName, sourceSize, dataCid, m.IpfsDownloadUrl})
+	params = append(params, SourceFileReq{sourceName, sourceSize, dataCid, m.IpfsGatewayUrl})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "",
 		Method:  "",
@@ -92,7 +92,7 @@ func (m *MetaClient) notifyMetaServer(sourceName string, sourceSize int64, dataC
 
 func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) error {
 	// Creates an IPFS Shell client.
-	sh := shell.NewShell(m.IpfsDownloadUrl)
+	sh := shell.NewShell(m.IpfsApiUrl)
 
 	isDir, err := dataCidIsDir(sh, dataCid)
 	if err != nil || isDir == nil {
@@ -101,8 +101,9 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) erro
 
 	// aria2 download file
 	if !(*isDir) && (conf != nil) {
-		downUrl := utils.UrlJoin(m.IpfsDownloadUrl, dataCid)
-		return downloadFileByAria2(conf, downUrl, outPath)
+
+		downUrl := utils.UrlJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
+		return downloadFileByAria2(conf, downUrl, PathJoin(outPath, dataCid))
 	}
 
 	return downloadFromIpfs(sh, dataCid, outPath)
