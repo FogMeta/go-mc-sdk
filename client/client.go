@@ -55,10 +55,11 @@ func (m *MetaClient) UploadFile(targetPath string) (dataCid string, err error) {
 	sourceSize := walkDirSize(targetPath)
 	logs.GetLogger().Infoln("upload total size is:", sourceSize)
 
-	err = m.notifyMetaServer(targetPath, sourceSize, dataCid)
-	if err != nil {
-		return "", err
-	}
+	//TODO
+	//err = m.notifyMetaServer(targetPath, sourceSize, dataCid)
+	//if err != nil {
+	//	return "", err
+	//}
 
 	return dataCid, nil
 }

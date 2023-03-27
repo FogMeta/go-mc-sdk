@@ -1,5 +1,13 @@
 package client
 
+type ClientConf struct {
+	Key            string `json:"key"`
+	Token          string `json:"token"`
+	IpfsApiUrl     string `json:"ipfs_api_url"`
+	IpfsGatewayUrl string `json:"ipfs_gateway_url"`
+	MetaServerUrl  string `json:"meta_server_url"`
+}
+
 type Aria2Conf struct {
 	Host   string `json:"host"`
 	Port   int    `json:"port"`
