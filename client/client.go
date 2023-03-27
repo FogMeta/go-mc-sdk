@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/logs"
-	"github.com/filswan/go-swan-lib/utils"
 	shell "github.com/ipfs/go-ipfs-api"
 )
 
@@ -55,10 +54,11 @@ func (m *MetaClient) UploadFile(targetPath string) (dataCid string, err error) {
 	// TODO: notify meta server the result
 	sourceSize := walkDirSize(targetPath)
 	logs.GetLogger().Infoln("upload total size is:", sourceSize)
-	//err = m.notifyMetaServer(targetPath, sourceSize, dataCid)
-	//if err != nil {
-	//	return "", err
-	//}
+
+	err = m.notifyMetaServer(targetPath, sourceSize, dataCid)
+	if err != nil {
+		return "", err
+	}
 
 	return dataCid, nil
 }
@@ -66,10 +66,11 @@ func (m *MetaClient) UploadFile(targetPath string) (dataCid string, err error) {
 func (m *MetaClient) notifyMetaServer(sourceName string, sourceSize int64, dataCid string) error {
 
 	var params []interface{}
-	params = append(params, SourceFileReq{sourceName, sourceSize, dataCid, m.IpfsGatewayUrl})
+	downUrl := pathJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
+	params = append(params, SourceFileReq{sourceName, sourceSize, dataCid, downUrl})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "",
-		Method:  "",
+		Method:  "StoreSourceFile",
 		Params:  params,
 		Id:      1,
 	}
@@ -100,8 +101,8 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) erro
 
 	// aria2 download file
 	if conf != nil {
-		downUrl := utils.UrlJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
-		outFile := PathJoin(outPath, dataCid)
+		downUrl := pathJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
+		outFile := pathJoin(outPath, dataCid)
 
 		if *isDir {
 			downUrl = downUrl + "?format=tar"
@@ -124,7 +125,7 @@ func (m *MetaClient) GetFileLists(page, limit uint64, showStorageInfo bool) ([]F
 	params = append(params, FileListsParams{page, limit, showStorageInfo})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "",
-		Method:  "",
+		Method:  "GetSourceFiles",
 		Params:  params,
 		Id:      1,
 	}
@@ -149,7 +150,7 @@ func (m *MetaClient) GetFileDataCID(fileName string) ([]string, error) {
 	params = append(params, FileDataCIDParams{fileName})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "",
-		Method:  "",
+		Method:  "GetSourceFilesByName",
 		Params:  params,
 		Id:      1,
 	}
