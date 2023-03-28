@@ -60,37 +60,6 @@ func (m *MetaClient) UploadFile(targetPath string) (dataCid string, err error) {
 	return dataCid, nil
 }
 
-func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error {
-
-	sourceSize := walkDirSize(sourceName)
-	logs.GetLogger().Infoln("upload total size is:", sourceSize)
-
-	var params []interface{}
-	downUrl := pathJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
-	params = append(params, SourceFileReq{sourceName, sourceSize, dataCid, downUrl})
-	jsonRpcParams := JsonRpcParams{
-		JsonRpc: "",
-		Method:  "StoreSourceFile",
-		Params:  params,
-		Id:      1,
-	}
-
-	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
-	if err != nil {
-		fmt.Printf("Get Response Error: %s \n", err)
-		return err
-	}
-
-	res := APIResp{}
-	err = json.Unmarshal(response, res)
-	if err != nil {
-		fmt.Printf("Parse Response (%s) Error: %s \n", response, err)
-		return err
-	}
-
-	return nil
-}
-
 func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) error {
 	// Creates an IPFS Shell client.
 	sh := shell.NewShell(m.IpfsApiUrl)
@@ -119,7 +88,39 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) erro
 	return downloadFromIpfs(sh, dataCid, outPath)
 }
 
-func (m *MetaClient) GetFileLists(page, limit int, showStorageInfo bool) ([]FileDetails, error) {
+func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error {
+
+	sourceSize := walkDirSize(sourceName)
+	logs.GetLogger().Infoln("upload total size is:", sourceSize)
+
+	var params []interface{}
+	downUrl := pathJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
+	params = append(params, StoreSourceFileReq{sourceName, sourceSize, dataCid, downUrl})
+	jsonRpcParams := JsonRpcParams{
+		JsonRpc: "",
+		Method:  "StoreSourceFile",
+		Params:  params,
+		Id:      1,
+	}
+
+	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
+	if err != nil {
+		fmt.Printf("Get Response Error: %s \n", err)
+		return err
+	}
+
+	res := StoreSourceFileResponse{}
+	err = json.Unmarshal(response, res)
+	if err != nil {
+		fmt.Printf("Parse Response (%s) Error: %s \n", response, err)
+		return err
+	}
+	logs.GetLogger().Info(res)
+
+	return nil
+}
+
+func (m *MetaClient) GetFileLists(page, limit int, showStorageInfo bool) ([]SourceFile, error) {
 
 	var params []interface{}
 	params = append(params, SourceFilePageReq{page, limit})
@@ -135,12 +136,13 @@ func (m *MetaClient) GetFileLists(page, limit int, showStorageInfo bool) ([]File
 		return nil, err
 	}
 
-	res := APIResp{}
+	res := SourceFilePageResponse{}
 	err = json.Unmarshal(response, res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
 		return nil, err
 	}
+	logs.GetLogger().Info(res)
 
 	return nil, nil
 }
@@ -159,23 +161,24 @@ func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) {
 		logs.GetLogger().Errorf("Get Response Error: %s \n", err)
 		return nil, err
 	}
-	res := APIResp{}
+	res := DataCidResponse{}
 	err = json.Unmarshal(response, res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
 		return nil, err
 	}
+	logs.GetLogger().Info(res)
 
 	return nil, nil
 }
 
-func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*FileDetails, error) {
+func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*SourceFile, error) {
 
 	var params []interface{}
 	params = append(params, dataCid)
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "",
-		Method:  "",
+		Method:  "GetSourceFileByDataCid",
 		Params:  params,
 		Id:      1,
 	}
@@ -185,12 +188,13 @@ func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*FileDetails, error) 
 		return nil, err
 	}
 
-	res := APIResp{}
+	res := SourceFileResponse{}
 	err = json.Unmarshal(response, res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
 		return nil, err
 	}
+	logs.GetLogger().Info(res)
 
 	return nil, nil
 }

@@ -21,30 +21,62 @@ type JsonRpcParams struct {
 	Id      int           `json:"id"`
 }
 
-type JsonRpcResponse struct {
-	JsonRpc string        `json:"jsonrpc"`
-	result  []interface{} `json:"result"`
-}
-
-type APIResp struct {
-	Code    string      `json:"code"`
-	Message string      `json:"message,omitempty"`
-	Data    interface{} `json:"data,omitempty"`
-}
-
-type SourceFileReq struct {
+// StoreSourceFile
+type StoreSourceFileReq struct {
 	SourceName  string `json:"source_name"`
 	SourceSize  int64  `json:"source_size"`
 	DataCid     string `json:"data_cid"`
 	DownloadUrl string `json:"download_url"`
 }
 
+type StoreSourceFileResponse struct {
+	JsonRpc string `json:"jsonrpc"`
+	result  struct {
+		Code    string `json:"code"`
+		Message string `json:"message,omitempty"`
+	} `json:"result"`
+}
+
+//GetSourceFiles
+
+type SourceFilePageReq struct {
+	PageNum int `json:"page_num"`
+	Size    int `json:"size"`
+}
+
+type SourceFilePageResponse struct {
+	JsonRpc string `json:"jsonrpc"`
+	result  struct {
+		Total     int64         `json:"total"`
+		PageCount int64         `json:"pageCount"`
+		Sources   []*SourceFile `json:"files"`
+	} `json:"result"`
+}
+
 type SourceFile struct {
-	SourceName  string      `json:"source_name"`
-	DataCid     string      `json:"data_cid"`
-	DownloadUrl string      `json:"download_url"`
-	StorageList []SplitFile `json:"storage_list"`
-	SourceSize  int64       `json:"source_size"`
+	SourceName  string       `json:"source_name"`
+	DataCid     string       `json:"data_cid"`
+	DownloadUrl string       `json:"download_url"`
+	StorageList []*SplitFile `json:"storage_list"`
+	SourceSize  int64        `json:"source_size"`
+}
+
+//GetDataCidByName
+
+type DataCidResponse struct {
+	JsonRpc string `json:"jsonrpc"`
+	result  struct {
+		Code    string   `json:"code"`
+		Message string   `json:"message,omitempty"`
+		Data    []string `json:"data,omitempty"`
+	} `json:"result"`
+}
+
+// GetSourceFileByDataCid
+
+type SourceFileResponse struct {
+	JsonRpc string     `json:"jsonrpc"`
+	result  SourceFile `json:"result"`
 }
 
 type SplitFile struct {
@@ -55,56 +87,4 @@ type SplitFile struct {
 	DealId            int64  `json:"deal_id"`
 	DealCid           string `json:"deal_cid"`
 	ExpiredTime       int64  `json:"expired_time"`
-}
-
-type SourceFilePageReq struct {
-	PageNum int `json:"page_num"`
-	Size    int `json:"size"`
-}
-
-//////////////////////////////////////////
-
-type FileDetails struct {
-	FileName     string           `json:"file_name"`
-	DataCID      string           `json:"data_cid"`
-	DownloadLink string           `json:"download_link"`
-	FileSize     int              `json:"file_size"`
-	StorageInfo  []StorageDetails `json:"storage_info"`
-}
-
-type SpDetail struct {
-	StorageProviderId string `json:"storage_provider_id"`
-	StorageStatus     string `json:"storage_status"`
-}
-
-type StorageDetails struct {
-	DataCID  string     `json:"data_cid"`
-	Size     int        `json:"size"`
-	SpDetail []SpDetail `json:"sp_detail"`
-}
-
-type FileListsParams struct {
-	Page        uint64 `json:"page"`
-	Limit       uint64 `json:"limit"`
-	ShowStorage bool   `json:"show_storage"`
-}
-
-type FileListsResponse struct {
-	FileLists []FileDetails `json:"file_lists"`
-}
-
-type FileDataCIDParams struct {
-	FileName string `json:"file_name"`
-}
-
-type FileDataCIDResponse struct {
-	DataCids []string `json:"data_cids"`
-}
-
-type FileInfoParams struct {
-	FileName string `json:"file_name"`
-}
-
-type FileInfoResponse struct {
-	Info FileDetails `json:"info"`
 }
