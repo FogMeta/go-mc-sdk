@@ -169,7 +169,7 @@ func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*FileDetails, error)
 Inputs:
 
 ```shell
-dataCid                # 查询Dada Cid
+dataCid                # 需要查询的Dada Cid
 ```
 
 Outputs:
@@ -198,22 +198,25 @@ import (
 	sdk "github.com/meta-client-sdk/client"
 	"os"
 )
+
 func main() {
-	key := "XXXXXXXX"
-	token := "XXXXXXXX"
+	key        := "XXXXXXXX"
+	token      := "XXXXXXXX"
 	ipfsApiUrl := "http://127.0.0.1:5001"
 	gatewatUrl := "http://127.0.0.1:8080"
-	metaUrl := "http://127.0.0.1:1234"
+	metaUrl    := "http://127.0.0.1:1234"
 
 	targetName := "./testdata"
-	outPath := "output"
+	outPath    := "output"
 
+	//根据实际参数，创建Meta Client实现
 	metaClient := sdk.NewAPIClient(key, token, ipfsApiUrl, gatewatUrl, metaUrl)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 		return
 	}
 
+	//上传指定文件或文件夹，并获取结果
 	dataCid, err := metaClient.UploadFile(targetName)
 	if err != nil {
 		logs.GetLogger().Error("upload dir error:", err)
@@ -221,6 +224,7 @@ func main() {
 	}
 	logs.GetLogger().Infoln("upload dir success, and data cid: ", dataCid)
 
+	//调用API，通知Meta Server已把文件或文件夹上传至IPFS
 	err = metaClient.NotifyMetaServer(targetName, dataCid)
 	if err != nil {
 		logs.GetLogger().Error("notify meta server error:", err)
@@ -228,9 +232,10 @@ func main() {
 	}
 	logs.GetLogger().Infoln("notify meta server success")
 
-	//create aria2 config
+	//创建Aria2配置项
 	conf := &sdk.Aria2Conf{Host: "127.0.0.1", Port: 6800, Secret: "secret123"}
 
+	//根据Aria2的配置，通过Aria2下载指定Data Cid对应的文件或文件夹到指定目录
 	err = metaClient.DownloadFile(dataCid, outPath, conf)
 	if err != nil {
 		logs.GetLogger().Error("download dir error:", err)
