@@ -31,10 +31,11 @@ type StoreSourceFileReq struct {
 
 type StoreSourceFileResponse struct {
 	JsonRpc string `json:"jsonrpc"`
-	result  struct {
+	Result  struct {
 		Code    string `json:"code"`
 		Message string `json:"message,omitempty"`
 	} `json:"result"`
+	Id int `json:"id"`
 }
 
 //GetSourceFiles
@@ -46,11 +47,12 @@ type SourceFilePageReq struct {
 
 type SourceFilePageResponse struct {
 	JsonRpc string `json:"jsonrpc"`
-	result  struct {
+	Result  struct {
 		Total     int64         `json:"total"`
 		PageCount int64         `json:"pageCount"`
 		Sources   []*SourceFile `json:"files"`
 	} `json:"result"`
+	Id int `json:"id"`
 }
 
 type SourceFile struct {
@@ -65,18 +67,19 @@ type SourceFile struct {
 
 type DataCidResponse struct {
 	JsonRpc string `json:"jsonrpc"`
-	result  struct {
+	Result  struct {
 		Code    string   `json:"code"`
 		Message string   `json:"message,omitempty"`
 		Data    []string `json:"data,omitempty"`
 	} `json:"result"`
+	Id int `json:"id"`
 }
 
 // GetSourceFileByDataCid
 
 type SourceFileResponse struct {
 	JsonRpc string     `json:"jsonrpc"`
-	result  SourceFile `json:"result"`
+	Result  SourceFile `json:"result"`
 }
 
 type SplitFile struct {
