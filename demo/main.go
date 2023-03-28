@@ -125,7 +125,7 @@ func main() {
 			},
 			{
 				Name:   "notify",
-				Usage:  "notify task to meta server",
+				Usage:  "notify to meta server",
 				Action: Notify2MetaDemo,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
@@ -145,6 +145,62 @@ func main() {
 					&MetaUrlFlag,
 				},
 			},
+			{
+				Name:   "list",
+				Usage:  "get files list from meta server",
+				Action: GetFilesListDemo,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "page-num",
+						Usage:    "",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "limit",
+						Usage:    "",
+						Required: true,
+					},
+					&KeyFlag,
+					&TokenFlag,
+					&ApiUrlFlag,
+					&GatewayUrlFlag,
+					&MetaUrlFlag,
+				},
+			},
+			{
+				Name:   "datacid",
+				Usage:  "get data cid from meta server",
+				Action: GetDataCidByNameDemo,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "name",
+						Usage:    "file or directory name which will be query from meta server.",
+						Required: true,
+					},
+					&KeyFlag,
+					&TokenFlag,
+					&ApiUrlFlag,
+					&GatewayUrlFlag,
+					&MetaUrlFlag,
+				},
+			},
+			{
+				Name:   "info",
+				Usage:  "get detail info from  meta server",
+				Action: GetInfoByDataCidDemo,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "data-cid",
+						Usage:    "data cid which will be query from meta server.",
+						Required: true,
+					},
+					&KeyFlag,
+					&TokenFlag,
+					&ApiUrlFlag,
+					&GatewayUrlFlag,
+					&MetaUrlFlag,
+				},
+			},
 		},
 	}
 
@@ -155,7 +211,7 @@ func main() {
 
 }
 
-func UploadDemo(c *cli.Context) error {
+func buildClient(c *cli.Context) *sdk.MetaClient {
 	key := c.String("key")
 	token := c.String("token")
 	apiUrl := c.String("api-url")
@@ -163,6 +219,13 @@ func UploadDemo(c *cli.Context) error {
 	metaUrl := c.String("meta-url")
 
 	metaClient := sdk.NewAPIClient(key, token, apiUrl, gatewayUrl, metaUrl)
+
+	return metaClient
+}
+
+func UploadDemo(c *cli.Context) error {
+
+	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 	}
@@ -179,13 +242,7 @@ func UploadDemo(c *cli.Context) error {
 }
 
 func DownloadDemo(c *cli.Context) error {
-	key := c.String("key")
-	token := c.String("token")
-	apiUrl := c.String("api-url")
-	gatewayUrl := c.String("gateway-url")
-	metaUrl := c.String("meta-url")
-
-	metaClient := sdk.NewAPIClient(key, token, apiUrl, gatewayUrl, metaUrl)
+	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 	}
@@ -212,13 +269,7 @@ func DownloadDemo(c *cli.Context) error {
 }
 
 func Notify2MetaDemo(c *cli.Context) error {
-	key := c.String("key")
-	token := c.String("token")
-	apiUrl := c.String("api-url")
-	gatewayUrl := c.String("gateway-url")
-	metaUrl := c.String("meta-url")
-
-	metaClient := sdk.NewAPIClient(key, token, apiUrl, gatewayUrl, metaUrl)
+	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 	}
@@ -231,6 +282,58 @@ func Notify2MetaDemo(c *cli.Context) error {
 		return err
 	}
 	logs.GetLogger().Infoln("notify data cid to meta server success")
+
+	return nil
+}
+
+func GetFilesListDemo(c *cli.Context) error {
+	metaClient := buildClient(c)
+	if metaClient == nil {
+		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+	}
+
+	pageNum := c.Int("page-num")
+	limit := c.Int("limit")
+	_, err := metaClient.GetFileLists(pageNum, limit, true)
+	if err != nil {
+		logs.GetLogger().Error("get files list from meta server error:", err)
+		return err
+	}
+	logs.GetLogger().Infoln("get files list from meta server success")
+
+	return nil
+}
+
+func GetDataCidByNameDemo(c *cli.Context) error {
+	metaClient := buildClient(c)
+	if metaClient == nil {
+		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+	}
+
+	name := c.String("name")
+	_, err := metaClient.GetDataCIDByName(name)
+	if err != nil {
+		logs.GetLogger().Error("get data cid from meta server error:", err)
+		return err
+	}
+	logs.GetLogger().Infoln("get data cid from meta server success")
+
+	return nil
+}
+
+func GetInfoByDataCidDemo(c *cli.Context) error {
+	metaClient := buildClient(c)
+	if metaClient == nil {
+		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+	}
+
+	dataCid := c.String("data-cid")
+	_, err := metaClient.GetFileInfoByDataCid(dataCid)
+	if err != nil {
+		logs.GetLogger().Error("get detail info from meta server error:", err)
+		return err
+	}
+	logs.GetLogger().Infoln("get detail info from meta server success")
 
 	return nil
 }
