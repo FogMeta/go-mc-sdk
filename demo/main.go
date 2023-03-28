@@ -224,7 +224,7 @@ func buildClient(c *cli.Context) *sdk.MetaClient {
 }
 
 func UploadDemo(c *cli.Context) error {
-
+	//
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")

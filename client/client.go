@@ -97,8 +97,8 @@ func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error {
 	downUrl := pathJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
 	params = append(params, StoreSourceFileReq{sourceName, sourceSize, dataCid, downUrl})
 	jsonRpcParams := JsonRpcParams{
-		JsonRpc: "",
-		Method:  "StoreSourceFile",
+		JsonRpc: "2.0",
+		Method:  "meta.StoreSourceFile",
 		Params:  params,
 		Id:      1,
 	}
@@ -125,8 +125,8 @@ func (m *MetaClient) GetFileLists(page, limit int, showStorageInfo bool) ([]Sour
 	var params []interface{}
 	params = append(params, SourceFilePageReq{page, limit})
 	jsonRpcParams := JsonRpcParams{
-		JsonRpc: "",
-		Method:  "GetSourceFiles",
+		JsonRpc: "2.0",
+		Method:  "meta.GetSourceFiles",
 		Params:  params,
 		Id:      1,
 	}
@@ -151,8 +151,8 @@ func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) {
 	var params []interface{}
 	params = append(params, fileName)
 	jsonRpcParams := JsonRpcParams{
-		JsonRpc: "",
-		Method:  "GetSourceFilesByName",
+		JsonRpc: "2.0",
+		Method:  "meta.GetSourceFilesByName",
 		Params:  params,
 		Id:      1,
 	}
@@ -177,8 +177,8 @@ func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*SourceFile, error) {
 	var params []interface{}
 	params = append(params, dataCid)
 	jsonRpcParams := JsonRpcParams{
-		JsonRpc: "",
-		Method:  "GetSourceFileByDataCid",
+		JsonRpc: "2.0",
+		Method:  "meta.GetSourceFileByDataCid",
 		Params:  params,
 		Id:      1,
 	}
