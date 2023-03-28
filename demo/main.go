@@ -123,6 +123,28 @@ func main() {
 					},
 				},
 			},
+			{
+				Name:   "notify",
+				Usage:  "notify task to meta server",
+				Action: Notify2MetaDemo,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "input",
+						Usage:    "file or directory which will upload to IPFS server.",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "data-cid",
+						Usage:    "data cid which will be downloaded",
+						Required: true,
+					},
+					&KeyFlag,
+					&TokenFlag,
+					&ApiUrlFlag,
+					&GatewayUrlFlag,
+					&MetaUrlFlag,
+				},
+			},
 		},
 	}
 
@@ -189,69 +211,26 @@ func DownloadDemo(c *cli.Context) error {
 	return nil
 }
 
-func UpDownDirDemo(c *sdk.MetaClient) {
-	dataCid, err := c.UploadFile("./testdata")
-	if err != nil {
-		logs.GetLogger().Error("upload dir error:", err)
-		return
-	}
-	logs.GetLogger().Infoln("upload dir success, and data cid: ", dataCid)
+func Notify2MetaDemo(c *cli.Context) error {
+	key := c.String("key")
+	token := c.String("token")
+	apiUrl := c.String("api-url")
+	gatewayUrl := c.String("gateway-url")
+	metaUrl := c.String("meta-url")
 
-	err = c.DownloadFile(dataCid, "./output", nil)
-	if err != nil {
-		logs.GetLogger().Error("download dir error:", err)
-		return
+	metaClient := sdk.NewAPIClient(key, token, apiUrl, gatewayUrl, metaUrl)
+	if metaClient == nil {
+		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 	}
-	logs.GetLogger().Infoln("download dir success")
-}
 
-func UpDownFileDemo(c *sdk.MetaClient) {
-	dataCid, err := c.UploadFile("./testdata")
+	input := c.String("input")
+	dataCid := c.String("data-cid")
+	err := metaClient.NotifyMetaServer(input, dataCid)
 	if err != nil {
-		logs.GetLogger().Error("upload file error:", err)
-		return
+		logs.GetLogger().Error("notify data cid to meta server error:", err)
+		return err
 	}
-	logs.GetLogger().Infoln("upload file success, and data cid: ", dataCid)
+	logs.GetLogger().Infoln("notify data cid to meta server success")
 
-	err = c.DownloadFile(dataCid, "./output", nil)
-	if err != nil {
-		logs.GetLogger().Error("download file error:", err)
-		return
-	}
-	logs.GetLogger().Infoln("download file success")
-}
-
-func Aria2DownFileDemo(c *sdk.MetaClient) {
-	dataCid, err := c.UploadFile("./testdata/help")
-	if err != nil {
-		logs.GetLogger().Error("upload file error:", err)
-		return
-	}
-	logs.GetLogger().Infoln("upload file success, and data cid: ", dataCid)
-
-	conf := &sdk.Aria2Conf{Host: "127.0.0.1", Port: 6800, Secret: "secret123"}
-	err = c.DownloadFile(dataCid, "output", conf)
-	if err != nil {
-		logs.GetLogger().Error("download file error:", err)
-		return
-	}
-	logs.GetLogger().Infoln("download file by aria2 success")
-}
-
-func Aria2DownDirDemo(c *sdk.MetaClient) {
-	dataCid, err := c.UploadFile("./testdata")
-	if err != nil {
-		logs.GetLogger().Error("upload dir error:", err)
-		return
-	}
-	logs.GetLogger().Infoln("upload dir success, and data cid: ", dataCid)
-
-	conf := &sdk.Aria2Conf{Host: "127.0.0.1", Port: 6800, Secret: "secret123"}
-
-	err = c.DownloadFile(dataCid, "output", conf)
-	if err != nil {
-		logs.GetLogger().Error("download dir error:", err)
-		return
-	}
-	logs.GetLogger().Infoln("download dir by aria2 success")
+	return nil
 }

@@ -26,6 +26,12 @@ type JsonRpcResponse struct {
 	result  []interface{} `json:"result"`
 }
 
+type APIResp struct {
+	Code    string      `json:"code"`
+	Message string      `json:"message,omitempty"`
+	Data    interface{} `json:"data,omitempty"`
+}
+
 type SourceFileReq struct {
 	SourceName  string `json:"source_name"`
 	SourceSize  int64  `json:"source_size"`
@@ -34,11 +40,11 @@ type SourceFileReq struct {
 }
 
 type SourceFile struct {
-	SourceName   string      `json:"source_name"`
-	DataCid      string      `json:"data_cid"`
-	DownloadLink string      `json:"download_link"`
-	StorageList  []SplitFile `json:"storage_list"`
-	SourceSize   int64       `json:"source_size"`
+	SourceName  string      `json:"source_name"`
+	DataCid     string      `json:"data_cid"`
+	DownloadUrl string      `json:"download_url"`
+	StorageList []SplitFile `json:"storage_list"`
+	SourceSize  int64       `json:"source_size"`
 }
 
 type SplitFile struct {
@@ -47,8 +53,16 @@ type SplitFile struct {
 	StorageProviderId string `json:"storage_provider_id"`
 	StorageStatus     string `json:"storage_status"`
 	DealId            int64  `json:"deal_id"`
-	DealCid           string `json:"deal_cid"` // proposalcid or uuid
+	DealCid           string `json:"deal_cid"`
+	ExpiredTime       int64  `json:"expired_time"`
 }
+
+type SourceFilePageReq struct {
+	PageNum int `json:"page_num"`
+	Size    int `json:"size"`
+}
+
+//////////////////////////////////////////
 
 type FileDetails struct {
 	FileName     string           `json:"file_name"`

@@ -52,11 +52,7 @@ func (m *MetaClient) UploadFile(targetPath string) (dataCid string, err error) {
 	}
 
 	// TODO: notify meta server the result
-	sourceSize := walkDirSize(targetPath)
-	logs.GetLogger().Infoln("upload total size is:", sourceSize)
-
-	//TODO
-	//err = m.notifyMetaServer(targetPath, sourceSize, dataCid)
+	//err = m.NotifyMetaServer(targetPath, dataCid)
 	//if err != nil {
 	//	return "", err
 	//}
@@ -64,7 +60,10 @@ func (m *MetaClient) UploadFile(targetPath string) (dataCid string, err error) {
 	return dataCid, nil
 }
 
-func (m *MetaClient) notifyMetaServer(sourceName string, sourceSize int64, dataCid string) error {
+func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error {
+
+	sourceSize := walkDirSize(sourceName)
+	logs.GetLogger().Infoln("upload total size is:", sourceSize)
 
 	var params []interface{}
 	downUrl := pathJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
@@ -82,7 +81,7 @@ func (m *MetaClient) notifyMetaServer(sourceName string, sourceSize int64, dataC
 		return err
 	}
 
-	res := JsonRpcResponse{}
+	res := APIResp{}
 	err = json.Unmarshal(response, res)
 	if err != nil {
 		fmt.Printf("Parse Response (%s) Error: %s \n", response, err)
@@ -120,10 +119,10 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) erro
 	return downloadFromIpfs(sh, dataCid, outPath)
 }
 
-func (m *MetaClient) GetFileLists(page, limit uint64, showStorageInfo bool) ([]FileDetails, error) {
+func (m *MetaClient) GetFileLists(page, limit int, showStorageInfo bool) ([]FileDetails, error) {
 
 	var params []interface{}
-	params = append(params, FileListsParams{page, limit, showStorageInfo})
+	params = append(params, SourceFilePageReq{page, limit})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "",
 		Method:  "GetSourceFiles",
@@ -136,19 +135,19 @@ func (m *MetaClient) GetFileLists(page, limit uint64, showStorageInfo bool) ([]F
 		return nil, err
 	}
 
-	res := FileListsResponse{}
+	res := APIResp{}
 	err = json.Unmarshal(response, res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
 		return nil, err
 	}
 
-	return res.FileLists, nil
+	return nil, nil
 }
 
-func (m *MetaClient) GetFileDataCID(fileName string) ([]string, error) {
+func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) {
 	var params []interface{}
-	params = append(params, FileDataCIDParams{fileName})
+	params = append(params, fileName)
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "",
 		Method:  "GetSourceFilesByName",
@@ -160,20 +159,20 @@ func (m *MetaClient) GetFileDataCID(fileName string) ([]string, error) {
 		logs.GetLogger().Errorf("Get Response Error: %s \n", err)
 		return nil, err
 	}
-	res := FileDataCIDResponse{}
+	res := APIResp{}
 	err = json.Unmarshal(response, res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
 		return nil, err
 	}
 
-	return res.DataCids, nil
+	return nil, nil
 }
 
-func (m *MetaClient) GetFileInfo(fileName string) (*FileDetails, error) {
+func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*FileDetails, error) {
 
 	var params []interface{}
-	params = append(params, FileInfoParams{fileName})
+	params = append(params, dataCid)
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "",
 		Method:  "",
@@ -186,12 +185,12 @@ func (m *MetaClient) GetFileInfo(fileName string) (*FileDetails, error) {
 		return nil, err
 	}
 
-	res := FileInfoResponse{}
+	res := APIResp{}
 	err = json.Unmarshal(response, res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
 		return nil, err
 	}
 
-	return &res.Info, nil
+	return nil, nil
 }
