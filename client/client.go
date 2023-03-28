@@ -194,3 +194,8 @@ func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*FileDetails, error) 
 
 	return nil, nil
 }
+
+func (m *MetaClient) RebuildDataCID(fileName string) error {
+	// TODO
+	return nil
+}

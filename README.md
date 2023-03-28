@@ -1,183 +1,19 @@
 # meta-client-sdk
 
-* [NewAPIClient](#NewAPIClient)
-* [UploadFile](#UploadFile)
-* [NotifyMetaServer](#NotifyMetaServer)
-* [DownloadFile](#DownloadFile)
-* [GetFileLists](#GetFileLists)
-* [GetDataCIDByName](#GetDataCIDByName)
-* [GetFileInfoByDataCid](#GetFileInfoByDataCid)
+* [Install Aria2 Service](#Install Aria2 Service)
+* [Install IPFS Server](#Install IPFS Server)
 * [Usage](#Usage)
 
-## NewAPIClient
-
-Definition:
-创建 Meta Client实例，通过这个示例调用相关API
-
+## Install Aria2 Service
 ```shell
-func NewAPIClient(key, token, ipfsApiUrl, ipfsGatewayUrl, metaUrl string) *MetaClient
+sudo apt install aria2
 ```
 
-Inputs:
-
-```shell
-key                    # 从Filswan获取的api key
-token                  # 从Filswan获取的access token
-ipfsApiUrl             # IPFS服务的API地址
-ipfsGatewayUrl         # IPFS服务的网关地址
-metaUrl                # Meta Server的地址
-```
-
-
-Outputs:
-
-```shell
-*MetaClient            # 创建的Meta Client实例
-```
-
-## UploadFile
-
-Definition:
-上传文件或文件夹到IPFS服务
-
-```shell
-func (m *MetaClient) UploadFile(inputPath string) (dataCid string, err error) 
-```
-
-Inputs:
-
-```shell
-inputPath              # 需要上传到IPFS服务器的文件路径
-
-```
-
-Outputs:
-
-```shell
-dataCid                # IPFS服务器返回的Data Cid
-error                  # error or nil
-```
-
-## NotifyMetaServer
-
-Definition:
-通知Meta Server，文件或文件夹已上传到IPFS服务。
-
-```shell
-func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error 
-```
-
-Inputs:
-
-```shell
-sourceName             # 已经上传到IPFS服务器的文件名.
-dataCid                # IPFS服务器返回的Data Cid
-```
-
-Outputs:
-
-```shell
-error                  # error or nil
-```
-
-
-## DownloadFile
-
-Definition:
-从IPFS下载指定Data Cid对应的文件或文件夹，如果配置aria2选项，则使用aria2工具下载，否则使用IPFS API下载
-
-```shell
-func (m *MetaClient) DownloadFile(dataCid string, outPath string, conf *Aria2Conf) error
-```
-
-Inputs:
-
-```shell
-dataCid                # 需要下载的Data CID
-outPath                # 下载文件输出路径
-conf                   # aria2 相关配置项，包括:  
-                       # host   Aria2 server address
-                       # port   Aria2 server port
-                       # secret Must be the same value as rpc-secure in aria2 conf
-
-```
-
-Outputs:
-
-```shell
-error                  # error or nil
-```
-
-
-## GetFileLists
-
-Definition:
-根据指定页码和每页条数，从Meta Server获取文件列表
-
-```shell
-func (m *MetaClient) GetFileLists(pageNum int, limit int, showStorageInfo bool) ([]FileDetails, error)
-```
-
-Inputs:
-
-```shell
-pageNum                # 查询第几页
-limit                  # 每页记录的条数
-showStorageInfo        # 是否返回存储信息
-```
-
-Outputs:
-
-```shell
-[]FileDetails          # 返回文件描述列表
-error                  # error or nil
-```
-
-
-## GetDataCIDByName
-
-Definition:
-从Meta Server获取指定文件或文件夹对应的Data Cid
-
-```shell
-func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) 
-```
-
-Inputs:
-
-```shell
-fileName               # 查询文件名
-```
-
-Outputs:
-
-```shell
-[]string               # 查询文件名对应的Data CID列表
-error                  # error or nil
-```
-
-
-## GetFileInfoByDataCid
-
-Definition:
-从Meta Server获取Data Cid对应的文件或文件详细信息
-
-```shell
-func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*FileDetails, error)
-```
-
-Inputs:
-
-```shell
-dataCid                # 需要查询的Dada Cid
-```
-
-Outputs:
-
-```shell
-*FileDetails           # 返回Data CID对应的信息
-error                  # error or nil
-```
+## Install IPFS Server
+###
+[Install IPFS binary](https://docs.ipfs.tech/install/command-line/#linux)
+### 
+[Start the IPFS daemon](https://docs.ipfs.tech/how-to/kubo-basic-cli/#install-kubo)
 
 ## Usage
 
@@ -187,7 +23,7 @@ Install
 go get github.com/filswan/go-swan-lib/meta-client-sdk@latest
 ```
 
-Demo
+Quick Start
 
 ```go
 package main
@@ -200,48 +36,53 @@ import (
 )
 
 func main() {
-	key        := "XXXXXXXX"
-	token      := "XXXXXXXX"
-	ipfsApiUrl := "http://127.0.0.1:5001"
-	gatewatUrl := "http://127.0.0.1:8080"
-	metaUrl    := "http://127.0.0.1:1234"
+	// Initialize parameters
+	
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	key        := "V0schjjl_bxCtSNwBYXXXX"
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	token      := "fca72014744019a949248874610fXXXX"
+	
+	ipfsApiUrl := "http://127.0.0.1:5001"    // IPFS API address
+	gatewayUrl := "http://127.0.0.1:8080"    // Gateway address
+	metaUrl := "http://127.0.0.1:8099"       // Meta server address
+	
+	targetName := "./testdata"               // Target file or folder
+	outPath    := "./output"                 // Directory to save downloaded files
 
-	targetName := "./testdata"
-	outPath    := "output"
-
-	//根据实际参数，创建Meta Client实现
-	metaClient := sdk.NewAPIClient(key, token, ipfsApiUrl, gatewatUrl, metaUrl)
+	// Create Meta Client object based on actual parameters
+	metaClient := sdk.NewAPIClient(key, token, ipfsApiUrl, gatewayUrl, metaUrl)
 	if metaClient == nil {
-		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+		logs.GetLogger().Error("create meta client failed, please check the input parameters") // Fail to create object
 		return
 	}
 
-	//上传指定文件或文件夹，并获取结果
+	// Upload the target file or folder
 	dataCid, err := metaClient.UploadFile(targetName)
 	if err != nil {
-		logs.GetLogger().Error("upload dir error:", err)
+		logs.GetLogger().Error("upload dir error:", err) // Fail to upload
 		return
 	}
-	logs.GetLogger().Infoln("upload dir success, and data cid: ", dataCid)
+	logs.GetLogger().Infoln("upload dir success, and data cid: ", dataCid) // Upload successful
 
-	//调用API，通知Meta Server已把文件或文件夹上传至IPFS
+	// Notify Meta Server that the file has been uploaded to IPFS
 	err = metaClient.NotifyMetaServer(targetName, dataCid)
 	if err != nil {
-		logs.GetLogger().Error("notify meta server error:", err)
+		logs.GetLogger().Error("notify meta server error:", err) // Fail to notify Meta Server
 		return
 	}
-	logs.GetLogger().Infoln("notify meta server success")
+	logs.GetLogger().Infoln("notify meta server success") // Successfully notified Meta Server
 
-	//创建Aria2配置项
-	conf := &sdk.Aria2Conf{Host: "127.0.0.1", Port: 6800, Secret: "secret123"}
+	// Create Aria2 configuration options
+	conf := &sdk.Aria2Conf{Host: "127.0.0.1", Port: 6800, Secret: "my_aria2_secret"}
 
-	//根据Aria2的配置，通过Aria2下载指定Data Cid对应的文件或文件夹到指定目录
+	// Download the file or folder corresponding to the specified Data Cid to the specified directory
 	err = metaClient.DownloadFile(dataCid, outPath, conf)
 	if err != nil {
-		logs.GetLogger().Error("download dir error:", err)
+		logs.GetLogger().Error("download dir error:", err) // Fail to download
 		return
 	}
-	logs.GetLogger().Infoln("download dir by aria2 success")
+	logs.GetLogger().Infoln("download dir by aria2 success") // Download successful
 
 }
 
