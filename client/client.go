@@ -110,7 +110,7 @@ func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error {
 	}
 
 	res := StoreSourceFileResponse{}
-	err = json.Unmarshal(response, res)
+	err = json.Unmarshal(response, &res)
 	if err != nil {
 		fmt.Printf("Parse Response (%s) Error: %s \n", response, err)
 		return err
@@ -137,7 +137,7 @@ func (m *MetaClient) GetFileLists(page, limit int, showStorageInfo bool) ([]Sour
 	}
 
 	res := SourceFilePageResponse{}
-	err = json.Unmarshal(response, res)
+	err = json.Unmarshal(response, &res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
 		return nil, err
@@ -162,7 +162,7 @@ func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) {
 		return nil, err
 	}
 	res := DataCidResponse{}
-	err = json.Unmarshal(response, res)
+	err = json.Unmarshal(response, &res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
 		return nil, err
@@ -189,7 +189,7 @@ func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*SourceFile, error) {
 	}
 
 	res := SourceFileResponse{}
-	err = json.Unmarshal(response, res)
+	err = json.Unmarshal(response, &res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
 		return nil, err
