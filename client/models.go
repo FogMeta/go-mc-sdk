@@ -24,6 +24,7 @@ type JsonRpcParams struct {
 // StoreSourceFile
 type StoreSourceFileReq struct {
 	SourceName  string `json:"source_name"`
+	IsDirector  bool   `json:"is_director"`
 	SourceSize  int64  `json:"source_size"`
 	DataCid     string `json:"data_cid"`
 	DownloadUrl string `json:"download_url"`

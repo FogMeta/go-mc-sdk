@@ -90,12 +90,17 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) erro
 
 func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error {
 
+	isFile, err := isFile(sourceName)
+	if err != nil {
+		return err
+	}
+
 	sourceSize := walkDirSize(sourceName)
 	logs.GetLogger().Infoln("upload total size is:", sourceSize)
 
 	var params []interface{}
 	downUrl := pathJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
-	params = append(params, StoreSourceFileReq{sourceName, sourceSize, dataCid, downUrl})
+	params = append(params, StoreSourceFileReq{sourceName, !(*isFile), sourceSize, dataCid, downUrl})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.StoreSourceFile",
