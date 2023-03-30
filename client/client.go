@@ -157,7 +157,7 @@ func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) {
 	params = append(params, fileName)
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
-		Method:  "meta.GetSourceFilesByName",
+		Method:  "meta.GetDataCidByName",
 		Params:  params,
 		Id:      1,
 	}
