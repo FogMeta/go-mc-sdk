@@ -1,7 +1,7 @@
 # meta-client-sdk
 
-* [Install Aria2 Service](#Install Aria2 Service)
-* [Install IPFS Server](#Install IPFS Server)
+* [Install Aria2 Service](#Install-Aria2-Service)
+* [Install IPFS Server](#Install-IPFS-Server)
 * [Usage](#Usage)
 
 ## Install Aria2 Service
