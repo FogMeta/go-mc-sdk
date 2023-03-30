@@ -21,9 +21,9 @@ func init() {
 	DefaultConf = &sdk.ClientConf{
 		Key:            "V0schjjl_bxCtSNwBYXXXX",
 		Token:          "fca72014744019a949248874610fXXXX",
-		IpfsApiUrl:     "http://192.168.2.42:5001",
-		IpfsGatewayUrl: "http://192.168.2.42:8080",
-		MetaServerUrl:  "http://192.168.2.34:8099",
+		IpfsApiUrl:     "http://127.0.0.1:5001",
+		IpfsGatewayUrl: "http://127.0.0.1:8080",
+		MetaServerUrl:  "http://127.0.0.1:8099/rpc/v0",
 	}
 
 	KeyFlag = cli.StringFlag{

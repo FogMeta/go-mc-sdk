@@ -94,11 +94,14 @@ type SourceFileResponse struct {
 }
 
 type SplitFile struct {
-	DataCid           string `json:"data_cid"`
-	FileSize          int64  `json:"file_size"`
+	DataCid          string            `json:"data_cid"`
+	FileSize         int64             `json:"file_size"`
+	StorageProviders []StorageProvider `json:"storage_providers"`
+}
+
+type StorageProvider struct {
 	StorageProviderId string `json:"storage_provider_id"`
 	StorageStatus     string `json:"storage_status"`
 	DealId            int64  `json:"deal_id"`
-	DealCid           string `json:"deal_cid"`
-	ExpiredTime       int64  `json:"expired_time"`
+	DealCid           string `json:"deal_cid"` // proposal cid or uuid
 }
