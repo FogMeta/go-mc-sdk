@@ -66,7 +66,7 @@ type SourceFile struct {
 	DownloadUrl string       `json:"download_url"`
 	StorageList []*SplitFile `json:"storage_list"`
 	SourceSize  int64        `json:"source_size"`
-	IsDirector  string       `json:"is_director"`
+	IsDirector  bool         `json:"is_director"`
 }
 
 //GetDataCidByName
