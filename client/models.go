@@ -83,8 +83,13 @@ type DataCidResponse struct {
 // GetSourceFileByDataCid
 
 type SourceFileResponse struct {
-	JsonRpc string     `json:"jsonrpc"`
-	Result  SourceFile `json:"result"`
+	JsonRpc string `json:"jsonrpc"`
+	Result  struct {
+		Code    string     `json:"code"`
+		Message string     `json:"message,omitempty"`
+		Data    SourceFile `json:"data,omitempty"`
+	} `json:"result"`
+	Id int `json:"id"`
 }
 
 type SplitFile struct {
