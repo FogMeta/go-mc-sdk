@@ -49,9 +49,13 @@ type SourceFilePageReq struct {
 type SourceFilePageResponse struct {
 	JsonRpc string `json:"jsonrpc"`
 	Result  struct {
-		Total     int64         `json:"total"`
-		PageCount int64         `json:"pageCount"`
-		Sources   []*SourceFile `json:"files"`
+		Code    string `json:"code"`
+		Message string `json:"message"`
+		Data    struct {
+			Total     int64         `json:"total"`
+			PageCount int64         `json:"pageCount"`
+			Sources   []*SourceFile `json:"files"`
+		} `json:"data"`
 	} `json:"result"`
 	Id int `json:"id"`
 }
