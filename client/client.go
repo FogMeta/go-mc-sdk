@@ -149,6 +149,11 @@ func (m *MetaClient) GetFileLists(page, limit int, showStorageInfo bool) ([]Sour
 	}
 	logs.GetLogger().Info(res)
 
+	Sources := res.Result.Data.Sources
+	for index, value := range Sources {
+		logs.GetLogger().Infoln("Index: %d, Item: %+v\n", index, value)
+	}
+
 	return nil, nil
 }
 
