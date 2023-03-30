@@ -30,6 +30,7 @@ func downloadFileByAria2(conf *Aria2Conf, downUrl, outPath string) error {
 	aria2 := client.GetAria2Client(conf.Host, conf.Secret, conf.Port)
 	outDir := filepath.Dir(outPath)
 	fileName := filepath.Base(outPath)
+	logs.GetLogger().Infof("start download by aria2, downUrl:%s, outDir:%s, fileName:%s", downUrl, outDir, fileName)
 	aria2Download := aria2.DownloadFile(downUrl, outDir, fileName)
 	if aria2Download == nil {
 		logs.GetLogger().Error("no response when asking aria2 to download")

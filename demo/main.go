@@ -119,7 +119,7 @@ func main() {
 					&cli.StringFlag{
 						Name:  "secret",
 						Usage: "directory where files will be downloaded to.",
-						Value: "",
+						Value: "my_aria2_secret",
 					},
 				},
 			},
@@ -233,10 +233,10 @@ func UploadDemo(c *cli.Context) error {
 	input := c.String("input")
 	dataCid, err := metaClient.UploadFile(input)
 	if err != nil {
-		logs.GetLogger().Error("upload dir error:", err)
+		logs.GetLogger().Error("upload error:", err)
 		return err
 	}
-	logs.GetLogger().Infoln("upload dir success, and data cid: ", dataCid)
+	logs.GetLogger().Infoln("upload success, and data cid: ", dataCid)
 
 	return nil
 }
