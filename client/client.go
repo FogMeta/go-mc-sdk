@@ -149,9 +149,13 @@ func (m *MetaClient) GetFileLists(page, limit int, showStorageInfo bool) ([]Sour
 	}
 	logs.GetLogger().Info(res)
 
-	Sources := res.Result.Data.Sources
-	for index, value := range Sources {
-		logs.GetLogger().Infoln("Index: %d, Item: %+v\n", index, value)
+	sources := res.Result.Data.Sources
+	for index, source := range sources {
+		logs.GetLogger().Infof("Index: %d, Source: %+v\n", index, source)
+		stores := source.StorageList
+		for _, store := range stores {
+			logs.GetLogger().Infof("Store: %+v\n", store)
+		}
 	}
 
 	return nil, nil
@@ -205,6 +209,13 @@ func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*SourceFile, error) {
 		return nil, err
 	}
 	logs.GetLogger().Info(res)
+
+	source := res.Result.Data
+	logs.GetLogger().Infof("Source: %+v\n", source)
+	stores := source.StorageList
+	for _, store := range stores {
+		logs.GetLogger().Infof("Store: %+v\n", store)
+	}
 
 	return nil, nil
 }
