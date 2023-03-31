@@ -43,121 +43,208 @@ go get github.com/FogMeta/meta-client-sdk
 
 First, you need to create a MetaClient object, which can be initialized as follows:
 
-```go
-import "github.com/FogMeta/Meta-Client-SDK/client"
+```
+package main
+
+import (
+  metacli "github.com/FogMeta/meta-client-sdk/client"
+)
 
 func main() {
-    cli := client.NewMetaClient()
+    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+    key := "V0schjjl_bxCtSNwBYXXXX"
+    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+    token := "fca72014744019a949248874610fXXXX"
+    metaUrl := "http://{ip}:8099/rpc/v0"
+    metaClient := metacli.NewAPIClient(key, token, metaUrl)
 }
 ```
 ### Upload Files or Folders
 To upload files or folders to IPFS gateway and Filecoin network, you can use the following method:
 ```
-import "github.com/FogMeta/Meta-Client-SDK/client"
+package main
+
+import (
+	metacli "github.com/FogMeta/meta-client-sdk/client"
+	"github.com/filswan/go-swan-lib/logs"
+)
 
 func main() {
-    cli := client.NewMetaClient()
+    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+    key := "V0schjjl_bxCtSNwBYXXXX"
+    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+    token := "fca72014744019a949248874610fXXXX"
+	metaUrl := "http://{ip}:8099/rpc/v0"
+	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
-    // Upload a single file
-    path := "/path/to/file"
-    result, err := cli.UploadFile(path)
-    if err != nil {
-        // handle error
-    }
-    fmt.Println(result)
+	apiUrl := "http://127.0.0.1:5001"
+	inputPath := "./testdata"
+	dataCid, err := metaClient.UploadFile(apiUrl, inputPath)
+	if err != nil {
+		logs.GetLogger().Error("upload failed:", err)
+	}
+	logs.GetLogger().Infoln("upload success, and data cid is: ", dataCid)
 
-    // Upload a folder
-    path := "/path/to/folder"
-    result, err := cli.UploadFolder(path)
-    if err != nil {
-        // handle error
-    }
-    fmt.Println(result)
+	return
 }
-
 ```
 ### Report Data-related Information
 To report data-related information to the Meta-Client server, you can use the following method:
 
 ```
-import "github.com/FogMeta/Meta-Client-SDK/client"
+package main
+
+import (
+	metacli "github.com/FogMeta/meta-client-sdk/client"
+	"github.com/filswan/go-swan-lib/logs"
+)
 
 func main() {
-    cli := client.NewMetaClient()
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	key := "V0schjjl_bxCtSNwBYXXXX"
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	token := "fca72014744019a949248874610fXXXX"
+	metaUrl := "http://{ip}:8099/rpc/v0"
+	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
-    cid := "bafkreiaugtrtgvtpnv23ipcfivfzljavh2olndt7blbnslvnhdbt7awqve"
-    result, err := cli.Report(cid)
-    if err != nil {
-        // handle error
-    }
-    fmt.Println(result)
+	sourceName := "./testdata"
+	dataCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
+	ipfsGateway := "http://127.0.0.1:8080"
+	err := metaClient.ReportMetaClientServer(sourceName, dataCid, ipfsGateway)
+	if err != nil {
+		logs.GetLogger().Error("report meta client server  failed:", err)
+	}
+	logs.GetLogger().Infoln("report meta client server success")
+
+	return
 }
-
 ```
 ### Download Files or Folders
 To download files or folders from the IPFS gateway and Filecoin network, you can use the following method:
 
 ```
-import "github.com/FogMeta/Meta-Client-SDK/client"
+package main
+
+import (
+	metacli "github.com/FogMeta/meta-client-sdk/client"
+	"github.com/filswan/go-swan-lib/logs"
+)
 
 func main() {
-    cli := client.NewMetaClient()
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	key := "V0schjjl_bxCtSNwBYXXXX"
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	token := "fca72014744019a949248874610fXXXX"
+	metaUrl := "http://{ip}:8099/rpc/v0"
+	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
-    // Download a single file
-    cid := "bafkreiaugtrtgvtpnv23ipcfivfzljavh2olndt7blbnslvnhdbt7awqve"
-    path := "/path/to/save/file"
-    err := cli.DownloadFile(cid, path)
-    if err != nil {
-        // handle error
-    }
+	dataCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
+	outPath := "./output"
+	downUrl := "http://127.0.0.1:8080/ipfs/QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
+	host := "127.0.0.1"
+	port := 6800
+	secret := "my_aria2_secret"
+	conf := &metacli.Aria2Conf{Host: host, Port: port, Secret: secret}
+	err := metaClient.DownloadFile(dataCid, outPath, downUrl, conf)
+	if err != nil {
+		logs.GetLogger().Error("download failed:", err)
+	}
+	logs.GetLogger().Infoln("download success")
 
-    // Download a folder
-    cid := "bafkreiaugtrtgvtpnv23ipcfivf
-
+	return
+}
 ```
 
 ### Get DataCID for a File by its Filename
 To get the DataCID for a file by its filename, you can use the following method:
 ```
-import "github.com/FogMeta/Meta-Client-SDK/client"
+package main
+
+import (
+	metacli "github.com/FogMeta/meta-client-sdk/client"
+	"github.com/filswan/go-swan-lib/logs"
+)
 
 func main() {
-    cli := client.NewMetaClient()
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	key := "V0schjjl_bxCtSNwBYXXXX"
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	token := "fca72014744019a949248874610fXXXX"
+	metaUrl := "http://{ip}:8099/rpc/v0"
+	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
-    filename := "file.txt"
-    cid, err := cli.GetDataCID(filename)
-    if err != nil {
-        // handle error
-    }
-    fmt.Println(cid)
+	name := "./testdata"
+	dataCids, err := metaClient.GetDataCIDByName(name)
+	if err != nil {
+		logs.GetLogger().Error("get data cid failed:", err)
+	}
+	logs.GetLogger().Infof("get data cid success: %+v", dataCids)
+
+	return
 }
 
 ```
 ### View List of Files and Storage Status
 To view a list of all files under the current user, or to query storage information and the status of a single file or folder, you can use the following method:
 ```
-import "github.com/FogMeta/Meta-Client-SDK/client"
+package main
+
+import (
+	metacli "github.com/FogMeta/meta-client-sdk/client"
+	"github.com/filswan/go-swan-lib/logs"
+)
 
 func main() {
-    cli := client.NewMetaClient()
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	key := "V0schjjl_bxCtSNwBYXXXX"
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	token := "fca72014744019a949248874610fXXXX"
+	metaUrl := "http://{ip}:8099/rpc/v0"
+	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
-    // View list of files
-    list, err := cli.List()
-    if err != nil {
-        // handle error
-    }
-    fmt.Println(list)
+	page := 0
+	limit := 10
+	showStorage := true
+	sourceFileList, err := metaClient.GetFileLists(page, limit, showStorage)
+	if err != nil {
+		logs.GetLogger().Error("get file list failed:", err)
+	}
+	logs.GetLogger().Infof("get file list success: %+v", sourceFileList)
 
-    // Query storage information and status of a single file or folder
-    cid := "bafkreiaugtrtgvtpnv23ipcfivfzljavh2olndt7blbnslvnhdbt7awqve"
-    info, err := cli.Info(cid)
-    if err != nil {
-        // handle error
-    }
-    fmt.Println(info)
+	return
 }
+```
+
+
+### Get Source File Information by its Filename
 
 ```
+package main
+
+import (
+	metacli "github.com/FogMeta/meta-client-sdk/client"
+	"github.com/filswan/go-swan-lib/logs"
+)
+
+func main() {
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	key := "V0schjjl_bxCtSNwBYXXXX"
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	token := "fca72014744019a949248874610fXXXX"
+	metaUrl := "http://{ip}:8099/rpc/v0"
+	metaClient := metacli.NewAPIClient(key, token, metaUrl)
+
+	dataCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
+	sourceFileInfo, err := metaClient.GetFileInfoByDataCid(dataCid)
+	if err != nil {
+		logs.GetLogger().Error("get source file info failed:", err)
+	}
+	logs.GetLogger().Infof("get source file info success: %+v", sourceFileInfo)
+
+	return
+}
+```
+
 ## API Documentation
 
 For detailed API lists, please check out the [API Documentation](document/api.md ':include').

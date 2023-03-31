@@ -14,7 +14,7 @@ Definition:
 Creates a Meta Client instance to make relevant API calls.
 
 ```shell
-func NewAPIClient(key, token, ipfsApiUrl, ipfsGatewayUrl, metaUrl string) *MetaClient
+func NewAPIClient(key, token, metaUrl string) *MetaClient
 ```
 
 Inputs:
@@ -22,8 +22,6 @@ Inputs:
 ```shell
 key                    # Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
 token                  # Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
-ipfsApiUrl             # API address of IPFS service.
-ipfsGatewayUrl         # Gateway address of IPFS service.
 metaUrl                # Address of Meta Server.
 ```
 
@@ -40,12 +38,13 @@ Definition:
 Uploads a file or folder to IPFS service.
 
 ```shell
-func (m *MetaClient) UploadFile(inputPath string) (dataCid string, err error) 
+func (m *MetaClient) UploadFile(ipfsApiUrl, inputPath string) (dataCid string, err error) 
 ```
 
 Inputs:
 
 ```shell
+ipfsApiUrl             # API address of IPFS service.
 inputPath              # File or director path to be uploaded to IPFS server
 ```
 
@@ -56,20 +55,21 @@ dataCid                # Data Cid returned by IPFS server
 error                  # error or nil
 ```
 
-## NotifyMetaServer
+## ReportMetaClientServer
 
 Definition:
-Notifies the Meta Server that the file or folder has been uploaded to the IPFS service.
+Report the Meta Client Server that the file or folder has been uploaded to the IPFS service.
 
 ```shell
-func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error 
+func (m *MetaClient) ReportMetaClientServer(sourceName string, dataCid string, ipfsGateway string) error 
 ```
 
 Inputs:
 
 ```shell
 sourceName             # Name of the file that has been uploaded to the IPFS server.
-dataCid                # Data Cid returned by IPFS server
+dataCid                # Data Cid returned by IPFS server.
+ipfsGateway            # Gateway address of IPFS service.
 ```
 
 Outputs:
@@ -85,7 +85,7 @@ Definition:
 Downloads the file or folder corresponding to the specified Data Cid from IPFS. If the Aria2 option is configured, Aria2 tool will be used for downloading. Otherwise, IPFS API will be used.
 
 ```shell
-func (m *MetaClient) DownloadFile(dataCid string, outPath string, conf *Aria2Conf) error
+func (m *MetaClient) DownloadFile(dataCid string, outPath string, downUrl string, conf *Aria2Conf) error
 ```
 
 Inputs:
@@ -93,10 +93,8 @@ Inputs:
 ```shell
 dataCid                # Data CID to be downloaded
 outPath                # Output path for downloaded file
-conf                   # Aria2 related options, including:
-                       # host   Aria2 server address
-                       # port   Aria2 server port
-                       # secret Must be the same value as rpc-secure in aria2 conf
+downUrl                # Download url address of IPFS service, if the option is not provided, it will automatically query the meta client server.
+conf                   # Aria2 related options, including:host, aria2 server address; port,aria2 server port; secret, must be the same value as rpc-secure in aria2 conf
 ```
 
 Outputs:

@@ -97,7 +97,7 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, downUrl string, conf 
 	return nil
 }
 
-func (m *MetaClient) NotifyMetaClientServer(sourceName string, dataCid string, ipfsGateway string) error {
+func (m *MetaClient) ReportMetaClientServer(sourceName string, dataCid string, ipfsGateway string) error {
 
 	isFile, err := isFile(sourceName)
 	if err != nil {

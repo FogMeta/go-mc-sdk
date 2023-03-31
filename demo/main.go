@@ -279,7 +279,7 @@ func Notify2MetaDemo(c *cli.Context) error {
 	input := c.String("input")
 	dataCid := c.String("data-cid")
 	gatewayUrl := c.String("gateway-url")
-	err := metaClient.NotifyMetaClientServer(input, dataCid, gatewayUrl)
+	err := metaClient.ReportMetaClientServer(input, dataCid, gatewayUrl)
 	if err != nil {
 		logs.GetLogger().Error("notify data cid to meta server error:", err)
 		return err
