@@ -3,6 +3,7 @@ module meta-client-sdk
 go 1.19
 
 require (
+	github.com/BurntSushi/toml v1.2.1
 	github.com/filswan/go-swan-lib v0.2.138
 	github.com/ipfs/go-ipfs-api v0.4.0
 	github.com/meta-client-sdk v0.0.0-00010101000000-000000000000

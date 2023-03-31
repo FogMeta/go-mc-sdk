@@ -5,11 +5,12 @@ import (
 	"github.com/filswan/go-swan-lib/logs"
 	sdk "github.com/meta-client-sdk/client"
 	"github.com/urfave/cli/v2"
+	"meta-client-sdk/demo/config"
 	"os"
 )
 
 var (
-	DefaultConf    *sdk.ClientConf
+	Conf           *sdk.ClientConf
 	KeyFlag        cli.StringFlag
 	TokenFlag      cli.StringFlag
 	ApiUrlFlag     cli.StringFlag
@@ -18,44 +19,39 @@ var (
 )
 
 func init() {
-	DefaultConf = &sdk.ClientConf{
-		Key:            "V0schjjl_bxCtSNwBYXXXX",
-		Token:          "fca72014744019a949248874610fXXXX",
-		IpfsApiUrl:     "http://127.0.0.1:5001",
-		IpfsGatewayUrl: "http://127.0.0.1:8080",
-		MetaServerUrl:  "http://127.0.0.1:8099/rpc/v0",
-	}
+
+	Conf = config.GetConfig("./client.toml")
 
 	KeyFlag = cli.StringFlag{
 		Name:    "key",
 		Aliases: []string{"k"},
 		Usage:   "key from meta swan",
-		Value:   DefaultConf.Key,
+		Value:   Conf.Key,
 	}
 
 	TokenFlag = cli.StringFlag{
 		Name:    "token",
 		Aliases: []string{"t"},
 		Usage:   "token from meta swan",
-		Value:   DefaultConf.Token,
+		Value:   Conf.Token,
 	}
 
 	ApiUrlFlag = cli.StringFlag{
 		Name:  "api-url",
 		Usage: "url of IPFS api server",
-		Value: DefaultConf.IpfsApiUrl,
+		Value: Conf.IpfsApiUrl,
 	}
 
 	GatewayUrlFlag = cli.StringFlag{
 		Name:  "gateway-url",
 		Usage: "url of IPFS gateway",
-		Value: DefaultConf.IpfsGatewayUrl,
+		Value: Conf.IpfsGatewayUrl,
 	}
 
 	MetaUrlFlag = cli.StringFlag{
 		Name:  "meta-url",
 		Usage: "url of meta server",
-		Value: DefaultConf.MetaServerUrl,
+		Value: Conf.MetaServerUrl,
 	}
 }
 
@@ -109,17 +105,17 @@ func main() {
 					&cli.StringFlag{
 						Name:  "host",
 						Usage: "aria2 server address.",
-						Value: "127.0.0.1",
+						Value: Conf.Aria2.Host,
 					},
 					&cli.IntFlag{
 						Name:  "port",
 						Usage: "aria2 server port.",
-						Value: 6800,
+						Value: Conf.Aria2.Port,
 					},
 					&cli.StringFlag{
 						Name:  "secret",
 						Usage: "directory where files will be downloaded to.",
-						Value: "my_aria2_secret",
+						Value: Conf.Aria2.Secret,
 					},
 				},
 			},
