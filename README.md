@@ -159,7 +159,7 @@ func main() {
 ```
 ## API Documentation
 
-For detailed API lists, please check out the [API Documentation](meta-client-sdk/document/api.md ':include').
+For detailed API lists, please check out the [API Documentation](document/api.md ':include').
 
 ## Contributing
 
