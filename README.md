@@ -1,89 +1,170 @@
-# meta-client-sdk
+# Meta-Client-SDK
 
-* [Install Aria2 Service](#Install-Aria2-Service)
-* [Install IPFS Server](#Install-IPFS-Server)
-* [Usage](#Usage)
+Meta-Client-SDK is a Web3 data service that helps users store backups and recover data. This SDK supports automated recording of data storage information and can store data automatically to IPFS gateway and Filecoin network, providing fast data retrieval, permanent backup, and data recovery capabilities.
 
-## Install Aria2 Service
-```shell
+## Features
+
+Meta-Client-SDK provides the following features:
+
+- Upload files or folders to the IPFS gateway
+- Report data information to the Meta-Client server (server will automatically complete data processing and deal-sending functions)
+- Store data to the Filecoin network
+- Store data in the IPFS gateway
+- Download files or folders to the local machine
+- Query DataCID for a file by its filename
+- View a list of all files under the current user
+- Query storage information and status of a single file or folder
+
+## Prerequisites
+
+Before using Meta-Client-SDK, you need to install the following services:
+
+- Aria2 service
+
+```
 sudo apt install aria2
 ```
+- [IPFS service](https://docs.ipfs.tech/install/command-line/#install-official-binary-distributions)
+- [Go](https://golang.org/dl/) (1.16 or later)
 
-## Install IPFS Server
-###
-[Install IPFS binary](https://docs.ipfs.tech/install/command-line/#linux)
-### 
-[Start the IPFS daemon](https://docs.ipfs.tech/how-to/kubo-basic-cli/#install-kubo)
+## Installation
+
+To install Meta-Client-SDK, run the following command:
+
+```
+go get github.com/FogMeta/Meta-Client-SDK
+```
+
 
 ## Usage
 
-Install
+### Initialization
+
+First, you need to create a MetaClient object, which can be initialized as follows:
 
 ```go
-go get github.com/filswan/go-swan-lib/meta-client-sdk@latest
-```
-
-Quick Start
-
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/filswan/go-swan-lib/logs"
-	sdk "github.com/FogMeta/meta-client-sdk/client"
-	"os"
-)
+import "github.com/FogMeta/Meta-Client-SDK/client"
 
 func main() {
-	// Initialize parameters
-	
-	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
-	key        := "V0schjjl_bxCtSNwBYXXXX"
-	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
-	token      := "fca72014744019a949248874610fXXXX"
-	
-	ipfsApiUrl := "http://127.0.0.1:5001"    // IPFS API address
-	gatewayUrl := "http://127.0.0.1:8080"    // Gateway address
-	metaUrl := "http://127.0.0.1:8099"       // Meta server address
-	
-	targetName := "./testdata"               // Target file or folder
-	outPath    := "./output"                 // Directory to save downloaded files
+    cli := client.NewMetaClient()
+}
+```
+### Upload Files or Folders
+To upload files or folders to IPFS gateway and Filecoin network, you can use the following method:
+```
+import "github.com/FogMeta/Meta-Client-SDK/client"
 
-	// Create Meta Client object based on actual parameters
-	metaClient := sdk.NewAPIClient(key, token, ipfsApiUrl, gatewayUrl, metaUrl)
-	if metaClient == nil {
-		logs.GetLogger().Error("create meta client failed, please check the input parameters") // Fail to create object
-		return
-	}
+func main() {
+    cli := client.NewMetaClient()
 
-	// Upload the target file or folder
-	dataCid, err := metaClient.UploadFile(targetName)
-	if err != nil {
-		logs.GetLogger().Error("upload dir error:", err) // Fail to upload
-		return
-	}
-	logs.GetLogger().Infoln("upload dir success, and data cid: ", dataCid) // Upload successful
+    // Upload a single file
+    path := "/path/to/file"
+    result, err := cli.UploadFile(path)
+    if err != nil {
+        // handle error
+    }
+    fmt.Println(result)
 
-	// Notify Meta Server that the file has been uploaded to IPFS
-	err = metaClient.NotifyMetaServer(targetName, dataCid)
-	if err != nil {
-		logs.GetLogger().Error("notify meta server error:", err) // Fail to notify Meta Server
-		return
-	}
-	logs.GetLogger().Infoln("notify meta server success") // Successfully notified Meta Server
-
-	// Create Aria2 configuration options
-	conf := &sdk.Aria2Conf{Host: "127.0.0.1", Port: 6800, Secret: "my_aria2_secret"}
-
-	// Download the file or folder corresponding to the specified Data Cid to the specified directory
-	err = metaClient.DownloadFile(dataCid, outPath, conf)
-	if err != nil {
-		logs.GetLogger().Error("download dir error:", err) // Fail to download
-		return
-	}
-	logs.GetLogger().Infoln("download dir by aria2 success") // Download successful
-
+    // Upload a folder
+    path := "/path/to/folder"
+    result, err := cli.UploadFolder(path)
+    if err != nil {
+        // handle error
+    }
+    fmt.Println(result)
 }
 
 ```
+### Report Data-related Information
+To report data-related information to the Meta-Client server, you can use the following method:
+
+```
+import "github.com/FogMeta/Meta-Client-SDK/client"
+
+func main() {
+    cli := client.NewMetaClient()
+
+    cid := "bafkreiaugtrtgvtpnv23ipcfivfzljavh2olndt7blbnslvnhdbt7awqve"
+    result, err := cli.Report(cid)
+    if err != nil {
+        // handle error
+    }
+    fmt.Println(result)
+}
+
+```
+### Download Files or Folders
+To download files or folders from the IPFS gateway and Filecoin network, you can use the following method:
+
+```
+import "github.com/FogMeta/Meta-Client-SDK/client"
+
+func main() {
+    cli := client.NewMetaClient()
+
+    // Download a single file
+    cid := "bafkreiaugtrtgvtpnv23ipcfivfzljavh2olndt7blbnslvnhdbt7awqve"
+    path := "/path/to/save/file"
+    err := cli.DownloadFile(cid, path)
+    if err != nil {
+        // handle error
+    }
+
+    // Download a folder
+    cid := "bafkreiaugtrtgvtpnv23ipcfivf
+
+```
+
+### Get DataCID for a File by its Filename
+To get the DataCID for a file by its filename, you can use the following method:
+```
+import "github.com/FogMeta/Meta-Client-SDK/client"
+
+func main() {
+    cli := client.NewMetaClient()
+
+    filename := "file.txt"
+    cid, err := cli.GetDataCID(filename)
+    if err != nil {
+        // handle error
+    }
+    fmt.Println(cid)
+}
+
+```
+### View List of Files and Storage Status
+To view a list of all files under the current user, or to query storage information and the status of a single file or folder, you can use the following method:
+```
+import "github.com/FogMeta/Meta-Client-SDK/client"
+
+func main() {
+    cli := client.NewMetaClient()
+
+    // View list of files
+    list, err := cli.List()
+    if err != nil {
+        // handle error
+    }
+    fmt.Println(list)
+
+    // Query storage information and status of a single file or folder
+    cid := "bafkreiaugtrtgvtpnv23ipcfivfzljavh2olndt7blbnslvnhdbt7awqve"
+    info, err := cli.Info(cid)
+    if err != nil {
+        // handle error
+    }
+    fmt.Println(info)
+}
+
+```
+## API Documentation
+
+For detailed API lists, please check out the [API Documentation](meta-client-sdk/document/api.md ':include').
+
+## Contributing
+
+Contributions to Meta-Client-SDK are welcome! If you find any errors or want to add new features, please submit an [Issue](https://github.com/FogMeta/meta-client-sdk/issues), or initiate a [Pull Request](https://github.com/FogMeta/meta-client-sdk/pulls).
+
+## License
+
+Meta-Client-SDK is licensed under the MIT License.
