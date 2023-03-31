@@ -125,10 +125,10 @@ func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error {
 	return nil
 }
 
-func (m *MetaClient) GetFileLists(page, limit int, showStorageInfo bool) ([]SourceFile, error) {
+func (m *MetaClient) GetFileLists(page, limit int, showStore bool) ([]SourceFile, error) {
 
 	var params []interface{}
-	params = append(params, SourceFilePageReq{page, limit})
+	params = append(params, SourceFilePageReq{page, limit, showStore})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.GetSourceFiles",

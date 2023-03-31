@@ -43,8 +43,9 @@ type StoreSourceFileResponse struct {
 //GetSourceFiles
 
 type SourceFilePageReq struct {
-	PageNum int `json:"page_num"`
-	Size    int `json:"size"`
+	PageNum   int  `json:"page_num"`
+	Size      int  `json:"size"`
+	ShowStore bool `json:"show_store"`
 }
 
 type SourceFilePageResponse struct {
