@@ -51,9 +51,9 @@ import (
 )
 
 func main() {
-    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
     key := "V0schjjl_bxCtSNwBYXXXX"
-    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
     token := "fca72014744019a949248874610fXXXX"
     metaUrl := "http://{ip}:8099/rpc/v0"
     metaClient := metacli.NewAPIClient(key, token, metaUrl)
@@ -70,9 +70,9 @@ import (
 )
 
 func main() {
-    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings".
     key := "V0schjjl_bxCtSNwBYXXXX"
-    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
     token := "fca72014744019a949248874610fXXXX"
 	metaUrl := "http://{ip}:8099/rpc/v0"
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
@@ -100,9 +100,9 @@ import (
 )
 
 func main() {
-	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 	key := "V0schjjl_bxCtSNwBYXXXX"
-	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 	token := "fca72014744019a949248874610fXXXX"
 	metaUrl := "http://{ip}:8099/rpc/v0"
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
@@ -131,9 +131,9 @@ import (
 )
 
 func main() {
-	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 	key := "V0schjjl_bxCtSNwBYXXXX"
-	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 	token := "fca72014744019a949248874610fXXXX"
 	metaUrl := "http://{ip}:8099/rpc/v0"
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
@@ -155,7 +155,7 @@ func main() {
 }
 ```
 
-### Get DataCID for a File by its Filename
+### Get DataCID for a File by file name
 To get the DataCID for a file by its filename, you can use the following method:
 ```
 package main
@@ -195,9 +195,9 @@ import (
 )
 
 func main() {
-	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 	key := "V0schjjl_bxCtSNwBYXXXX"
-	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 	token := "fca72014744019a949248874610fXXXX"
 	metaUrl := "http://{ip}:8099/rpc/v0"
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
@@ -227,9 +227,9 @@ import (
 )
 
 func main() {
-	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 	key := "V0schjjl_bxCtSNwBYXXXX"
-	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings".
 	token := "fca72014744019a949248874610fXXXX"
 	metaUrl := "http://{ip}:8099/rpc/v0"
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
