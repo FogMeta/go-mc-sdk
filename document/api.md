@@ -61,13 +61,13 @@ Definition:
 Report the Meta Client Server that the file or folder has been uploaded to the IPFS service.
 
 ```shell
-func (m *MetaClient) ReportMetaClientServer(sourceName string, dataCid string, ipfsGateway string) error 
+func (m *MetaClient) ReportMetaClientServer(inputPath string, dataCid string, ipfsGateway string) error 
 ```
 
 Inputs:
 
 ```shell
-sourceName             # Name of the file that has been uploaded to the IPFS server.
+inputPath              # File or directory name that has been uploaded to the IPFS Gateway.
 dataCid                # Data Cid returned by IPFS server.
 ipfsGateway            # Gateway address of IPFS service.
 ```
@@ -141,7 +141,7 @@ func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error)
 Inputs:
 
 ```shell
-fileName               # Name of the file to be queried
+fileName               # File or directory name to be queried
 ```
 
 Outputs:
