@@ -215,11 +215,9 @@ func main() {
 func buildClient(c *cli.Context) *sdk.MetaClient {
 	key := c.String("key")
 	token := c.String("token")
-	apiUrl := c.String("api-url")
-	gatewayUrl := c.String("gateway-url")
 	metaUrl := c.String("meta-url")
 
-	metaClient := sdk.NewAPIClient(key, token, apiUrl, gatewayUrl, metaUrl)
+	metaClient := sdk.NewAPIClient(key, token, metaUrl)
 
 	return metaClient
 }
@@ -232,7 +230,8 @@ func UploadDemo(c *cli.Context) error {
 	}
 
 	input := c.String("input")
-	dataCid, err := metaClient.UploadFile(input)
+	apiUrl := c.String("api-url")
+	dataCid, err := metaClient.UploadFile(apiUrl, input)
 	if err != nil {
 		logs.GetLogger().Error("upload error:", err)
 		return err
@@ -251,6 +250,8 @@ func DownloadDemo(c *cli.Context) error {
 	dataCid := c.String("data-cid")
 	outPath := c.String("out-path")
 
+	//gatewayUrl := c.String("gateway-url")
+
 	var conf *sdk.Aria2Conf
 
 	if c.Bool("aria2") {
@@ -259,12 +260,12 @@ func DownloadDemo(c *cli.Context) error {
 		secret := c.String("secret")
 		conf = &sdk.Aria2Conf{Host: host, Port: port, Secret: secret}
 	}
-	err := metaClient.DownloadFile(dataCid, outPath, conf)
+	err := metaClient.DownloadFile(dataCid, outPath, "", conf)
 	if err != nil {
-		logs.GetLogger().Error("download dir error:", err)
+		logs.GetLogger().Error("download error:", err)
 		return err
 	}
-	logs.GetLogger().Infoln("download dir success")
+	logs.GetLogger().Infoln("download success")
 
 	return nil
 }
@@ -277,7 +278,8 @@ func Notify2MetaDemo(c *cli.Context) error {
 
 	input := c.String("input")
 	dataCid := c.String("data-cid")
-	err := metaClient.NotifyMetaServer(input, dataCid)
+	gatewayUrl := c.String("gateway-url")
+	err := metaClient.NotifyMetaClientServer(input, dataCid, gatewayUrl)
 	if err != nil {
 		logs.GetLogger().Error("notify data cid to meta server error:", err)
 		return err

@@ -2,40 +2,36 @@ package client
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/logs"
 	shell "github.com/ipfs/go-ipfs-api"
+	"path/filepath"
 )
 
 type MetaClient struct {
-	ApiKey         string
-	ApiToken       string
-	IpfsApiUrl     string
-	IpfsGatewayUrl string
-	MetaUrl        string
+	ApiKey   string
+	ApiToken string
+	MetaUrl  string
 
 	sh    *shell.Shell
 	aria2 *client.Aria2Client
 }
 
-func NewAPIClient(key, token, ipfsApiUrl, ipfsGatewayUrl, metaUrl string) *MetaClient {
+func NewAPIClient(key, token, metaUrl string) *MetaClient {
 
 	c := &MetaClient{
-		ApiKey:         key,
-		ApiToken:       token,
-		IpfsApiUrl:     ipfsApiUrl,
-		IpfsGatewayUrl: ipfsGatewayUrl,
-		MetaUrl:        metaUrl,
+		ApiKey:   key,
+		ApiToken: token,
+		MetaUrl:  metaUrl,
 	}
-	// TODO: check key and token ,need meta server api
 
 	return c
 }
 
-func (m *MetaClient) UploadFile(inputPath string) (dataCid string, err error) {
+func (m *MetaClient) UploadFile(ipfsApiUrl, inputPath string) (dataCid string, err error) {
 	// Creates an IPFS Shell client.
-	sh := shell.NewShell(m.IpfsApiUrl)
+	sh := shell.NewShell(ipfsApiUrl)
 
 	isInputFile, err := isFile(inputPath)
 	if err != nil {
@@ -51,44 +47,57 @@ func (m *MetaClient) UploadFile(inputPath string) (dataCid string, err error) {
 		return "", err
 	}
 
-	// TODO: notify meta server the result
-	//err = m.NotifyMetaServer(inputPath, dataCid)
-	//if err != nil {
-	//	return "", err
-	//}
-
 	return dataCid, nil
 }
 
-func (m *MetaClient) DownloadFile(dataCid, outPath string, conf *Aria2Conf) error {
-	// Creates an IPFS Shell client.
-	sh := shell.NewShell(m.IpfsApiUrl)
-	isDir, err := dataCidIsDir(sh, dataCid)
-	if err != nil || isDir == nil {
+func (m *MetaClient) DownloadFile(dataCid, outPath string, downUrl string, conf *Aria2Conf) error {
+
+	if conf == nil {
+		return errors.New("need aria2 server config")
+	}
+
+	// check data cid from meta server
+	downInfo, err := m.GetDownloadFileInfoByDataCid(dataCid)
+	if err != nil || len(downInfo) == 0 {
+		logs.GetLogger().Errorf("Get Download File Info Error: %s \n", err)
 		return err
 	}
 
-	// aria2 download file
-	if conf != nil {
-		downUrl := pathJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
-		outFile := pathJoin(outPath, dataCid)
-
-		if *isDir {
-			downUrl = downUrl + "?format=tar"
-			outFile = outFile + ".tar"
+	if downUrl != "" {
+		downFile := pathJoin(outPath, filepath.Base(downInfo[0].SourceName))
+		if downInfo[0].IsDirector {
+			downFile = downFile + ".tar"
 		}
 
-		err = downloadFileByAria2(conf, downUrl, outFile)
+		err := downloadFileByAria2(conf, downUrl, downFile)
 		if err == nil {
+			logs.GetLogger().Info("download ", dataCid, "by aria2 success")
 			return nil
 		}
-		logs.GetLogger().Warnln("download ", dataCid, "by aria2 error:", err)
 	}
 
-	return downloadFromIpfs(sh, dataCid, outPath)
+	// aria2 download file
+	for _, down := range downInfo {
+		realUrl := down.DownloadUrl
+		downFile := pathJoin(outPath, filepath.Base(down.SourceName))
+		if down.IsDirector {
+			realUrl = realUrl + "?format=tar"
+			downFile = downFile + ".tar"
+		}
+
+		err := downloadFileByAria2(conf, realUrl, downFile)
+		if err == nil {
+			logs.GetLogger().Info("download ", dataCid, "by aria2", err)
+			break
+		}
+		logs.GetLogger().Warn("download ", dataCid, " url ", realUrl, " by aria2 error:", err)
+		//remove failed
+	}
+
+	return nil
 }
 
-func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error {
+func (m *MetaClient) NotifyMetaClientServer(sourceName string, dataCid string, ipfsGateway string) error {
 
 	isFile, err := isFile(sourceName)
 	if err != nil {
@@ -99,7 +108,7 @@ func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error {
 	logs.GetLogger().Infoln("upload total size is:", sourceSize)
 
 	var params []interface{}
-	downUrl := pathJoin(m.IpfsGatewayUrl, "ipfs/", dataCid)
+	downUrl := pathJoin(ipfsGateway, "ipfs/", dataCid)
 	params = append(params, StoreSourceFileReq{sourceName, !(*isFile), sourceSize, dataCid, downUrl})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
@@ -110,14 +119,14 @@ func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error {
 
 	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
 	if err != nil {
-		fmt.Printf("Get Response Error: %s \n", err)
+		logs.GetLogger().Errorf("Get Response Error: %s \n", err)
 		return err
 	}
 
 	res := StoreSourceFileResponse{}
 	err = json.Unmarshal(response, &res)
 	if err != nil {
-		fmt.Printf("Parse Response (%s) Error: %s \n", response, err)
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
 		return err
 	}
 	logs.GetLogger().Info(res)
@@ -226,6 +235,33 @@ func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*SourceFile, error) {
 	}
 
 	return nil, nil
+}
+
+func (m *MetaClient) GetDownloadFileInfoByDataCid(dataCid string) ([]DownloadFileInfo, error) {
+
+	var params []interface{}
+	params = append(params, dataCid)
+	jsonRpcParams := JsonRpcParams{
+		JsonRpc: "2.0",
+		Method:  "meta.GetDownloadFileInfoByDataCid",
+		Params:  params,
+		Id:      1,
+	}
+	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Errorf("Get Response Error: %s", err)
+		return nil, err
+	}
+
+	res := DownloadFileInfoResponse{}
+	err = json.Unmarshal(response, &res)
+	if err != nil {
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
+		return nil, err
+	}
+	logs.GetLogger().Info(res)
+
+	return res.Result.Data, nil
 }
 
 func (m *MetaClient) RebuildDataCID(fileName string) error {

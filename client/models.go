@@ -96,6 +96,7 @@ type SourceFileResponse struct {
 }
 
 type SplitFile struct {
+	FileName         string            `json:"file_name"`
 	DataCid          string            `json:"data_cid"`
 	FileSize         int64             `json:"file_size"`
 	StorageProviders []StorageProvider `json:"storage_providers"`
@@ -106,4 +107,22 @@ type StorageProvider struct {
 	StorageStatus     string `json:"storage_status"`
 	DealId            int64  `json:"deal_id"`
 	DealCid           string `json:"deal_cid"` // proposal cid or uuid
+}
+
+// GetDownloadFileInfoByDataCid
+
+type DownloadFileInfoResponse struct {
+	JsonRpc string `json:"jsonrpc"`
+	Result  struct {
+		Code    string             `json:"code"`
+		Message string             `json:"message,omitempty"`
+		Data    []DownloadFileInfo `json:"data,omitempty"`
+	} `json:"result"`
+	Id int `json:"id"`
+}
+
+type DownloadFileInfo struct {
+	SourceName  string `json:"source_name"`
+	DownloadUrl string `json:"download_url"`
+	IsDirector  bool   `json:"is_director"`
 }
