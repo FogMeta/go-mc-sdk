@@ -33,7 +33,7 @@ sudo apt install aria2
 To install Meta-Client-SDK, run the following command:
 
 ```
-go get github.com/FogMeta/Meta-Client-SDK
+go get github.com/FogMeta/meta-client-sdk
 ```
 
 
