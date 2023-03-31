@@ -75,18 +75,17 @@ func main() {
     key := "V0schjjl_bxCtSNwBYXXXX"
     // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
     token := "fca72014744019a949248874610fXXXX"
-	metaUrl := "http://{ip}:8099/rpc/v0"
-	metaClient := metacli.NewAPIClient(key, token, metaUrl)
+    metaUrl := "http://{ip}:8099/rpc/v0"
+    metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
-	apiUrl := "http://127.0.0.1:5001"
-	inputPath := "./testdata"
-	dataCid, err := metaClient.UploadFile(apiUrl, inputPath)
-	if err != nil {
-		logs.GetLogger().Error("upload failed:", err)
-	}
-	logs.GetLogger().Infoln("upload success, and data cid is: ", dataCid)
-
-	return
+    apiUrl := "http://127.0.0.1:5001"
+    inputPath := "./testdata" //file or directory path
+    dataCid, err := metaClient.UploadFile(apiUrl, inputPath)
+    if err != nil {
+	logs.GetLogger().Error("upload failed:", err)
+    }
+    logs.GetLogger().Infoln("upload success, and data cid is: ", dataCid)
+    return
 }
 ```
 ### Report Data-related Information
@@ -108,10 +107,10 @@ func main() {
 	metaUrl := "http://{ip}:8099/rpc/v0"
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
-	sourceName := "./testdata"
+	inputPath := "./testdata" // file or directory path that has been uploaded to the IPFS gateway
 	dataCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	ipfsGateway := "http://127.0.0.1:8080"
-	err := metaClient.ReportMetaClientServer(sourceName, dataCid, ipfsGateway)
+	err := metaClient.ReportMetaClientServer(inputPath, dataCid, ipfsGateway)
 	if err != nil {
 		logs.GetLogger().Error("report meta client server  failed:", err)
 	}
@@ -167,9 +166,9 @@ import (
 )
 
 func main() {
-	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 	key := "V0schjjl_bxCtSNwBYXXXX"
-	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 	token := "fca72014744019a949248874610fXXXX"
 	metaUrl := "http://{ip}:8099/rpc/v0"
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
