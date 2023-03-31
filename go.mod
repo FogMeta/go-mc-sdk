@@ -1,4 +1,4 @@
-module meta-client-sdk
+module github.com/FogMeta/meta-client-sdk
 
 go 1.19
 
@@ -50,6 +50,5 @@ require (
 	lukechampine.com/blake3 v1.1.7 // indirect
 )
 
-replace github.com/meta-client-sdk => ./
 
 replace github.com/filswan/go-swan-lib v0.2.138 => github.com/qinghua8080/go-swan-lib v0.2.139-0.20230323064203-82f8e6ed92da
