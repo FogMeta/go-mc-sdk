@@ -1,20 +1,21 @@
 # Meta-Client-SDK
 
-Meta-Client-SDK is a Web3 data service that helps users store the backups and recover data. This SDK supports automated recording of data storage information and can store data automatically to IPFS gateway and Filecoin network, providing fast data retrieval, permanent backup, and data recovery capabilities.
+Meta-Client is a Web3 data service that securely stores data backups and enables data recovery. It automatically records data storage information and stores data on both IPFS gateway and Filecoin network, providing fast retrieval and permanent backup.
 
+With Meta-Client-SDK, users can easily access and recover their data while ensuring its safety. The automated recording of data storage information also helps users optimize their storage strategies.
 ## Features
 
 Meta-Client-SDK provides the following features:
 
-- Upload files or folders to the IPFS gateway
+- Upload files or directory to the IPFS gateway
 - Report data information to the Meta-Client server 
     - Meta-Client will automatically complete data processing(split or merge file and generate CAR files)
     - Store the CAR file in the IPFS gateway
-    - Send CAR file to the Filecoin network
-- Download files or folders to the local machine
-- Query DataCID for a file by its filename
+    - Send CAR files to the storage providers in the Filecoin network
+- Download files or directory to the local machine
+- Query DataCID for a file by the file name
 - Get a list of all files of current user
-- Query storage information and status of a single file or folder
+- Query storage information and status of a single file or directory
 
 ## Prerequisites
 
@@ -59,8 +60,8 @@ func main() {
     metaClient := metacli.NewAPIClient(key, token, metaUrl)
 }
 ```
-### Upload Files or Folders
-To upload files or folders to IPFS gateway and Filecoin network, you can use the following method:
+### Upload Files or Directory
+To upload files or directory to IPFS gateway and Filecoin network, you can use the following method:
 ```
 package main
 
@@ -119,8 +120,8 @@ func main() {
 	return
 }
 ```
-### Download Files or Folders
-To download files or folders from the IPFS gateway and Filecoin network, you can use the following method:
+### Download Files or Directory
+To download files or directory from the IPFS gateway and Filecoin network, you can use the following method:
 
 ```
 package main
