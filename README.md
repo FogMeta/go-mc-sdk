@@ -1,18 +1,19 @@
 # Meta-Client-SDK
 
-Meta-Client-SDK is a Web3 data service that helps users store backups and recover data. This SDK supports automated recording of data storage information and can store data automatically to IPFS gateway and Filecoin network, providing fast data retrieval, permanent backup, and data recovery capabilities.
+Meta-Client-SDK is a Web3 data service that helps users store the backups and recover data. This SDK supports automated recording of data storage information and can store data automatically to IPFS gateway and Filecoin network, providing fast data retrieval, permanent backup, and data recovery capabilities.
 
 ## Features
 
 Meta-Client-SDK provides the following features:
 
 - Upload files or folders to the IPFS gateway
-- Report data information to the Meta-Client server (server will automatically complete data processing and deal-sending functions)
-- Store data to the Filecoin network
-- Store data in the IPFS gateway
+- Report data information to the Meta-Client server 
+    - Meta-Client will automatically complete data processing(split or merge file and generate CAR files)
+    - Store the CAR file in the IPFS gateway
+    - Send CAR file to the Filecoin network
 - Download files or folders to the local machine
 - Query DataCID for a file by its filename
-- View a list of all files under the current user
+- Get a list of all files of current user
 - Query storage information and status of a single file or folder
 
 ## Prerequisites
