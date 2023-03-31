@@ -6,7 +6,6 @@ require (
 	github.com/BurntSushi/toml v1.2.1
 	github.com/filswan/go-swan-lib v0.2.138
 	github.com/ipfs/go-ipfs-api v0.4.0
-	github.com/meta-client-sdk v0.0.0-00010101000000-000000000000
 	github.com/urfave/cli/v2 v2.25.1
 )
 
@@ -49,6 +48,5 @@ require (
 	golang.org/x/sys v0.3.0 // indirect
 	lukechampine.com/blake3 v1.1.7 // indirect
 )
-
 
 replace github.com/filswan/go-swan-lib v0.2.138 => github.com/qinghua8080/go-swan-lib v0.2.139-0.20230323064203-82f8e6ed92da

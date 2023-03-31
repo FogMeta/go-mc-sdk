@@ -31,7 +31,7 @@ package main
 import (
 	"fmt"
 	"github.com/filswan/go-swan-lib/logs"
-	sdk "github.com/meta-client-sdk/client"
+	sdk "github.com/FogMeta/meta-client-sdk/client"
 	"os"
 )
 

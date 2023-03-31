@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
+	sdk "github.com/FogMeta/meta-client-sdk/client"
+	"github.com/FogMeta/meta-client-sdk/demo/config"
 	"github.com/filswan/go-swan-lib/logs"
-	sdk "github.com/meta-client-sdk/client"
 	"github.com/urfave/cli/v2"
-	"meta-client-sdk/demo/config"
 	"os"
 )
 

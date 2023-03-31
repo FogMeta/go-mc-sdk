@@ -2,8 +2,8 @@ package config
 
 import (
 	"github.com/BurntSushi/toml"
+	sdk "github.com/FogMeta/meta-client-sdk/client"
 	"github.com/filswan/go-swan-lib/logs"
-	sdk "github.com/meta-client-sdk/client"
 	"log"
 	"os"
 )
