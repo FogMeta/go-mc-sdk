@@ -33,26 +33,26 @@ func NewAPIClient(key, token, ipfsApiUrl, ipfsGatewayUrl, metaUrl string) *MetaC
 	return c
 }
 
-func (m *MetaClient) UploadFile(targetPath string) (dataCid string, err error) {
+func (m *MetaClient) UploadFile(inputPath string) (dataCid string, err error) {
 	// Creates an IPFS Shell client.
 	sh := shell.NewShell(m.IpfsApiUrl)
 
-	isInputFile, err := isFile(targetPath)
+	isInputFile, err := isFile(inputPath)
 	if err != nil {
 		return "", err
 	}
 
 	if *isInputFile {
-		dataCid, err = uploadFileToIpfs(sh, targetPath)
+		dataCid, err = uploadFileToIpfs(sh, inputPath)
 	} else {
-		dataCid, err = uploadDirToIpfs(sh, targetPath)
+		dataCid, err = uploadDirToIpfs(sh, inputPath)
 	}
 	if err != nil {
 		return "", err
 	}
 
 	// TODO: notify meta server the result
-	//err = m.NotifyMetaServer(targetPath, dataCid)
+	//err = m.NotifyMetaServer(inputPath, dataCid)
 	//if err != nil {
 	//	return "", err
 	//}
@@ -125,10 +125,10 @@ func (m *MetaClient) NotifyMetaServer(sourceName string, dataCid string) error {
 	return nil
 }
 
-func (m *MetaClient) GetFileLists(page, limit int, showStore bool) ([]SourceFile, error) {
+func (m *MetaClient) GetFileLists(page, limit int, showStorage bool) ([]SourceFile, error) {
 
 	var params []interface{}
-	params = append(params, SourceFilePageReq{page, limit, showStore})
+	params = append(params, SourceFilePageReq{page, limit, showStorage})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.GetSourceFiles",

@@ -112,7 +112,7 @@ Definition:
 Gets the file list from the Meta Server based on the specified page number and number of records per page.
 
 ```shell
-func (m *MetaClient) GetFileLists(pageNum int, limit int, showStorageInfo bool) ([]FileDetails, error)
+func (m *MetaClient) GetFileLists(pageNum int, limit int, showStorage bool) ([]FileDetails, error)
 ```
 
 Inputs:
@@ -120,7 +120,7 @@ Inputs:
 ```shell
 pageNum                # Which page to query
 limit                  # Number of records per page
-showStorageInfo        # Whether to return storage information
+showStorage            # Whether to return storage information
 ```
 
 Outputs:
