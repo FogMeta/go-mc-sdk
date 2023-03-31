@@ -144,17 +144,21 @@ func (m *MetaClient) GetFileLists(page, limit int, showStore bool) ([]SourceFile
 	res := SourceFilePageResponse{}
 	err = json.Unmarshal(response, &res)
 	if err != nil {
-		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
 		return nil, err
 	}
 	logs.GetLogger().Info(res)
 
 	sources := res.Result.Data.Sources
 	for index, source := range sources {
-		logs.GetLogger().Infof("Index: %d, Source: %+v\n", index, source)
+		logs.GetLogger().Infof("Index: %d, Source: %+v", index, source)
 		stores := source.StorageList
-		for _, store := range stores {
-			logs.GetLogger().Infof("Store: %+v\n", store)
+		for i, store := range stores {
+			logs.GetLogger().Infof("Store-%d: %+v", i, store)
+			providers := store.StorageProviders
+			for ii, provider := range providers {
+				logs.GetLogger().Infof("Provider-%d: %+v", ii, provider)
+			}
 		}
 	}
 
@@ -172,13 +176,13 @@ func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) {
 	}
 	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
 	if err != nil {
-		logs.GetLogger().Errorf("Get Response Error: %s \n", err)
+		logs.GetLogger().Errorf("Get Response Error: %s", err)
 		return nil, err
 	}
 	res := DataCidResponse{}
 	err = json.Unmarshal(response, &res)
 	if err != nil {
-		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
 		return nil, err
 	}
 	logs.GetLogger().Info(res)
@@ -198,23 +202,27 @@ func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*SourceFile, error) {
 	}
 	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
 	if err != nil {
-		logs.GetLogger().Errorf("Get Response Error: %s \n", err)
+		logs.GetLogger().Errorf("Get Response Error: %s", err)
 		return nil, err
 	}
 
 	res := SourceFileResponse{}
 	err = json.Unmarshal(response, &res)
 	if err != nil {
-		logs.GetLogger().Errorf("Parse Response (%s) Error: %s \n", response, err)
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
 		return nil, err
 	}
 	logs.GetLogger().Info(res)
 
 	source := res.Result.Data
-	logs.GetLogger().Infof("Source: %+v\n", source)
+	logs.GetLogger().Infof("Source: %+v", source)
 	stores := source.StorageList
 	for _, store := range stores {
-		logs.GetLogger().Infof("Store: %+v\n", store)
+		logs.GetLogger().Infof("Store: %+v", store)
+		providers := store.StorageProviders
+		for ii, provider := range providers {
+			logs.GetLogger().Infof("Provider-%d: %+v", ii, provider)
+		}
 	}
 
 	return nil, nil
