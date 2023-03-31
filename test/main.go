@@ -21,10 +21,10 @@ func main() {
 	}
 	logs.GetLogger().Infoln("upload success, and data cid is: ", dataCid)
 
-	sourceName := "./testdata"
+	inputPath = "./testdata"
 	dataCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	ipfsGateway := "http://127.0.0.1:8080"
-	err = metaClient.ReportMetaClientServer(sourceName, dataCid, ipfsGateway)
+	err = metaClient.ReportMetaClientServer(inputPath, dataCid, ipfsGateway)
 	if err != nil {
 		logs.GetLogger().Error("report meta client server  failed:", err)
 	}
@@ -32,28 +32,28 @@ func main() {
 
 	dataCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	outPath := "./output"
-	downUrl := "http://127.0.0.1:8080/ipfs/QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
+	downloadUrl := "http://127.0.0.1:8080/ipfs/QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	host := "127.0.0.1"
 	port := 6800
 	secret := "my_aria2_secret"
 	conf := &metacli.Aria2Conf{Host: host, Port: port, Secret: secret}
-	err = metaClient.DownloadFile(dataCid, outPath, downUrl, conf)
+	err = metaClient.DownloadFile(dataCid, outPath, downloadUrl, conf)
 	if err != nil {
 		logs.GetLogger().Error("download failed:", err)
 	}
 	logs.GetLogger().Infoln("download success")
 
-	name := "./testdata"
-	dataCids, err := metaClient.GetDataCIDByName(name)
+	fileName := "testdata"
+	dataCids, err := metaClient.GetDataCIDByName(fileName)
 	if err != nil {
 		logs.GetLogger().Error("get data cid failed:", err)
 	}
 	logs.GetLogger().Infof("get data cid success: %+v", dataCids)
 
-	page := 0
+	pageNum := 0
 	limit := 10
 	showStorage := true
-	sourceFileList, err := metaClient.GetFileLists(page, limit, showStorage)
+	sourceFileList, err := metaClient.GetFileLists(pageNum, limit, showStorage)
 	if err != nil {
 		logs.GetLogger().Error("get file list failed:", err)
 	}

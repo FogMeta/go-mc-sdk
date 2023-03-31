@@ -120,8 +120,8 @@ func main() {
 				},
 			},
 			{
-				Name:   "notify",
-				Usage:  "notify to meta server",
+				Name:   "report",
+				Usage:  "report to meta server",
 				Action: Notify2MetaDemo,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
@@ -250,8 +250,6 @@ func DownloadDemo(c *cli.Context) error {
 	dataCid := c.String("data-cid")
 	outPath := c.String("out-path")
 
-	//gatewayUrl := c.String("gateway-url")
-
 	var conf *sdk.Aria2Conf
 
 	if c.Bool("aria2") {
@@ -281,10 +279,10 @@ func Notify2MetaDemo(c *cli.Context) error {
 	gatewayUrl := c.String("gateway-url")
 	err := metaClient.ReportMetaClientServer(input, dataCid, gatewayUrl)
 	if err != nil {
-		logs.GetLogger().Error("notify data cid to meta server error:", err)
+		logs.GetLogger().Error("report data cid to meta client server error:", err)
 		return err
 	}
-	logs.GetLogger().Infoln("notify data cid to meta server success")
+	logs.GetLogger().Infoln("report data cid to meta client server success")
 
 	return nil
 }

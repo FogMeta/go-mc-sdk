@@ -50,7 +50,7 @@ func (m *MetaClient) UploadFile(ipfsApiUrl, inputPath string) (dataCid string, e
 	return dataCid, nil
 }
 
-func (m *MetaClient) DownloadFile(dataCid, outPath string, downUrl string, conf *Aria2Conf) error {
+func (m *MetaClient) DownloadFile(dataCid, outPath string, downloadUrl string, conf *Aria2Conf) error {
 
 	if conf == nil {
 		return errors.New("need aria2 server config")
@@ -63,13 +63,13 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, downUrl string, conf 
 		return err
 	}
 
-	if downUrl != "" {
-		downFile := pathJoin(outPath, filepath.Base(downInfo[0].SourceName))
+	if downloadUrl != "" {
+		downloadFile := pathJoin(outPath, filepath.Base(downInfo[0].SourceName))
 		if downInfo[0].IsDirector {
-			downFile = downFile + ".tar"
+			downloadFile = downloadFile + ".tar"
 		}
 
-		err := downloadFileByAria2(conf, downUrl, downFile)
+		err := downloadFileByAria2(conf, downloadUrl, downloadFile)
 		if err == nil {
 			logs.GetLogger().Info("download ", dataCid, "by aria2 success")
 			return nil
@@ -79,13 +79,13 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, downUrl string, conf 
 	// aria2 download file
 	for _, down := range downInfo {
 		realUrl := down.DownloadUrl
-		downFile := pathJoin(outPath, filepath.Base(down.SourceName))
+		downloadFile := pathJoin(outPath, filepath.Base(down.SourceName))
 		if down.IsDirector {
 			realUrl = realUrl + "?format=tar"
-			downFile = downFile + ".tar"
+			downloadFile = downloadFile + ".tar"
 		}
 
-		err := downloadFileByAria2(conf, realUrl, downFile)
+		err := downloadFileByAria2(conf, realUrl, downloadFile)
 		if err == nil {
 			logs.GetLogger().Info("download ", dataCid, "by aria2", err)
 			break
@@ -97,19 +97,19 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, downUrl string, conf 
 	return nil
 }
 
-func (m *MetaClient) ReportMetaClientServer(sourceName string, dataCid string, ipfsGateway string) error {
+func (m *MetaClient) ReportMetaClientServer(inputPath string, dataCid string, ipfsGateway string) error {
 
-	isFile, err := isFile(sourceName)
+	isFile, err := isFile(inputPath)
 	if err != nil {
 		return err
 	}
 
-	sourceSize := walkDirSize(sourceName)
+	sourceSize := walkDirSize(inputPath)
 	logs.GetLogger().Infoln("upload total size is:", sourceSize)
 
 	var params []interface{}
 	downUrl := pathJoin(ipfsGateway, "ipfs/", dataCid)
-	params = append(params, StoreSourceFileReq{sourceName, !(*isFile), sourceSize, dataCid, downUrl})
+	params = append(params, StoreSourceFileReq{inputPath, !(*isFile), sourceSize, dataCid, downUrl})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.StoreSourceFile",
@@ -134,10 +134,10 @@ func (m *MetaClient) ReportMetaClientServer(sourceName string, dataCid string, i
 	return nil
 }
 
-func (m *MetaClient) GetFileLists(page, limit int, showStorage bool) ([]SourceFile, error) {
+func (m *MetaClient) GetFileLists(pageNum, limit int, showStorage bool) ([]SourceFile, error) {
 
 	var params []interface{}
-	params = append(params, SourceFilePageReq{page, limit, showStorage})
+	params = append(params, SourceFilePageReq{pageNum, limit, showStorage})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.GetSourceFiles",

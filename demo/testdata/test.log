@@ -1,0 +1,57 @@
+
+./client upload --input ./testdata
+```
+time="2023-03-31 14:47:36.621" level=info msg="upload success, and data cid:  QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM" func=UploadDemo file="main.go:239"
+```
+
+./client download --data-cid QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM --out-path ./output/ --aria2 true
+```
+time="2023-03-31 14:48:23.651" level=info msg="{2.0 {get_source_file_success  [{./testdata http://192.168.2.73:8080/ipfs/QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM true} {./testdata http://192.168.2.73:8080/ipfs/QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM true}]} 1}" func=GetDownloadFileInfoByDataCid file="client.go:262"
+time="2023-03-31 14:48:23.652" level=info msg="start download by aria2, downUrl:http://192.168.2.73:8080/ipfs/QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM?format=tar, outDir:output, fileName:testdata.tar" func=downloadFileByAria2 file="util.go:33"
+time="2023-03-31 14:48:23.653" level=info msg="can check download status by gid:a280afc7775f01c7" func=downloadFileByAria2 file="util.go:50"
+time="2023-03-31 14:48:23.653" level=info msg="download QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWMby aria2<nil>" func=DownloadFile file="client.go:90"
+time="2023-03-31 14:48:23.653" level=info msg="download success" func=DownloadDemo file="main.go:268"
+
+```
+
+./client report --input ./testdata --data-cid QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM
+```
+time="2023-03-31 14:49:52.689" level=info msg="upload total size is: 5922" func=ReportMetaClientServer file="client.go:108"
+time="2023-03-31 14:49:52.694" level=info msg="{2.0 {save_source_file_success } 1}" func=ReportMetaClientServer file="client.go:132"
+time="2023-03-31 14:49:52.694" level=info msg="notify data cid to meta server success" func=Notify2MetaDemo file="main.go:287"
+
+```
+
+./client list --page-num 0 --limit 10
+```
+time="2023-03-31 14:50:23.343" level=info msg="{2.0 {get_source_file_list_success  {7 1 [0xc0002a4120 0xc0002a4180 0xc0002a41e0 0xc0002a4240 0xc0002a42a0 0xc0002a4300 0xc0002a4360]}} 1}" func=GetFileLists file="client.go:159"
+time="2023-03-31 14:50:23.344" level=info msg="Index: 0, Source: &{SourceName:./testdata DataCid:QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM DownloadUrl:http://192.168.2.73:8080/ipfs/QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM StorageList:[] SourceSize:5922 IsDirector:true}" func=GetFileLists file="client.go:163"
+time="2023-03-31 14:50:23.344" level=info msg="Index: 1, Source: &{SourceName:./testdata DataCid:QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM DownloadUrl:http://192.168.2.73:8080/ipfs/QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM StorageList:[] SourceSize:5922 IsDirector:true}" func=GetFileLists file="client.go:163"
+time="2023-03-31 14:50:23.344" level=info msg="Index: 2, Source: &{SourceName:./testdata DataCid:QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM DownloadUrl:http://192.168.2.73:8080/ipfs/QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM StorageList:[] SourceSize:5922 IsDirector:true}" func=GetFileLists file="client.go:163"
+time="2023-03-31 14:50:23.344" level=info msg="Index: 3, Source: &{SourceName:/f1/fix-bug/test-data/Annotator-Gen1-MCFO-part-60.car DataCid:QmNTQ81WDvz3RJMZEL5s9qEvf6wZ8fYF1Jn8i3WJr7Z6Kv DownloadUrl:http://192.168.2.73:8080/ipfs/QmNTQ81WDvz3RJMZEL5s9qEvf6wZ8fYF1Jn8i3WJr7Z6Kv StorageList:[] SourceSize:18696600302 IsDirector:false}" func=GetFileLists file="client.go:163"
+time="2023-03-31 14:50:23.344" level=info msg="Index: 4, Source: &{SourceName:/f1/fix-bug/test-data DataCid:Qmb1MXqrG6HE6yTs8rC7WXFHbaraqTBEAhyWh5JrK9BZX8 DownloadUrl:http://192.168.2.73:8080/ipfs/Qmb1MXqrG6HE6yTs8rC7WXFHbaraqTBEAhyWh5JrK9BZX8 StorageList:[] SourceSize:207190076142 IsDirector:true}" func=GetFileLists file="client.go:163"
+time="2023-03-31 14:50:23.344" level=info msg="Index: 5, Source: &{SourceName:./test2/main DataCid:QmWj5ZUMoG2m6cuuUrMdJvk5FZNT3XEbfVTCLyxiq8ca57 DownloadUrl:http://192.168.2.73:8080/ipfs/QmWj5ZUMoG2m6cuuUrMdJvk5FZNT3XEbfVTCLyxiq8ca57 StorageList:[0xc00029a200] SourceSize:13205533 IsDirector:false}" func=GetFileLists file="client.go:163"
+time="2023-03-31 14:50:23.344" level=info msg="Store-0: &{FileName:QmQipLvGjHUbC55PFiM4FSdYuNU4cgpNvmiDLPkocCq2W1.car DataCid:QmQipLvGjHUbC55PFiM4FSdYuNU4cgpNvmiDLPkocCq2W1 FileSize:16646144 StorageProviders:[]}" func=GetFileLists file="client.go:166"
+time="2023-03-31 14:50:23.344" level=info msg="Index: 6, Source: &{SourceName:./test2/ DataCid:QmcKCrngoTP5CdVhoENwNVEZZLKVtsRHz8xv36gF41tmtF DownloadUrl:http://192.168.2.73:8080/ipfs/QmcKCrngoTP5CdVhoENwNVEZZLKVtsRHz8xv36gF41tmtF StorageList:[0xc00029a240] SourceSize:0 IsDirector:true}" func=GetFileLists file="client.go:163"
+time="2023-03-31 14:50:23.344" level=info msg="Store-0: &{FileName:QmWj4jBfcajHQDq8V9UjPbnANFDShiNc4mHKzqqdHewbiM.car DataCid:QmWj4jBfcajHQDq8V9UjPbnANFDShiNc4mHKzqqdHewbiM FileSize:66584576 StorageProviders:[]}" func=GetFileLists file="client.go:166"
+time="2023-03-31 14:50:23.344" level=info msg="get files list from meta server success" func=GetFilesListDemo file="main.go:306"
+```
+
+./client  datacid --name testdata
+```
+time="2023-03-31 14:51:05.939" level=info msg="{2.0 {not_found not found source file []} 1}" func=GetDataCIDByName file="client.go:197"
+time="2023-03-31 14:51:05.939" level=info msg="get data cid from meta server success" func=GetDataCidByNameDemo file="main.go:323"
+```
+
+./client  datacid --name ./testdata
+```
+time="2023-03-31 14:51:16.198" level=info msg="{2.0 {get_source_file_success  [QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM]} 1}" func=GetDataCIDByName file="client.go:197"
+time="2023-03-31 14:51:16.199" level=info msg="get data cid from meta server success" func=GetDataCidByNameDemo file="main.go:323"
+```
+
+./client  info --data-cid QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM
+```
+time="2023-03-31 14:51:37.984" level=info msg="{2.0 {get_source_file_success  {./testdata QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM http://192.168.2.73:8080/ipfs/QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM [] 5922 true}} 1}" func=GetFileInfoByDataCid file="client.go:224"
+time="2023-03-31 14:51:37.984" level=info msg="Source: {SourceName:./testdata DataCid:QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM DownloadUrl:http://192.168.2.73:8080/ipfs/QmdiQmsdv2BtrXsCo4Rh71UWPtkYT3A5F9xPrmRYBm9YWM StorageList:[] SourceSize:5922 IsDirector:true}" func=GetFileInfoByDataCid file="client.go:227"
+time="2023-03-31 14:51:37.985" level=info msg="get detail info from meta server success" func=GetInfoByDataCidDemo file="main.go:340"
+```
