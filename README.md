@@ -1,4 +1,9 @@
+
+
 # Meta-Client-SDK
+[![Made by FogMeta](https://img.shields.io/badge/made%20by-FogMeta-green.svg)](https://en.fogmeta.com/)
+[![Twitter Follow](https://img.shields.io/twitter/follow/FogMeta)](https://twitter.com/FogMeta)
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 
 Meta-Client is a Web3 data service that securely stores data backups and enables data recovery. It automatically records data storage information and stores data on both IPFS gateway and Filecoin network, providing fast retrieval and permanent backup.
 
