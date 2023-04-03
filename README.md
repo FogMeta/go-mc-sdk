@@ -204,8 +204,7 @@ func main() {
 
 	page := 0
 	limit := 10
-	showStorage := true
-	sourceFileList, err := metaClient.GetFileLists(page, limit, showStorage)
+	sourceFileList, err := metaClient.GetFileLists(page, limit)
 	if err != nil {
 		logs.GetLogger().Error("get file list failed:", err)
 	}

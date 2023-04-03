@@ -144,14 +144,14 @@ func (fdo *funcOption) apply(do *listOption) {
 	fdo.f(do)
 }
 
-func ShowStorageOption(f func(*listOption)) *funcOption {
+func showStorageOption(f func(*listOption)) *funcOption {
 	return &funcOption{
 		f: f,
 	}
 }
 
 func WithShowStorage(show bool) ListOption {
-	return ShowStorageOption(func(o *listOption) {
+	return showStorageOption(func(o *listOption) {
 		o.ShowStorage = show
 	})
 }
