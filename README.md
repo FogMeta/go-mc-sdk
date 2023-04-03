@@ -5,9 +5,10 @@
 [![Twitter Follow](https://img.shields.io/twitter/follow/FogMeta)](https://twitter.com/FogMeta)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
 
+A Golang SDK for the Meta-Client service, providing an easy interface for developers to deal with the Meta-Client API. It streamlines the process of securely storing, retrieving, and recovering data on the IPFS and Filecoin network. 
+
 Meta-Client is a Web3 data service that securely stores data backups and enables data recovery. It automatically records data storage information and stores data on both IPFS gateway and Filecoin network, providing fast retrieval and permanent backup.
 
-With Meta-Client-SDK, users can easily access and recover their data while ensuring its safety. The automated recording of data storage information also helps users optimize their storage strategies.
 ## Features
 
 Meta-Client-SDK provides the following features:
