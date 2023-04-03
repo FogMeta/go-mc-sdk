@@ -7,6 +7,7 @@ import (
 	"github.com/filswan/go-swan-lib/logs"
 	shell "github.com/ipfs/go-ipfs-api"
 	"path/filepath"
+	"strings"
 )
 
 type MetaClient struct {
@@ -64,6 +65,10 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, downloadUrl string, c
 	}
 
 	if downloadUrl != "" {
+		if !strings.Contains(downloadUrl, dataCid) {
+			logs.GetLogger().Warnf("datacid: %s should be included in the url %s, but it is not.", dataCid, downloadUrl)
+		}
+
 		downloadFile := pathJoin(outPath, filepath.Base(downInfo[0].SourceName))
 		if downInfo[0].IsDirector {
 			downloadFile = downloadFile + ".tar"
@@ -74,27 +79,34 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, downloadUrl string, c
 			logs.GetLogger().Info("download ", dataCid, "by aria2 success")
 			return nil
 		}
+		logs.GetLogger().Warn("download ", dataCid, " url ", downloadUrl, " by aria2 error:", err)
+
+	} else {
+		// aria2 download file
+		for _, info := range downInfo {
+			realUrl := info.DownloadUrl
+			if !strings.Contains(realUrl, dataCid) {
+				logs.GetLogger().Warnf("datacid: %s should be included in the url %s, but it is not.", dataCid, realUrl)
+				continue
+			}
+
+			downloadFile := pathJoin(outPath, filepath.Base(info.SourceName))
+			if info.IsDirector {
+				realUrl = realUrl + "?format=tar"
+				downloadFile = downloadFile + ".tar"
+			}
+
+			err := downloadFileByAria2(conf, realUrl, downloadFile)
+			if err == nil {
+				logs.GetLogger().Info("download ", dataCid, "by aria2 success")
+				return nil
+			}
+
+			logs.GetLogger().Warn("download ", dataCid, " url ", realUrl, " by aria2 error:", err)
+		}
 	}
 
-	// aria2 download file
-	for _, down := range downInfo {
-		realUrl := down.DownloadUrl
-		downloadFile := pathJoin(outPath, filepath.Base(down.SourceName))
-		if down.IsDirector {
-			realUrl = realUrl + "?format=tar"
-			downloadFile = downloadFile + ".tar"
-		}
-
-		err := downloadFileByAria2(conf, realUrl, downloadFile)
-		if err == nil {
-			logs.GetLogger().Info("download ", dataCid, "by aria2", err)
-			break
-		}
-		logs.GetLogger().Warn("download ", dataCid, " url ", realUrl, " by aria2 error:", err)
-		//remove failed
-	}
-
-	return nil
+	return errors.New("there are no available download links")
 }
 
 func (m *MetaClient) ReportMetaClientServer(inputPath string, dataCid string, ipfsGateway string) error {
