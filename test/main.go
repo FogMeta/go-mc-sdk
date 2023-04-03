@@ -52,8 +52,8 @@ func main() {
 
 	pageNum := 0
 	limit := 10
-	showStorage := true
-	sourceFileList, err := metaClient.GetFileLists(pageNum, limit, showStorage)
+	// sourceFileList, err := metaClient.GetFileLists(pageNum, limit, metacli.WithShowStorage(true))
+	sourceFileList, err := metaClient.GetFileLists(pageNum, limit) //default show storage option is false
 	if err != nil {
 		logs.GetLogger().Error("get file list failed:", err)
 	}

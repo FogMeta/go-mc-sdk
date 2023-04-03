@@ -296,7 +296,7 @@ func GetFilesListDemo(c *cli.Context) error {
 	pageNum := c.Int("page-num")
 	limit := c.Int("limit")
 	showStore := c.Bool("show-store")
-	_, err := metaClient.GetFileLists(pageNum, limit, showStore)
+	_, err := metaClient.GetFileLists(pageNum, limit, sdk.WithShowStorage(showStore))
 	if err != nil {
 		logs.GetLogger().Error("get files list from meta server error:", err)
 		return err

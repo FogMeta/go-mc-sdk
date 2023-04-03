@@ -126,3 +126,37 @@ type DownloadFileInfo struct {
 	DownloadUrl string `json:"download_url"`
 	IsDirector  bool   `json:"is_director"`
 }
+
+// list option
+type listOption struct {
+	ShowStorage bool
+}
+
+type ListOption interface {
+	apply(*listOption)
+}
+
+type funcOption struct {
+	f func(*listOption)
+}
+
+func (fdo *funcOption) apply(do *listOption) {
+	fdo.f(do)
+}
+
+func ShowStorageOption(f func(*listOption)) *funcOption {
+	return &funcOption{
+		f: f,
+	}
+}
+
+func WithShowStorage(show bool) ListOption {
+	return ShowStorageOption(func(o *listOption) {
+		o.ShowStorage = show
+	})
+}
+func defaultOptions() listOption {
+	return listOption{
+		ShowStorage: false,
+	}
+}

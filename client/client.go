@@ -134,10 +134,16 @@ func (m *MetaClient) ReportMetaClientServer(inputPath string, dataCid string, ip
 	return nil
 }
 
-func (m *MetaClient) GetFileLists(pageNum, limit int, showStorage bool) ([]SourceFile, error) {
+func (m *MetaClient) GetFileLists(pageNum, limit int, opts ...ListOption) ([]SourceFile, error) {
 
+	op := defaultOptions()
+	for _, opt := range opts {
+		opt.apply(&op)
+	}
+
+	logs.GetLogger().Info("with opts is:", op.ShowStorage)
 	var params []interface{}
-	params = append(params, SourceFilePageReq{pageNum, limit, showStorage})
+	params = append(params, SourceFilePageReq{pageNum, limit, op.ShowStorage})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.GetSourceFiles",
