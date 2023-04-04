@@ -132,12 +132,28 @@ func uploadFileToIpfs(sh *shell.Shell, fileName string) (string, error) {
 		return "", err
 	}
 
+	destPath := "/"
+	srcPath := pathJoin("/ipfs/", dataCid)
+	err = sh.FilesCp(context.Background(), srcPath, destPath)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return "", err
+	}
+
 	return dataCid, nil
 }
 
 func uploadDirToIpfs(sh *shell.Shell, dirName string) (string, error) {
 
 	dataCid, err := sh.AddDir(dirName)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return "", err
+	}
+
+	destPath := "/"
+	srcPath := pathJoin("/ipfs/", dataCid)
+	err = sh.FilesCp(context.Background(), srcPath, destPath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return "", err
