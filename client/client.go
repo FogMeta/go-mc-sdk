@@ -286,3 +286,8 @@ func (m *MetaClient) RebuildDataCID(fileName string) error {
 	// TODO
 	return nil
 }
+
+func (m *MetaClient) BuildDirectoryTree(dataCid string) error {
+	// TODO
+	return nil
+}

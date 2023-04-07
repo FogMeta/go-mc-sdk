@@ -202,6 +202,23 @@ func main() {
 					&MetaUrlFlag,
 				},
 			},
+			{
+				Name:   "build",
+				Usage:  "Build directory tree from ipfs",
+				Action: BuildDirTreeDemo,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:  "data-cid",
+						Usage: "data cid which will be start to build.",
+						Value: "",
+					},
+					&KeyFlag,
+					&TokenFlag,
+					&ApiUrlFlag,
+					&GatewayUrlFlag,
+					&MetaUrlFlag,
+				},
+			},
 		},
 	}
 
@@ -331,6 +348,23 @@ func GetInfoByDataCidDemo(c *cli.Context) error {
 
 	dataCid := c.String("data-cid")
 	_, err := metaClient.GetFileInfoByDataCid(dataCid)
+	if err != nil {
+		logs.GetLogger().Error("get detail info from meta server error:", err)
+		return err
+	}
+	logs.GetLogger().Infoln("get detail info from meta server success")
+
+	return nil
+}
+
+func BuildDirTreeDemo(c *cli.Context) error {
+	metaClient := buildClient(c)
+	if metaClient == nil {
+		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+	}
+
+	dataCid := c.String("data-cid")
+	err := metaClient.BuildDirectoryTree(dataCid)
 	if err != nil {
 		logs.GetLogger().Error("get detail info from meta server error:", err)
 		return err
