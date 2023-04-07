@@ -127,6 +127,22 @@ type DownloadFileInfo struct {
 	IsDirector  bool   `json:"is_director"`
 }
 
+type DagLink struct {
+	Hash struct {
+		Target string `json:"/"`
+	} `json:"Hash"`
+	Name  string `json:"Name"`
+	Tsize int64  `json:"Tsize"`
+}
+type DagGetResponse struct {
+	Data struct {
+		Target struct {
+			Bytes string `json:"bytes"`
+		} `json:"/"`
+	} `json:"Data"`
+	Links []DagLink `json:"Links,omitempty"`
+}
+
 // list option
 type listOption struct {
 	ShowStorage bool

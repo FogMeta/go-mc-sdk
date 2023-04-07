@@ -363,8 +363,9 @@ func BuildDirTreeDemo(c *cli.Context) error {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 	}
 
+	apiUrl := c.String("api-url")
 	dataCid := c.String("data-cid")
-	err := metaClient.BuildDirectoryTree(dataCid)
+	err := metaClient.BuildDirectoryTree(apiUrl, dataCid)
 	if err != nil {
 		logs.GetLogger().Error("get detail info from meta server error:", err)
 		return err

@@ -287,7 +287,27 @@ func (m *MetaClient) RebuildDataCID(fileName string) error {
 	return nil
 }
 
-func (m *MetaClient) BuildDirectoryTree(dataCid string) error {
+func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error {
 	// TODO
+	// Creates an IPFS Shell client.
+	sh := shell.NewShell(ipfsApiUrl)
+
+	pins, err := sh.Pins()
+	if err != nil {
+		logs.GetLogger().Errorf("List pins error: %s", err)
+		return err
+	}
+	for hash, info := range pins {
+
+		logs.GetLogger().Info("Key:", hash, " Type:", info.Type)
+		isDir, err := dataCidIsDir(sh, hash)
+		if err == nil && *isDir {
+			resp := DagGetResponse{}
+			sh.DagGet(hash, &resp)
+			logs.GetLogger().Infof("Dag Directory Info Resp:%+v", resp)
+		}
+
+	}
+
 	return nil
 }
