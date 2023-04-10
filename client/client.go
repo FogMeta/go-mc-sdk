@@ -334,12 +334,13 @@ func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error
 	}
 
 	root.BuildChildTree(sh)
+	root.SortChild()
 	root.PrintAll()
 	fmt.Print("\n")
 
 	root.ReduceChildTree()
 	root.PrintAllTop()
 	fmt.Print("\n")
-	
+
 	return nil
 }

@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 )
 
@@ -290,6 +291,11 @@ func (n *TreeNode) ReduceChildTree() error {
 	return nil
 }
 
+func (n *TreeNode) SortChild() error {
+	sort.Sort(TreeNodeDecrement(n.Child))
+	return nil
+}
+
 func (n *TreeNode) Insert(hash string, node *TreeNode) error {
 
 	prev := n.Find(hash)
@@ -339,11 +345,14 @@ func (n *TreeNode) PrintAll() error {
 }
 
 func (n *TreeNode) PrintAllTop() error {
+	n.Print()
+
 	for _, child := range n.Child {
 		if child.IsTop {
 			child.PrintAll()
 		}
 	}
+
 	return nil
 }
 
@@ -370,3 +379,9 @@ func (n *TreeNode) Show() error {
 		n.Hash, n.Path, n.Name, n.Size, n.Deep, n.Dir, len(n.Child))
 	return nil
 }
+
+type TreeNodeDecrement []*TreeNode
+
+func (s TreeNodeDecrement) Len() int           { return len(s) }
+func (s TreeNodeDecrement) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
+func (s TreeNodeDecrement) Less(i, j int) bool { return s[i].Size > s[j].Size }
