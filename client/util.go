@@ -186,18 +186,87 @@ func downloadFromIpfs(sh *shell.Shell, dataCid, outDir string) error {
 
 func NewNode(hash, path, name string, size uint64, dir bool) *TreeNode {
 	return &TreeNode{
-		Hash:     hash,
-		Path:     path,
-		Name:     name,
-		Size:     size,
-		Dir:      dir,
-		Children: []*TreeNode{},
+		Hash:  hash,
+		Path:  path,
+		Name:  name,
+		Size:  size,
+		Dir:   dir,
+		Child: []*TreeNode{},
 	}
 }
-func (n *TreeNode) Add(hash string, node *TreeNode) error {
 
-	if n.Children != nil {
-		n.Children = append(n.Children, node)
+func NewNodeByDataCid(sh *shell.Shell, dataCid string, nodePath, name string) *TreeNode {
+	path := pathJoin("/ipfs/", dataCid)
+	stat, err := sh.FilesStat(context.Background(), path)
+	if err != nil {
+		logs.GetLogger().Error(dataCid, " get dag directory info err:", err)
+		return nil
+	}
+
+	if stat.Type == "directory" {
+		return NewNode(dataCid, pathJoin(nodePath, dataCid), name, stat.CumulativeSize, true)
+	} else if stat.Type == "file" {
+		return NewNode(dataCid, pathJoin(nodePath, dataCid), name, stat.CumulativeSize, false)
+	} else {
+		logs.GetLogger().Warn("unknown type in build node: ", stat.Type)
+	}
+
+	return nil
+}
+
+func (n *TreeNode) AddChild(node *TreeNode) error {
+
+	if n.Child != nil {
+		n.Child = append(n.Child, node)
+	}
+
+	return nil
+}
+
+func (n *TreeNode) BuildChildTree(sh *shell.Shell) error {
+	if !n.Dir || len(n.Child) == 0 {
+		return nil
+	}
+
+	for _, child := range n.Child {
+		if !child.Dir {
+			continue
+		}
+
+		resp := DagGetResponse{}
+		if err := sh.DagGet(child.Hash, &resp); err != nil {
+			logs.GetLogger().Error(child.Hash, " get dag directory info err:", err)
+			continue
+		}
+
+		// build all subChild
+		for _, link := range resp.Links {
+			subChild := NewNodeByDataCid(sh, link.Hash.Target, child.Path, link.Name)
+			if subChild == nil {
+				continue
+			}
+
+			child.AddChild(subChild)
+			//path := pathJoin("/ipfs/", link.Hash.Target)
+			//stat, err := sh.FilesStat(context.Background(), path)
+			//if err != nil {
+			//	logs.GetLogger().Error(link.Hash.Target, " get child dag directory info err:", err)
+			//	continue
+			//}
+			//
+			//if stat.Type == "directory" {
+			//	subChild := NewNode(link.Hash.Target, pathJoin(child.Path, link.Hash.Target), link.Name, stat.CumulativeSize, true)
+			//	child.AddChild(subChild)
+			//} else if stat.Type == "file" {
+			//	subChild := NewNode(link.Hash.Target, pathJoin(child.Path, link.Hash.Target), link.Name, stat.CumulativeSize, false)
+			//	child.AddChild(subChild)
+			//} else {
+			//	logs.GetLogger().Warn("unknown type in build child tree: ", stat.Type)
+			//}
+		}
+
+		child.BuildChildTree(sh)
+
 	}
 
 	return nil
@@ -205,21 +274,44 @@ func (n *TreeNode) Add(hash string, node *TreeNode) error {
 
 func (n *TreeNode) Insert(hash string, node *TreeNode) error {
 
-	if n.Children != nil {
-		n.Children = append(n.Children, node)
+	prev := n.Find(hash)
+	if prev != nil {
+		prev.Child = append(prev.Child, node)
 	}
 
 	return nil
 }
 
 func (n *TreeNode) Del(hash string) error {
+	//TODO:
 	return nil
 }
 
-func (n *TreeNode) Find(hash string) (*TreeNode, error) {
-	return nil, nil
+func (n *TreeNode) Find(hash string) *TreeNode {
+	if n.Hash == hash {
+		return n
+	}
+
+	for _, child := range n.Child {
+		if fn := child.Find(hash); fn != nil {
+			return fn
+		}
+	}
+
+	return nil
 }
 
-func (n *TreeNode) Show() error {
+func (n *TreeNode) PrintAll() error {
+	n.Print()
+	for _, child := range n.Child {
+		child.PrintAll()
+	}
+
+	return nil
+}
+
+func (n *TreeNode) Print() error {
+	logs.GetLogger().Infof("TreeNode: hash=%s, path=%s, name=%s, size=%d, deep=%d, dir=%t, child-num=%d",
+		n.Hash, n.Path, n.Name, n.Size, n.Deep, n.Dir, len(n.Child))
 	return nil
 }

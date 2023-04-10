@@ -301,10 +301,10 @@ func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error
 
 	logs.GetLogger().Info(len(pins), " records to process ...")
 
-	// create root node
+	//build root node
 	root := NewNode("/", "/", "/", 0, true)
 	for hash, info := range pins {
-		logs.GetLogger().Info("Key:", hash, " Type:", info.Type)
+		logs.GetLogger().Debug("Key:", hash, " Type:", info.Type)
 
 		path := pathJoin("/ipfs/", hash)
 		stat, err := sh.FilesStat(context.Background(), path)
@@ -312,27 +312,28 @@ func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error
 			logs.GetLogger().Error(err)
 			continue
 		}
-		logs.GetLogger().Debugf("FileStat:%+v", stat)
+		logs.GetLogger().Infof("FileStat:%+v", stat)
 
 		if stat.Type == "directory" {
 			resp := DagGetResponse{}
 			sh.DagGet(hash, &resp)
-			logs.GetLogger().Debugf("Dag Directory Info Resp:%+v", resp)
+			logs.GetLogger().Debugf("dag directory info resp:%+v", resp)
 
-			n := NewNode(hash, pathJoin(root.Path, hash), hash, stat.Size, true)
-			root.Add(root.Hash, n)
+			n := NewNode(hash, pathJoin(root.Path, hash), hash, stat.CumulativeSize, true)
+			root.AddChild(n)
 			logs.GetLogger().Debugf("add node director of %s to root", hash)
 
 		} else if stat.Type == "file" {
-			n := NewNode(hash, pathJoin(root.Path, hash), hash, stat.Size, false)
-			root.Add(root.Hash, n)
+			n := NewNode(hash, pathJoin(root.Path, hash), hash, stat.CumulativeSize, false)
+			root.AddChild(n)
 			logs.GetLogger().Debugf("add node file of %s to root", hash)
 		} else {
-			logs.GetLogger().Warn("Unknown type: ", stat.Type)
+			logs.GetLogger().Warn("unknown type: ", stat.Type)
 		}
-
 	}
 
-	root.Show()
+	root.BuildChildTree(sh)
+	root.PrintAll()
+
 	return nil
 }

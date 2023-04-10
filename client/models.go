@@ -144,12 +144,13 @@ type DagGetResponse struct {
 }
 
 type TreeNode struct {
-	Path     string
-	Name     string
-	Hash     string
-	Size     uint64
-	Dir      bool
-	Children []*TreeNode
+	Path  string
+	Name  string
+	Hash  string
+	Size  uint64
+	Dir   bool
+	Deep  int
+	Child []*TreeNode
 }
 
 // list option

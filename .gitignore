@@ -1,3 +1,5 @@
 .DS_Store
 .idea
 main
+logs/
+client.toml
