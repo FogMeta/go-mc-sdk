@@ -247,22 +247,6 @@ func (n *TreeNode) BuildChildTree(sh *shell.Shell) error {
 			}
 
 			child.AddChild(subChild)
-			//path := pathJoin("/ipfs/", link.Hash.Target)
-			//stat, err := sh.FilesStat(context.Background(), path)
-			//if err != nil {
-			//	logs.GetLogger().Error(link.Hash.Target, " get child dag directory info err:", err)
-			//	continue
-			//}
-			//
-			//if stat.Type == "directory" {
-			//	subChild := NewNode(link.Hash.Target, pathJoin(child.Path, link.Hash.Target), link.Name, stat.CumulativeSize, true)
-			//	child.AddChild(subChild)
-			//} else if stat.Type == "file" {
-			//	subChild := NewNode(link.Hash.Target, pathJoin(child.Path, link.Hash.Target), link.Name, stat.CumulativeSize, false)
-			//	child.AddChild(subChild)
-			//} else {
-			//	logs.GetLogger().Warn("unknown type in build child tree: ", stat.Type)
-			//}
 		}
 
 		child.BuildChildTree(sh)
@@ -302,7 +286,9 @@ func (n *TreeNode) Find(hash string) *TreeNode {
 }
 
 func (n *TreeNode) PrintAll() error {
+
 	n.Print()
+
 	for _, child := range n.Child {
 		child.PrintAll()
 	}
@@ -311,7 +297,19 @@ func (n *TreeNode) PrintAll() error {
 }
 
 func (n *TreeNode) Print() error {
-	logs.GetLogger().Infof("TreeNode: hash=%s, path=%s, name=%s, size=%d, deep=%d, dir=%t, child-num=%d",
-		n.Hash, n.Path, n.Name, n.Size, n.Deep, n.Dir, len(n.Child))
+	//logs.GetLogger().Infof("TreeNode: hash=%s, path=%s, name=%s, size=%d, deep=%d, dir=%t, child-num=%d",
+	//	n.Hash, n.Path, n.Name, n.Size, n.Deep, n.Dir, len(n.Child))
+	fmt.Print("\n")
+	if n.Path == "/" {
+		fmt.Printf("/")
+		return nil
+	}
+
+	count := strings.Count(n.Path, "/")
+	for i := 0; i < count-1; i++ {
+		fmt.Print("    ")
+	}
+	fmt.Printf("|---%s (Hash:%s Size:%d)", n.Name, n.Hash, n.Size)
+
 	return nil
 }

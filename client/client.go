@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/logs"
 	shell "github.com/ipfs/go-ipfs-api"
@@ -312,7 +313,7 @@ func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error
 			logs.GetLogger().Error(err)
 			continue
 		}
-		logs.GetLogger().Infof("FileStat:%+v", stat)
+		logs.GetLogger().Debugf("FileStat:%+v", stat)
 
 		if stat.Type == "directory" {
 			resp := DagGetResponse{}
@@ -334,6 +335,11 @@ func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error
 
 	root.BuildChildTree(sh)
 	root.PrintAll()
+	fmt.Print("\n\n\n")
+
+	testData := root.Find("QmUXkhV3K5pqkyjqMgRGyTq2x5en6ws18iwyrVxKVGVZqF")
+	testData.PrintAll()
+	fmt.Print("\n")
 
 	return nil
 }
