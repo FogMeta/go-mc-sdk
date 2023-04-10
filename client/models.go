@@ -149,6 +149,7 @@ type TreeNode struct {
 	Hash  string
 	Size  uint64
 	Dir   bool
+	IsTop bool
 	Deep  int
 	Child []*TreeNode
 }

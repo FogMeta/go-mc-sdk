@@ -335,11 +335,11 @@ func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error
 
 	root.BuildChildTree(sh)
 	root.PrintAll()
-	fmt.Print("\n\n\n")
-
-	testData := root.Find("QmUXkhV3K5pqkyjqMgRGyTq2x5en6ws18iwyrVxKVGVZqF")
-	testData.PrintAll()
 	fmt.Print("\n")
 
+	root.ReduceChildTree()
+	root.PrintAllTop()
+	fmt.Print("\n")
+	
 	return nil
 }

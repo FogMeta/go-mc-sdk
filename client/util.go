@@ -250,6 +250,40 @@ func (n *TreeNode) BuildChildTree(sh *shell.Shell) error {
 		}
 
 		child.BuildChildTree(sh)
+	}
+
+	return nil
+}
+
+func (n *TreeNode) ReduceChildTree() error {
+	if n.Path != "/" {
+		logs.GetLogger().Error("reduce child must from root")
+		return errors.New("reduce child must from root")
+	}
+
+	for _, child := range n.Child {
+
+		hash := child.Hash
+		child.IsTop = false
+
+		funded := false
+		for _, reduceChild := range n.Child {
+
+			// First exclude its own nodes.
+			if hash == reduceChild.Hash {
+				continue
+			}
+
+			n := reduceChild.Find(hash)
+			if n != nil {
+				funded = true
+				//n.Show()
+			}
+		}
+
+		if !funded {
+			child.IsTop = true
+		}
 
 	}
 
@@ -290,9 +324,26 @@ func (n *TreeNode) PrintAll() error {
 	n.Print()
 
 	for _, child := range n.Child {
-		child.PrintAll()
+		if !child.Dir {
+			child.PrintAll()
+		}
 	}
 
+	for _, child := range n.Child {
+		if child.Dir {
+			child.PrintAll()
+		}
+	}
+
+	return nil
+}
+
+func (n *TreeNode) PrintAllTop() error {
+	for _, child := range n.Child {
+		if child.IsTop {
+			child.PrintAll()
+		}
+	}
 	return nil
 }
 
@@ -311,5 +362,11 @@ func (n *TreeNode) Print() error {
 	}
 	fmt.Printf("|---%s (Hash:%s Size:%d)", n.Name, n.Hash, n.Size)
 
+	return nil
+}
+
+func (n *TreeNode) Show() error {
+	logs.GetLogger().Infof("TreeNode: hash=%s, path=%s, name=%s, size=%d, deep=%d, dir=%t, child-num=%d",
+		n.Hash, n.Path, n.Name, n.Size, n.Deep, n.Dir, len(n.Child))
 	return nil
 }
