@@ -143,6 +143,15 @@ type DagGetResponse struct {
 	Links []DagLink `json:"Links,omitempty"`
 }
 
+type TreeNode struct {
+	Path     string
+	Name     string
+	Hash     string
+	Size     uint64
+	Dir      bool
+	Children []*TreeNode
+}
+
 // list option
 type listOption struct {
 	ShowStorage bool

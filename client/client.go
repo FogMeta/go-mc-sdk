@@ -1,6 +1,7 @@
 package client
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"github.com/filswan/go-swan-lib/client"
@@ -297,17 +298,41 @@ func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error
 		logs.GetLogger().Errorf("List pins error: %s", err)
 		return err
 	}
-	for hash, info := range pins {
 
+	logs.GetLogger().Info(len(pins), " records to process ...")
+
+	// create root node
+	root := NewNode("/", "/", "/", 0, true)
+	for hash, info := range pins {
 		logs.GetLogger().Info("Key:", hash, " Type:", info.Type)
-		isDir, err := dataCidIsDir(sh, hash)
-		if err == nil && *isDir {
+
+		path := pathJoin("/ipfs/", hash)
+		stat, err := sh.FilesStat(context.Background(), path)
+		if err != nil {
+			logs.GetLogger().Error(err)
+			continue
+		}
+		logs.GetLogger().Debugf("FileStat:%+v", stat)
+
+		if stat.Type == "directory" {
 			resp := DagGetResponse{}
 			sh.DagGet(hash, &resp)
-			logs.GetLogger().Infof("Dag Directory Info Resp:%+v", resp)
+			logs.GetLogger().Debugf("Dag Directory Info Resp:%+v", resp)
+
+			n := NewNode(hash, pathJoin(root.Path, hash), hash, stat.Size, true)
+			root.Add(root.Hash, n)
+			logs.GetLogger().Debugf("add node director of %s to root", hash)
+
+		} else if stat.Type == "file" {
+			n := NewNode(hash, pathJoin(root.Path, hash), hash, stat.Size, false)
+			root.Add(root.Hash, n)
+			logs.GetLogger().Debugf("add node file of %s to root", hash)
+		} else {
+			logs.GetLogger().Warn("Unknown type: ", stat.Type)
 		}
 
 	}
 
+	root.Show()
 	return nil
 }

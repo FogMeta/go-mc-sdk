@@ -183,3 +183,43 @@ func dataCidIsDir(sh *shell.Shell, dataCid string) (*bool, error) {
 func downloadFromIpfs(sh *shell.Shell, dataCid, outDir string) error {
 	return sh.Get(dataCid, outDir)
 }
+
+func NewNode(hash, path, name string, size uint64, dir bool) *TreeNode {
+	return &TreeNode{
+		Hash:     hash,
+		Path:     path,
+		Name:     name,
+		Size:     size,
+		Dir:      dir,
+		Children: []*TreeNode{},
+	}
+}
+func (n *TreeNode) Add(hash string, node *TreeNode) error {
+
+	if n.Children != nil {
+		n.Children = append(n.Children, node)
+	}
+
+	return nil
+}
+
+func (n *TreeNode) Insert(hash string, node *TreeNode) error {
+
+	if n.Children != nil {
+		n.Children = append(n.Children, node)
+	}
+
+	return nil
+}
+
+func (n *TreeNode) Del(hash string) error {
+	return nil
+}
+
+func (n *TreeNode) Find(hash string) (*TreeNode, error) {
+	return nil, nil
+}
+
+func (n *TreeNode) Show() error {
+	return nil
+}
