@@ -86,11 +86,11 @@ func main() {
 
     apiUrl := "http://127.0.0.1:5001"
     inputPath := "./testdata" //file or directory path
-    dataCid, err := metaClient.UploadFile(apiUrl, inputPath)
+    ipfsCid, err := metaClient.UploadFile(apiUrl, inputPath)
     if err != nil {
 	logs.GetLogger().Error("upload failed:", err)
     }
-    logs.GetLogger().Infoln("upload success, and data cid is: ", dataCid)
+    logs.GetLogger().Infoln("upload success, and data cid is: ", ipfsCid)
     return
 }
 ```
@@ -114,9 +114,9 @@ func main() {
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
 	inputPath := "./testdata" // file or directory path that has been uploaded to the IPFS gateway
-	dataCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
+	ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	ipfsGateway := "http://127.0.0.1:8080"
-	err := metaClient.ReportMetaClientServer(inputPath, dataCid, ipfsGateway)
+	err := metaClient.ReportMetaClientServer(inputPath, ipfsCid, ipfsGateway)
 	if err != nil {
 		logs.GetLogger().Error("report meta client server  failed:", err)
 	}
@@ -144,14 +144,14 @@ func main() {
 	metaUrl := "http://{ip}:8099/rpc/v0"
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
-	dataCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
+	ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	outPath := "./output"
 	downUrl := "http://127.0.0.1:8080/ipfs/QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	host := "127.0.0.1"
 	port := 6800
 	secret := "my_aria2_secret"
 	conf := &metacli.Aria2Conf{Host: host, Port: port, Secret: secret}
-	err := metaClient.DownloadFile(dataCid, outPath, downUrl, conf)
+	err := metaClient.DownloadFile(ipfsCid, outPath, downUrl, conf)
 	if err != nil {
 		logs.GetLogger().Error("download failed:", err)
 	}
@@ -180,11 +180,11 @@ func main() {
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
 	name := "./testdata"
-	dataCids, err := metaClient.GetDataCIDByName(name)
+	ipfsCids, err := metaClient.GetIpfsCidByName(name)
 	if err != nil {
 		logs.GetLogger().Error("get data cid failed:", err)
 	}
-	logs.GetLogger().Infof("get data cid success: %+v", dataCids)
+	logs.GetLogger().Infof("get data cid success: %+v", ipfsCids)
 
 	return
 }
@@ -239,8 +239,8 @@ func main() {
 	metaUrl := "http://{ip}:8099/rpc/v0"
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
-	dataCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-	sourceFileInfo, err := metaClient.GetFileInfoByDataCid(dataCid)
+	ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
+	sourceFileInfo, err := metaClient.GetFileInfoByIpfsCid(ipfsCid)
 	if err != nil {
 		logs.GetLogger().Error("get source file info failed:", err)
 	}

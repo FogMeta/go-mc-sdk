@@ -22,13 +22,16 @@ type JsonRpcParams struct {
 	Id      int           `json:"id"`
 }
 
-// StoreSourceFile
-type StoreSourceFileReq struct {
-	SourceName  string `json:"source_name"`
+type DataItem struct {
 	IsDirector  bool   `json:"is_director"`
-	SourceSize  int64  `json:"source_size"`
-	IpfsCid     string `json:"data_cid"`
+	DataSize    int64  `json:"data_size"`
+	IpfsCid     string `json:"ipfs_cid"`
 	DownloadUrl string `json:"download_url"`
+}
+
+type SourceFileReq struct {
+	SourceName string     `json:"source_name"`
+	DataList   []DataItem `json:"data_list"`
 }
 
 type StoreSourceFileResponse struct {

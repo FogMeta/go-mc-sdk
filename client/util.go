@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func pathJoin(root string, parts ...string) string {
+func PathJoin(root string, parts ...string) string {
 	url := root
 
 	for _, part := range parts {
@@ -133,7 +133,7 @@ func uploadFileToIpfs(sh *shell.Shell, fileName string) (string, error) {
 	}
 
 	destPath := "/"
-	srcPath := pathJoin("/ipfs/", ipfsCid)
+	srcPath := PathJoin("/ipfs/", ipfsCid)
 	err = sh.FilesCp(context.Background(), srcPath, destPath)
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -152,7 +152,7 @@ func uploadDirToIpfs(sh *shell.Shell, dirName string) (string, error) {
 	}
 
 	destPath := "/"
-	srcPath := pathJoin("/ipfs/", ipfsCid)
+	srcPath := PathJoin("/ipfs/", ipfsCid)
 	err = sh.FilesCp(context.Background(), srcPath, destPath)
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -164,7 +164,7 @@ func uploadDirToIpfs(sh *shell.Shell, dirName string) (string, error) {
 
 func ipfsCidIsDir(sh *shell.Shell, ipfsCid string) (*bool, error) {
 
-	path := pathJoin("/ipfs/", ipfsCid)
+	path := PathJoin("/ipfs/", ipfsCid)
 	stat, err := sh.FilesStat(context.Background(), path)
 	if err != nil {
 		logs.GetLogger().Error(err)

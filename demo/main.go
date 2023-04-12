@@ -277,7 +277,21 @@ func Notify2MetaDemo(c *cli.Context) error {
 	input := c.String("input")
 	ipfsCid := c.String("data-cid")
 	gatewayUrl := c.String("gateway-url")
-	err := metaClient.ReportMetaClientServer(input, ipfsCid, gatewayUrl)
+
+	sourceFile := sdk.SourceFileReq{}
+	sourceFile.SourceName = ""
+
+	info, err := os.Stat(input)
+	if err != nil {
+		logs.GetLogger().Error("get input stat information error:", err)
+		return err
+	}
+	isDir := info.IsDir()
+	dataSize := info.Size()
+	downloadUrl := sdk.PathJoin(gatewayUrl, "ipfs/", ipfsCid)
+	sourceFile.DataList = append(sourceFile.DataList, sdk.DataItem{IsDirector: isDir, DataSize: dataSize, IpfsCid: ipfsCid, DownloadUrl: downloadUrl})
+
+	err = metaClient.ReportMetaClientServer(sourceFile)
 	if err != nil {
 		logs.GetLogger().Error("report data cid to meta client server error:", err)
 		return err
@@ -313,7 +327,7 @@ func GetIpfsCidByNameDemo(c *cli.Context) error {
 	}
 
 	name := c.String("name")
-	_, err := metaClient.GetDataCIDByName(name)
+	_, err := metaClient.GetIpfsCidByName(name)
 	if err != nil {
 		logs.GetLogger().Error("get data cid from meta server error:", err)
 		return err

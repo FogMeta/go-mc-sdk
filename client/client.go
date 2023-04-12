@@ -69,7 +69,7 @@ func (m *MetaClient) DownloadFile(ipfsCid, outPath string, downloadUrl string, c
 			logs.GetLogger().Warnf("datacid: %s should be included in the url %s, but it is not.", ipfsCid, downloadUrl)
 		}
 
-		downloadFile := pathJoin(outPath, filepath.Base(downInfo[0].SourceName))
+		downloadFile := PathJoin(outPath, filepath.Base(downInfo[0].SourceName))
 		if downInfo[0].IsDirector {
 			downloadFile = downloadFile + ".tar"
 		}
@@ -90,7 +90,7 @@ func (m *MetaClient) DownloadFile(ipfsCid, outPath string, downloadUrl string, c
 				continue
 			}
 
-			downloadFile := pathJoin(outPath, filepath.Base(info.SourceName))
+			downloadFile := PathJoin(outPath, filepath.Base(info.SourceName))
 			if info.IsDirector {
 				realUrl = realUrl + "?format=tar"
 				downloadFile = downloadFile + ".tar"
@@ -109,19 +109,9 @@ func (m *MetaClient) DownloadFile(ipfsCid, outPath string, downloadUrl string, c
 	return errors.New("there are no available download links")
 }
 
-func (m *MetaClient) ReportMetaClientServer(inputPath string, ipfsCid string, ipfsGateway string) error {
-
-	isFile, err := isFile(inputPath)
-	if err != nil {
-		return err
-	}
-
-	sourceSize := walkDirSize(inputPath)
-	logs.GetLogger().Infoln("upload total size is:", sourceSize)
-
+func (m *MetaClient) ReportMetaClientServer(sourceFile SourceFileReq) error {
 	var params []interface{}
-	downUrl := pathJoin(ipfsGateway, "ipfs/", ipfsCid)
-	params = append(params, StoreSourceFileReq{inputPath, !(*isFile), sourceSize, ipfsCid, downUrl})
+	params = append(params, sourceFile)
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.StoreSourceFile",
@@ -192,7 +182,7 @@ func (m *MetaClient) GetFileLists(pageNum, limit int, opts ...ListOption) ([]Sou
 	return nil, nil
 }
 
-func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) {
+func (m *MetaClient) GetIpfsCidByName(fileName string) ([]string, error) {
 	var params []interface{}
 	params = append(params, fileName)
 	jsonRpcParams := JsonRpcParams{
@@ -282,7 +272,7 @@ func (m *MetaClient) GetDownloadFileInfoByIpfsCid(ipfsCid string) ([]DownloadFil
 	return res.Result.Data, nil
 }
 
-func (m *MetaClient) RebuildDataCID(fileName string) error {
+func (m *MetaClient) RebuildIpfsCid(fileName string) error {
 	// TODO
 	return nil
 }
