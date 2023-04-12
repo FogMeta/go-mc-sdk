@@ -23,25 +23,24 @@ func main() {
 	}
 	logs.GetLogger().Infoln("upload success, and data cid is: ", ipfsCid)
 
-	sourceFile := metacli.SourceFileReq{}
-	sourceFile.SourceName = "source-name"
-
+	datasetName := "dataset-name"
 	ipfsGateway := "http://127.0.0.1:8080"
-	inputPath = "./testdata"
+	sourceName := "./testdata"
 	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-	info, err := os.Stat(inputPath)
+	info, err := os.Stat(sourceName)
 	if err != nil {
-		logs.GetLogger().Error("get input stat information error:", err)
+		logs.GetLogger().Error("get source file stat information error:", err)
 		return
 	}
-	dataItem := metacli.DataItem{}
-	dataItem.IpfsCid = ipfsCid
-	dataItem.DataSize = info.Size()
-	dataItem.IsDirector = info.IsDir()
-	dataItem.DownloadUrl = metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
-	sourceFile.DataList = append(sourceFile.DataList, dataItem)
+	oneItem := metacli.IpfsData{}
+	oneItem.SourceName = sourceName
+	oneItem.IpfsCid = ipfsCid
+	oneItem.DataSize = info.Size()
+	oneItem.IsDirectory = info.IsDir()
+	oneItem.DownloadUrl = metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
+	ipfsData := []metacli.IpfsData{oneItem}
+	err = metaClient.ReportMetaClientServer(datasetName, ipfsData)
 
-	err = metaClient.ReportMetaClientServer(sourceFile)
 	if err != nil {
 		logs.GetLogger().Error("report meta client server  failed:", err)
 		return

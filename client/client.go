@@ -109,9 +109,9 @@ func (m *MetaClient) DownloadFile(ipfsCid, outPath string, downloadUrl string, c
 	return errors.New("there are no available download links")
 }
 
-func (m *MetaClient) ReportMetaClientServer(sourceFile SourceFileReq) error {
+func (m *MetaClient) ReportMetaClientServer(datasetName string, ipfsData []IpfsData) error {
 	var params []interface{}
-	params = append(params, sourceFile)
+	params = append(params, datasetName, ipfsData)
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.StoreSourceFile",
@@ -136,16 +136,15 @@ func (m *MetaClient) ReportMetaClientServer(sourceFile SourceFileReq) error {
 	return nil
 }
 
-func (m *MetaClient) GetFileLists(pageNum, limit int, opts ...ListOption) ([]*SourceFile, error) {
-
-	op := defaultOptions()
-	for _, opt := range opts {
-		opt.apply(&op)
+func (m *MetaClient) GetFileLists(pageNum, limit int, showCar ...bool) ([]*SourceFile, error) {
+	isCar := false
+	if len(showCar) >= 1 {
+		isCar = showCar[0]
 	}
+	logs.GetLogger().Info("with opts is:", isCar)
 
-	logs.GetLogger().Info("with opts is:", op.ShowCar)
 	var params []interface{}
-	params = append(params, SourceFilePageReq{pageNum, limit, op.ShowCar})
+	params = append(params, SourceFilePageReq{pageNum, limit, isCar})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.GetSourceFiles",

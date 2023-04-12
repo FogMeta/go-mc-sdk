@@ -274,24 +274,24 @@ func Notify2MetaDemo(c *cli.Context) error {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 	}
 
-	input := c.String("input")
-	ipfsCid := c.String("data-cid")
+	dataset := c.String("dataset")
+	source := c.String("source")
+	ipfsCid := c.String("ipfs-cid")
 	gatewayUrl := c.String("gateway-url")
 
-	sourceFile := sdk.SourceFileReq{}
-	sourceFile.SourceName = ""
-
-	info, err := os.Stat(input)
+	info, err := os.Stat(source)
 	if err != nil {
 		logs.GetLogger().Error("get input stat information error:", err)
 		return err
 	}
-	isDir := info.IsDir()
-	dataSize := info.Size()
-	downloadUrl := sdk.PathJoin(gatewayUrl, "ipfs/", ipfsCid)
-	sourceFile.DataList = append(sourceFile.DataList, sdk.DataItem{IsDirector: isDir, DataSize: dataSize, IpfsCid: ipfsCid, DownloadUrl: downloadUrl})
-
-	err = metaClient.ReportMetaClientServer(sourceFile)
+	oneItem := sdk.IpfsData{}
+	oneItem.SourceName = source
+	oneItem.IpfsCid = ipfsCid
+	oneItem.DataSize = info.Size()
+	oneItem.IsDirectory = info.IsDir()
+	oneItem.DownloadUrl = sdk.PathJoin(gatewayUrl, "ipfs/", ipfsCid)
+	ipfsData := []sdk.IpfsData{oneItem}
+	err = metaClient.ReportMetaClientServer(dataset, ipfsData)
 	if err != nil {
 		logs.GetLogger().Error("report data cid to meta client server error:", err)
 		return err
@@ -310,7 +310,7 @@ func GetFilesListDemo(c *cli.Context) error {
 	pageNum := c.Int("page-num")
 	limit := c.Int("limit")
 	showCar := c.Bool("show-car")
-	_, err := metaClient.GetFileLists(pageNum, limit, sdk.WithShowCar(showCar))
+	_, err := metaClient.GetFileLists(pageNum, limit, showCar)
 	if err != nil {
 		logs.GetLogger().Error("get files list from meta server error:", err)
 		return err

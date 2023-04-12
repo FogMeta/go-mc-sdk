@@ -2,7 +2,7 @@
 
 * [NewAPIClient](#NewAPIClient)
 * [UploadFile](#UploadFile)
-* [NotifyMetaServer](#NotifyMetaServer)
+* [ReportMetaClientServer](#ReportMetaClientServer)
 * [DownloadFile](#DownloadFile)
 * [GetFileLists](#GetFileLists)
 * [GetIpfsCidByName](#GetIpfsCidByName)
@@ -35,7 +35,7 @@ Outputs:
 ## UploadFile
 
 Definition:
-Uploads a file or folder to IPFS service.
+Uploads a file or directory to IPFS service.
 
 ```shell
 func (m *MetaClient) UploadFile(ipfsApiUrl, inputPath string) (ipfsCid string, err error) 
@@ -45,7 +45,7 @@ Inputs:
 
 ```shell
 ipfsApiUrl             # API address of IPFS service.
-inputPath              # File or director path to be uploaded to IPFS server
+inputPath              # File or directory path to be uploaded to IPFS server
 ```
 
 Outputs:
@@ -61,13 +61,15 @@ Definition:
 Report the Meta Client Server that the file or folder has been uploaded to the IPFS service.
 
 ```shell
-func (m *MetaClient) ReportMetaClientServer(sourceFile SourceFileReq) error 
+ReportMetaClientServer(datasetName string, ipfsData []IpfsData) 
+func (m *MetaClient) ReportMetaClientServer(datasetName string, ipfsData []IpfsData)  error 
 ```
 
 Inputs:
 
 ```shell
-sourceFile             # Source file request that has been uploaded to the IPFS Gateway.
+datasetName             # 
+ipfsData                #  , refer to the `Structs` below for details.
 ```
 
 Outputs:
@@ -108,7 +110,7 @@ Definition:
 Gets the file list from the Meta Server based on the specified page number and number of records per page.
 
 ```shell
-func (m *MetaClient) GetFileLists(pageNum int, limit int, opts ...ListOption) ([]*SourceFile, error)
+func (m *MetaClient) GetFileLists(pageNum int, limit int, showCar ...bool) ([]*SourceFile, error)
 ```
 
 Inputs:
@@ -116,13 +118,13 @@ Inputs:
 ```shell
 pageNum                # Which page to query
 limit                  # Number of records per page
-opts                   # Whether to return storage information,default showCar is WithShowCar(false)
+showCar                # Whether to return storage information,default is false
 ```
 
 Outputs:
 
 ```shell
-[]*SourceFile          # List of file descriptions returned,including:SourceName, the source file name;DealFile, the deal file;TaskName, the task name;StorageList, a list of storage list;DataList, a list of IPFS data details.
+[]*SourceFile          # List of file descriptions, refer to the `Structs` below for details.
 error                  # error or nil
 ```
 
@@ -156,7 +158,7 @@ Definition:
 Gets detailed information about the file or folder corresponding to the IPFS Cid from the Meta Server.
 
 ```shell
-func (m *MetaClient) GetFileInfoByIpfsCid(ipfsCid string) (*FileDetails, error)
+func (m *MetaClient) GetFileInfoByIpfsCid(ipfsCid string) (*SourceFile, error)
 ```
 
 Inputs:
@@ -168,6 +170,51 @@ ipfsCid                # IPFS Cid to be queried
 Outputs:
 
 ```shell
-*FileDetails           # Information corresponding to the queried IPFS Cid
+*SourceFile            # Information corresponding to the queried IPFS Cid, refer to the `Structs` below for details.
 error                  # error or nil
+```
+
+
+
+## Structs
+
+```go
+type IpfsData struct {
+    IpfsCid     string `json:"ipfs_cid"`
+    SourceName  string `json:"source_name"`
+    DataSize    int64  `json:"data_size"`
+    IsDirectory bool   `json:"is_directory"`
+    DownloadUrl string `json:"download_url"`
+}
+
+type SourceFile struct {
+	SourceName  string             `json:"source_name"`
+	DealFile    string             `json:"deal_file"`
+	TaskName    string             `json:"task_name"`
+	StorageList []*SplitFileDetail `json:"storage_list"`
+	DataList    []*IpfsDataDetail  `json:"data_list"`
+}
+
+type SplitFileDetail struct {
+    FileName         string            `json:"file_name"`
+    DataCid          string            `json:"data_cid"`
+    FileSize         int64             `json:"file_size"`
+    StorageProviders []StorageProvider `json:"storage_providers"`
+}
+
+type StorageProvider struct {
+    StorageProviderId string `json:"storage_provider_id"`
+    StorageStatus     string `json:"storage_status"`
+    DealId            int64  `json:"deal_id"`
+    DealCid           string `json:"deal_cid"` // proposal cid or uuid
+}
+
+type IpfsDataDetail struct {
+    DataId       int64  `json:"data_id"`
+    SourceFileId int64  `json:"source_file_id"`
+    IpfsCid      string `json:"ipfs_cid"`
+    DataSize     int64  `json:"data_size"`
+    IsDirector   bool   `json:"is_director"`
+    DownloadUrl  string `json:"download_url"`
+}
 ```
