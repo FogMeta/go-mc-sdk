@@ -19,7 +19,7 @@ Meta-Client-SDK provides the following features:
     - Store the CAR file in the IPFS gateway
     - Send CAR files to the storage providers in the Filecoin network
 - Download files or directory to the local machine
-- Query DataCID for a file by the file name
+- Query IPFS CID for a file by the file name
 - Get a list of all files of current user
 - Query storage information and status of a single file or directory
 
@@ -173,8 +173,8 @@ func main() {
 }
 ```
 
-### Get DataCID for a File by file name
-To get the DataCID for a file by its filename, you can use the following method:
+### Get IPFS CID for a File by file name
+To get the IPFS CID for a file by its filename, you can use the following method:
 ```
 package main
 
