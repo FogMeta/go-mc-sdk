@@ -171,7 +171,7 @@ func main() {
 			{
 				Name:   "datacid",
 				Usage:  "get data cid from meta server",
-				Action: GetDataCidByNameDemo,
+				Action: GetIpfsCidByNameDemo,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "name",
@@ -188,7 +188,7 @@ func main() {
 			{
 				Name:   "info",
 				Usage:  "get detail info from  meta server",
-				Action: GetInfoByDataCidDemo,
+				Action: GetInfoByIpfsCidDemo,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:     "data-cid",
@@ -231,12 +231,12 @@ func UploadDemo(c *cli.Context) error {
 
 	input := c.String("input")
 	apiUrl := c.String("api-url")
-	dataCid, err := metaClient.UploadFile(apiUrl, input)
+	ipfsCid, err := metaClient.UploadFile(apiUrl, input)
 	if err != nil {
 		logs.GetLogger().Error("upload error:", err)
 		return err
 	}
-	logs.GetLogger().Infoln("upload success, and data cid: ", dataCid)
+	logs.GetLogger().Infoln("upload success, and data cid: ", ipfsCid)
 
 	return nil
 }
@@ -247,7 +247,7 @@ func DownloadDemo(c *cli.Context) error {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 	}
 
-	dataCid := c.String("data-cid")
+	ipfsCid := c.String("data-cid")
 	outPath := c.String("out-path")
 
 	var conf *sdk.Aria2Conf
@@ -258,7 +258,7 @@ func DownloadDemo(c *cli.Context) error {
 		secret := c.String("secret")
 		conf = &sdk.Aria2Conf{Host: host, Port: port, Secret: secret}
 	}
-	err := metaClient.DownloadFile(dataCid, outPath, "", conf)
+	err := metaClient.DownloadFile(ipfsCid, outPath, "", conf)
 	if err != nil {
 		logs.GetLogger().Error("download error:", err)
 		return err
@@ -275,9 +275,9 @@ func Notify2MetaDemo(c *cli.Context) error {
 	}
 
 	input := c.String("input")
-	dataCid := c.String("data-cid")
+	ipfsCid := c.String("data-cid")
 	gatewayUrl := c.String("gateway-url")
-	err := metaClient.ReportMetaClientServer(input, dataCid, gatewayUrl)
+	err := metaClient.ReportMetaClientServer(input, ipfsCid, gatewayUrl)
 	if err != nil {
 		logs.GetLogger().Error("report data cid to meta client server error:", err)
 		return err
@@ -306,7 +306,7 @@ func GetFilesListDemo(c *cli.Context) error {
 	return nil
 }
 
-func GetDataCidByNameDemo(c *cli.Context) error {
+func GetIpfsCidByNameDemo(c *cli.Context) error {
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
@@ -323,14 +323,14 @@ func GetDataCidByNameDemo(c *cli.Context) error {
 	return nil
 }
 
-func GetInfoByDataCidDemo(c *cli.Context) error {
+func GetInfoByIpfsCidDemo(c *cli.Context) error {
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 	}
 
-	dataCid := c.String("data-cid")
-	_, err := metaClient.GetFileInfoByDataCid(dataCid)
+	ipfsCid := c.String("data-cid")
+	_, err := metaClient.GetFileInfoByIpfsCid(ipfsCid)
 	if err != nil {
 		logs.GetLogger().Error("get detail info from meta server error:", err)
 		return err

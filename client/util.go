@@ -126,45 +126,45 @@ func uploadFileToIpfs(sh *shell.Shell, fileName string) (string, error) {
 	}
 	defer file.Close()
 
-	dataCid, err := sh.Add(file)
+	ipfsCid, err := sh.Add(file)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return "", err
 	}
 
 	destPath := "/"
-	srcPath := pathJoin("/ipfs/", dataCid)
+	srcPath := pathJoin("/ipfs/", ipfsCid)
 	err = sh.FilesCp(context.Background(), srcPath, destPath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return "", err
 	}
 
-	return dataCid, nil
+	return ipfsCid, nil
 }
 
 func uploadDirToIpfs(sh *shell.Shell, dirName string) (string, error) {
 
-	dataCid, err := sh.AddDir(dirName)
+	ipfsCid, err := sh.AddDir(dirName)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return "", err
 	}
 
 	destPath := "/"
-	srcPath := pathJoin("/ipfs/", dataCid)
+	srcPath := pathJoin("/ipfs/", ipfsCid)
 	err = sh.FilesCp(context.Background(), srcPath, destPath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return "", err
 	}
 
-	return dataCid, nil
+	return ipfsCid, nil
 }
 
-func dataCidIsDir(sh *shell.Shell, dataCid string) (*bool, error) {
+func ipfsCidIsDir(sh *shell.Shell, ipfsCid string) (*bool, error) {
 
-	path := pathJoin("/ipfs/", dataCid)
+	path := pathJoin("/ipfs/", ipfsCid)
 	stat, err := sh.FilesStat(context.Background(), path)
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -180,6 +180,6 @@ func dataCidIsDir(sh *shell.Shell, dataCid string) (*bool, error) {
 	return &isFile, nil
 }
 
-func downloadFromIpfs(sh *shell.Shell, dataCid, outDir string) error {
-	return sh.Get(dataCid, outDir)
+func downloadFromIpfs(sh *shell.Shell, ipfsCid, outDir string) error {
+	return sh.Get(ipfsCid, outDir)
 }

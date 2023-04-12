@@ -27,7 +27,7 @@ type StoreSourceFileReq struct {
 	SourceName  string `json:"source_name"`
 	IsDirector  bool   `json:"is_director"`
 	SourceSize  int64  `json:"source_size"`
-	DataCid     string `json:"data_cid"`
+	IpfsCid     string `json:"data_cid"`
 	DownloadUrl string `json:"download_url"`
 }
 
@@ -64,16 +64,16 @@ type SourceFilePageResponse struct {
 
 type SourceFile struct {
 	SourceName  string       `json:"source_name"`
-	DataCid     string       `json:"data_cid"`
+	IpfsCid     string       `json:"data_cid"`
 	DownloadUrl string       `json:"download_url"`
 	StorageList []*SplitFile `json:"storage_list"`
 	SourceSize  int64        `json:"source_size"`
 	IsDirector  bool         `json:"is_director"`
 }
 
-//GetDataCidByName
+//GetIpfsCidByName
 
-type DataCidResponse struct {
+type IpfsCidResponse struct {
 	JsonRpc string `json:"jsonrpc"`
 	Result  struct {
 		Code    string   `json:"code"`
@@ -83,7 +83,7 @@ type DataCidResponse struct {
 	Id int `json:"id"`
 }
 
-// GetSourceFileByDataCid
+// GetSourceFileByIpfsCid
 
 type SourceFileResponse struct {
 	JsonRpc string `json:"jsonrpc"`
@@ -97,7 +97,7 @@ type SourceFileResponse struct {
 
 type SplitFile struct {
 	FileName         string            `json:"file_name"`
-	DataCid          string            `json:"data_cid"`
+	IpfsCid          string            `json:"data_cid"`
 	FileSize         int64             `json:"file_size"`
 	StorageProviders []StorageProvider `json:"storage_providers"`
 }
@@ -109,7 +109,7 @@ type StorageProvider struct {
 	DealCid           string `json:"deal_cid"` // proposal cid or uuid
 }
 
-// GetDownloadFileInfoByDataCid
+// GetDownloadFileInfoByIpfsCid
 
 type DownloadFileInfoResponse struct {
 	JsonRpc string `json:"jsonrpc"`

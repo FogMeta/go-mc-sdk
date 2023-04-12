@@ -30,7 +30,7 @@ func NewAPIClient(key, token, metaUrl string) *MetaClient {
 	return c
 }
 
-func (m *MetaClient) UploadFile(ipfsApiUrl, inputPath string) (dataCid string, err error) {
+func (m *MetaClient) UploadFile(ipfsApiUrl, inputPath string) (ipfsCid string, err error) {
 	// Creates an IPFS Shell client.
 	sh := shell.NewShell(ipfsApiUrl)
 
@@ -40,33 +40,33 @@ func (m *MetaClient) UploadFile(ipfsApiUrl, inputPath string) (dataCid string, e
 	}
 
 	if *isInputFile {
-		dataCid, err = uploadFileToIpfs(sh, inputPath)
+		ipfsCid, err = uploadFileToIpfs(sh, inputPath)
 	} else {
-		dataCid, err = uploadDirToIpfs(sh, inputPath)
+		ipfsCid, err = uploadDirToIpfs(sh, inputPath)
 	}
 	if err != nil {
 		return "", err
 	}
 
-	return dataCid, nil
+	return ipfsCid, nil
 }
 
-func (m *MetaClient) DownloadFile(dataCid, outPath string, downloadUrl string, conf *Aria2Conf) error {
+func (m *MetaClient) DownloadFile(ipfsCid, outPath string, downloadUrl string, conf *Aria2Conf) error {
 
 	if conf == nil {
 		return errors.New("need aria2 server config")
 	}
 
 	// check data cid from meta server
-	downInfo, err := m.GetDownloadFileInfoByDataCid(dataCid)
+	downInfo, err := m.GetDownloadFileInfoByIpfsCid(ipfsCid)
 	if err != nil || len(downInfo) == 0 {
 		logs.GetLogger().Errorf("Get Download File Info Error: %s \n", err)
 		return err
 	}
 
 	if downloadUrl != "" {
-		if !strings.Contains(downloadUrl, dataCid) {
-			logs.GetLogger().Warnf("datacid: %s should be included in the url %s, but it is not.", dataCid, downloadUrl)
+		if !strings.Contains(downloadUrl, ipfsCid) {
+			logs.GetLogger().Warnf("datacid: %s should be included in the url %s, but it is not.", ipfsCid, downloadUrl)
 		}
 
 		downloadFile := pathJoin(outPath, filepath.Base(downInfo[0].SourceName))
@@ -76,17 +76,17 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, downloadUrl string, c
 
 		err := downloadFileByAria2(conf, downloadUrl, downloadFile)
 		if err == nil {
-			logs.GetLogger().Info("download ", dataCid, "by aria2 success")
+			logs.GetLogger().Info("download ", ipfsCid, "by aria2 success")
 			return nil
 		}
-		logs.GetLogger().Warn("download ", dataCid, " url ", downloadUrl, " by aria2 error:", err)
+		logs.GetLogger().Warn("download ", ipfsCid, " url ", downloadUrl, " by aria2 error:", err)
 
 	} else {
 		// aria2 download file
 		for _, info := range downInfo {
 			realUrl := info.DownloadUrl
-			if !strings.Contains(realUrl, dataCid) {
-				logs.GetLogger().Warnf("datacid: %s should be included in the url %s, but it is not.", dataCid, realUrl)
+			if !strings.Contains(realUrl, ipfsCid) {
+				logs.GetLogger().Warnf("datacid: %s should be included in the url %s, but it is not.", ipfsCid, realUrl)
 				continue
 			}
 
@@ -98,18 +98,18 @@ func (m *MetaClient) DownloadFile(dataCid, outPath string, downloadUrl string, c
 
 			err := downloadFileByAria2(conf, realUrl, downloadFile)
 			if err == nil {
-				logs.GetLogger().Info("download ", dataCid, "by aria2 success")
+				logs.GetLogger().Info("download ", ipfsCid, "by aria2 success")
 				return nil
 			}
 
-			logs.GetLogger().Warn("download ", dataCid, " url ", realUrl, " by aria2 error:", err)
+			logs.GetLogger().Warn("download ", ipfsCid, " url ", realUrl, " by aria2 error:", err)
 		}
 	}
 
 	return errors.New("there are no available download links")
 }
 
-func (m *MetaClient) ReportMetaClientServer(inputPath string, dataCid string, ipfsGateway string) error {
+func (m *MetaClient) ReportMetaClientServer(inputPath string, ipfsCid string, ipfsGateway string) error {
 
 	isFile, err := isFile(inputPath)
 	if err != nil {
@@ -120,8 +120,8 @@ func (m *MetaClient) ReportMetaClientServer(inputPath string, dataCid string, ip
 	logs.GetLogger().Infoln("upload total size is:", sourceSize)
 
 	var params []interface{}
-	downUrl := pathJoin(ipfsGateway, "ipfs/", dataCid)
-	params = append(params, StoreSourceFileReq{inputPath, !(*isFile), sourceSize, dataCid, downUrl})
+	downUrl := pathJoin(ipfsGateway, "ipfs/", ipfsCid)
+	params = append(params, StoreSourceFileReq{inputPath, !(*isFile), sourceSize, ipfsCid, downUrl})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.StoreSourceFile",
@@ -197,7 +197,7 @@ func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) {
 	params = append(params, fileName)
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
-		Method:  "meta.GetDataCidByName",
+		Method:  "meta.GetIpfsCidByName",
 		Params:  params,
 		Id:      1,
 	}
@@ -206,7 +206,7 @@ func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) {
 		logs.GetLogger().Errorf("Get Response Error: %s", err)
 		return nil, err
 	}
-	res := DataCidResponse{}
+	res := IpfsCidResponse{}
 	err = json.Unmarshal(response, &res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
@@ -217,13 +217,13 @@ func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) {
 	return nil, nil
 }
 
-func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*SourceFile, error) {
+func (m *MetaClient) GetFileInfoByIpfsCid(ipfsCid string) (*SourceFile, error) {
 
 	var params []interface{}
-	params = append(params, dataCid)
+	params = append(params, ipfsCid)
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
-		Method:  "meta.GetSourceFileByDataCid",
+		Method:  "meta.GetSourceFileByIpfsCid",
 		Params:  params,
 		Id:      1,
 	}
@@ -255,13 +255,13 @@ func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*SourceFile, error) {
 	return nil, nil
 }
 
-func (m *MetaClient) GetDownloadFileInfoByDataCid(dataCid string) ([]DownloadFileInfo, error) {
+func (m *MetaClient) GetDownloadFileInfoByIpfsCid(ipfsCid string) ([]DownloadFileInfo, error) {
 
 	var params []interface{}
-	params = append(params, dataCid)
+	params = append(params, ipfsCid)
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
-		Method:  "meta.GetDownloadFileInfoByDataCid",
+		Method:  "meta.GetDownloadFileInfoByIpfsCid",
 		Params:  params,
 		Id:      1,
 	}
