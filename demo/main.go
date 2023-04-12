@@ -157,7 +157,7 @@ func main() {
 						Required: true,
 					},
 					&cli.BoolFlag{
-						Name:  "show-store",
+						Name:  "show-car",
 						Usage: "",
 						Value: true,
 					},
@@ -309,8 +309,8 @@ func GetFilesListDemo(c *cli.Context) error {
 
 	pageNum := c.Int("page-num")
 	limit := c.Int("limit")
-	showStore := c.Bool("show-store")
-	_, err := metaClient.GetFileLists(pageNum, limit, sdk.WithShowStorage(showStore))
+	showCar := c.Bool("show-car")
+	_, err := metaClient.GetFileLists(pageNum, limit, sdk.WithShowCar(showCar))
 	if err != nil {
 		logs.GetLogger().Error("get files list from meta server error:", err)
 		return err

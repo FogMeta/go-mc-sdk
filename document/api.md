@@ -5,8 +5,8 @@
 * [NotifyMetaServer](#NotifyMetaServer)
 * [DownloadFile](#DownloadFile)
 * [GetFileLists](#GetFileLists)
-* [GetDataCIDByName](#GetDataCIDByName)
-* [GetFileInfoByDataCid](#GetFileInfoByDataCid)
+* [GetIpfsCidByName](#GetIpfsCidByName)
+* [GetFileInfoByIpfsCid](#GetFileInfoByIpfsCid)
 
 ## NewAPIClient
 
@@ -38,7 +38,7 @@ Definition:
 Uploads a file or folder to IPFS service.
 
 ```shell
-func (m *MetaClient) UploadFile(ipfsApiUrl, inputPath string) (dataCid string, err error) 
+func (m *MetaClient) UploadFile(ipfsApiUrl, inputPath string) (ipfsCid string, err error) 
 ```
 
 Inputs:
@@ -51,7 +51,7 @@ inputPath              # File or director path to be uploaded to IPFS server
 Outputs:
 
 ```shell
-dataCid                # Data Cid returned by IPFS server
+ipfsCid                # IPFS Cid returned by IPFS server
 error                  # error or nil
 ```
 
@@ -61,15 +61,13 @@ Definition:
 Report the Meta Client Server that the file or folder has been uploaded to the IPFS service.
 
 ```shell
-func (m *MetaClient) ReportMetaClientServer(inputPath string, dataCid string, ipfsGateway string) error 
+func (m *MetaClient) ReportMetaClientServer(sourceFile SourceFileReq) error 
 ```
 
 Inputs:
 
 ```shell
-inputPath              # File or directory name that has been uploaded to the IPFS Gateway.
-dataCid                # Data Cid returned by IPFS server.
-ipfsGateway            # Gateway address of IPFS service.
+sourceFile             # Source file request that has been uploaded to the IPFS Gateway.
 ```
 
 Outputs:
@@ -82,18 +80,18 @@ error                  # error or nil
 ## DownloadFile
 
 Definition:
-Downloads the file or folder corresponding to the specified Data Cid from IPFS. If the Aria2 option is configured, Aria2 tool will be used for downloading. Otherwise, IPFS API will be used.
+Downloads the file or folder corresponding to the specified IPFS Cid from IPFS. If the Aria2 option is configured, Aria2 tool will be used for downloading. Otherwise, IPFS API will be used.
 
 ```shell
-func (m *MetaClient) DownloadFile(dataCid string, outPath string, downUrl string, conf *Aria2Conf) error
+func (m *MetaClient) DownloadFile(dataCid string, outPath string, downloadUrl string, conf *Aria2Conf) error
 ```
 
 Inputs:
 
 ```shell
-dataCid                # Data CID to be downloaded
+ipfsCid                # IPFS Cid to be downloaded
 outPath                # Output path for downloaded file
-downUrl                # Download url address of IPFS service, if the option is not provided, it will automatically query the meta client server.
+downloadUrl            # Download url address of IPFS service, if the option is not provided, it will automatically query the meta client server.
 conf                   # Aria2 related options, including:host, aria2 server address; port,aria2 server port; secret, must be the same value as rpc-secure in aria2 conf
 ```
 
@@ -118,7 +116,7 @@ Inputs:
 ```shell
 pageNum                # Which page to query
 limit                  # Number of records per page
-opts                   # Whether to return storage information,default ShowStorage is WithShowStorage(false)
+opts                   # Whether to return storage information,default ShowCar is WithShowCar(false)
 ```
 
 Outputs:
@@ -129,13 +127,13 @@ error                  # error or nil
 ```
 
 
-## GetDataCIDByName
+## GetIpfsCidByName
 
 Definition:
-Gets the Data Cid corresponding to the specified file or folder from the Meta Server.
+Gets the IPFS Cid corresponding to the specified file or folder from the Meta Server.
 
 ```shell
-func (m *MetaClient) GetDataCIDByName(fileName string) ([]string, error) 
+func (m *MetaClient) GetIpfsCidByName(fileName string) ([]string, error) 
 ```
 
 Inputs:
@@ -147,24 +145,24 @@ fileName               # File or directory name to be queried
 Outputs:
 
 ```shell
-[]string               # List of Data Cids corresponding to the queried file name
+[]string               # List of IPFS Cids corresponding to the queried file name
 error                  # error or nil
 ```
 
 
-## GetFileInfoByDataCid
+## GetFileInfoByIpfsCid
 
 Definition:
-Gets detailed information about the file or folder corresponding to the Data Cid from the Meta Server.
+Gets detailed information about the file or folder corresponding to the IPFS Cid from the Meta Server.
 
 ```shell
-func (m *MetaClient) GetFileInfoByDataCid(dataCid string) (*FileDetails, error)
+func (m *MetaClient) GetFileInfoByIpfsCid(ipfsCid string) (*FileDetails, error)
 ```
 
 Inputs:
 
 ```shell
-dataCid                # Data Cid to be queried
+ipfsCid                # IPFS Cid to be queried
 ```
 
 Outputs:

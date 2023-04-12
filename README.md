@@ -113,15 +113,27 @@ func main() {
 	metaUrl := "http://{ip}:8099/rpc/v0"
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
+	sourceFile := metacli.SourceFileReq{}
+	sourceFile.SourceName = "source-name"
+	
+	ipfsGateway := "http://127.0.0.1:8080"
 	inputPath := "./testdata" // file or directory path that has been uploaded to the IPFS gateway
 	ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-	ipfsGateway := "http://127.0.0.1:8080"
-	err := metaClient.ReportMetaClientServer(inputPath, ipfsCid, ipfsGateway)
+	info, err := os.Stat(inputPath)
+	if err != nil {
+		logs.GetLogger().Error("get input stat information error:", err)
+	}
+	isDir := info.IsDir()
+	dataSize := info.Size()
+	downloadUrl := metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
+	sourceFile.DataList = append(sourceFile.DataList, metacli.DataItem{IsDirector: isDir, DataSize: dataSize, IpfsCid: ipfsCid, DownloadUrl: downloadUrl})
+	
+	err = metaClient.ReportMetaClientServer(sourceFile)
 	if err != nil {
 		logs.GetLogger().Error("report meta client server  failed:", err)
 	}
 	logs.GetLogger().Infoln("report meta client server success")
-
+	
 	return
 }
 ```
@@ -182,9 +194,9 @@ func main() {
 	name := "./testdata"
 	ipfsCids, err := metaClient.GetIpfsCidByName(name)
 	if err != nil {
-		logs.GetLogger().Error("get data cid failed:", err)
+		logs.GetLogger().Error("get ipfs cid failed:", err)
 	}
-	logs.GetLogger().Infof("get data cid success: %+v", ipfsCids)
+	logs.GetLogger().Infof("get ipfs cid success: %+v", ipfsCids)
 
 	return
 }

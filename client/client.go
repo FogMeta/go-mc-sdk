@@ -143,9 +143,9 @@ func (m *MetaClient) GetFileLists(pageNum, limit int, opts ...ListOption) ([]Sou
 		opt.apply(&op)
 	}
 
-	logs.GetLogger().Info("with opts is:", op.ShowStorage)
+	logs.GetLogger().Info("with opts is:", op.ShowCar)
 	var params []interface{}
-	params = append(params, SourceFilePageReq{pageNum, limit, op.ShowStorage})
+	params = append(params, SourceFilePageReq{pageNum, limit, op.ShowCar})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.GetSourceFiles",
@@ -169,6 +169,7 @@ func (m *MetaClient) GetFileLists(pageNum, limit int, opts ...ListOption) ([]Sou
 	sources := res.Result.Data.Sources
 	for index, source := range sources {
 		logs.GetLogger().Infof("Index: %d, Source: %+v", index, source)
+
 		stores := source.StorageList
 		for i, store := range stores {
 			logs.GetLogger().Infof("Store-%d: %+v", i, store)
@@ -176,6 +177,10 @@ func (m *MetaClient) GetFileLists(pageNum, limit int, opts ...ListOption) ([]Sou
 			for ii, provider := range providers {
 				logs.GetLogger().Infof("Provider-%d: %+v", ii, provider)
 			}
+		}
+		dataList := source.DataList
+		for i, data := range dataList {
+			logs.GetLogger().Infof("Data-%d: %+v", i, data)
 		}
 	}
 

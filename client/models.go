@@ -23,10 +23,10 @@ type JsonRpcParams struct {
 }
 
 type DataItem struct {
-	IsDirector  bool   `json:"is_director"`
-	DataSize    int64  `json:"data_size"`
 	IpfsCid     string `json:"ipfs_cid"`
 	DownloadUrl string `json:"download_url"`
+	IsDirector  bool   `json:"is_director"`
+	DataSize    int64  `json:"data_size"`
 }
 
 type SourceFileReq struct {
@@ -46,9 +46,9 @@ type StoreSourceFileResponse struct {
 //GetSourceFiles
 
 type SourceFilePageReq struct {
-	PageNum   int  `json:"page_num"`
-	Size      int  `json:"size"`
-	ShowStore bool `json:"show_store"`
+	PageNum int  `json:"page_num"`
+	Size    int  `json:"size"`
+	ShowCar bool `json:"show_car"`
 }
 
 type SourceFilePageResponse struct {
@@ -66,12 +66,27 @@ type SourceFilePageResponse struct {
 }
 
 type SourceFile struct {
-	SourceName  string       `json:"source_name"`
-	IpfsCid     string       `json:"data_cid"`
-	DownloadUrl string       `json:"download_url"`
-	StorageList []*SplitFile `json:"storage_list"`
-	SourceSize  int64        `json:"source_size"`
-	IsDirector  bool         `json:"is_director"`
+	SourceName  string             `json:"source_name"`
+	DealFile    string             `json:"deal_file"`
+	TaskName    string             `json:"task_name"`
+	StorageList []*SplitFileDetail `json:"storage_list"`
+	DataList    []*IpfsDataDetail  `json:"data_list"`
+}
+
+type IpfsDataDetail struct {
+	DataId       int64  `json:"data_id"`
+	SourceFileId int64  `json:"source_file_id"`
+	IpfsCid      string `json:"ipfs_cid"`
+	DataSize     int64  `json:"data_size"`
+	IsDirector   bool   `json:"is_director"`
+	DownloadUrl  string `json:"download_url"`
+}
+
+type SplitFileDetail struct {
+	FileName         string            `json:"file_name"`
+	DataCid          string            `json:"data_cid"`
+	FileSize         int64             `json:"file_size"`
+	StorageProviders []StorageProvider `json:"storage_providers"`
 }
 
 //GetIpfsCidByName
@@ -132,7 +147,7 @@ type DownloadFileInfo struct {
 
 // list option
 type listOption struct {
-	ShowStorage bool
+	ShowCar bool
 }
 
 type ListOption interface {
@@ -153,13 +168,13 @@ func showStorageOption(f func(*listOption)) *funcOption {
 	}
 }
 
-func WithShowStorage(show bool) ListOption {
+func WithShowCar(show bool) ListOption {
 	return showStorageOption(func(o *listOption) {
-		o.ShowStorage = show
+		o.ShowCar = show
 	})
 }
 func defaultOptions() listOption {
 	return listOption{
-		ShowStorage: false,
+		ShowCar: false,
 	}
 }
