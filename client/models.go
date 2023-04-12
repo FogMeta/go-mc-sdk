@@ -150,7 +150,7 @@ type TreeNode struct {
 	Size  uint64
 	Dir   bool
 	IsTop bool
-	Deep  int
+	Group int
 	Child []*TreeNode
 }
 

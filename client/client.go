@@ -290,7 +290,6 @@ func (m *MetaClient) RebuildDataCID(fileName string) error {
 }
 
 func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error {
-	// TODO
 	// Creates an IPFS Shell client.
 	sh := shell.NewShell(ipfsApiUrl)
 

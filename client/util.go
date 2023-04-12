@@ -375,8 +375,8 @@ func (n *TreeNode) Print() error {
 }
 
 func (n *TreeNode) Show() error {
-	logs.GetLogger().Infof("TreeNode: hash=%s, path=%s, name=%s, size=%d, deep=%d, dir=%t, child-num=%d",
-		n.Hash, n.Path, n.Name, n.Size, n.Deep, n.Dir, len(n.Child))
+	logs.GetLogger().Infof("TreeNode: hash=%s, path=%s, name=%s, size=%d, group=%d, dir=%t, child-num=%d",
+		n.Hash, n.Path, n.Name, n.Size, n.Group, n.Dir, len(n.Child))
 	return nil
 }
 
