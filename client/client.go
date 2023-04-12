@@ -136,7 +136,7 @@ func (m *MetaClient) ReportMetaClientServer(sourceFile SourceFileReq) error {
 	return nil
 }
 
-func (m *MetaClient) GetFileLists(pageNum, limit int, opts ...ListOption) ([]SourceFile, error) {
+func (m *MetaClient) GetFileLists(pageNum, limit int, opts ...ListOption) ([]*SourceFile, error) {
 
 	op := defaultOptions()
 	for _, opt := range opts {
@@ -184,7 +184,7 @@ func (m *MetaClient) GetFileLists(pageNum, limit int, opts ...ListOption) ([]Sou
 		}
 	}
 
-	return nil, nil
+	return res.Result.Data.Sources, nil
 }
 
 func (m *MetaClient) GetIpfsCidByName(fileName string) ([]string, error) {

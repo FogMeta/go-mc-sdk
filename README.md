@@ -1,6 +1,5 @@
-
-
 # go-mc-sdk
+
 [![Made by FogMeta](https://img.shields.io/badge/made%20by-FogMeta-green.svg)](https://en.fogmeta.com/)
 [![Twitter Follow](https://img.shields.io/twitter/follow/FogMeta)](https://twitter.com/FogMeta)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg)](https://github.com/RichardLitt/standard-readme)
@@ -11,7 +10,7 @@ Meta-Client is a Web3 data service that securely stores data backups and enables
 
 ## Features
 
-Meta-Client-SDK provides the following features:
+go-mc-sdk provides the following features:
 
 - Upload files or directory to the IPFS gateway
 - Report data information to the Meta-Client server 
@@ -25,7 +24,7 @@ Meta-Client-SDK provides the following features:
 
 ## Prerequisites
 
-Before using Meta-Client-SDK, you need to install the following services:
+Before using go-mc-sdk, you need to install the following services:
 
 - Aria2 service
 
@@ -37,10 +36,10 @@ sudo apt install aria2
 
 ## Installation
 
-To install Meta-Client-SDK, run the following command:
+To install go-mc-sdk, run the following command:
 
 ```
-go get github.com/FogMeta/meta-client-sdk
+go get github.com/FogMeta/go-mc-sdk
 ```
 
 
@@ -54,7 +53,7 @@ First, you need to create a MetaClient object, which can be initialized as follo
 package main
 
 import (
-  metacli "github.com/FogMeta/meta-client-sdk/client"
+  metacli "github.com/FogMeta/go-mc-sdk/client"
 )
 
 func main() {
@@ -72,7 +71,7 @@ To upload files or directory to IPFS gateway and Filecoin network, you can use t
 package main
 
 import (
-	metacli "github.com/FogMeta/meta-client-sdk/client"
+	metacli "github.com/FogMeta/go-mc-sdk/client"
 	"github.com/filswan/go-swan-lib/logs"
 )
 
@@ -90,7 +89,7 @@ func main() {
     if err != nil {
 	logs.GetLogger().Error("upload failed:", err)
     }
-    logs.GetLogger().Infoln("upload success, and data cid is: ", ipfsCid)
+    logs.GetLogger().Infoln("upload success, and ipfs cid is: ", ipfsCid)
     return
 }
 ```
@@ -101,7 +100,7 @@ To report data-related information to the Meta-Client server, you can use the fo
 package main
 
 import (
-	metacli "github.com/FogMeta/meta-client-sdk/client"
+	metacli "github.com/FogMeta/go-mc-sdk/client"
 	"github.com/filswan/go-swan-lib/logs"
 )
 
@@ -123,10 +122,12 @@ func main() {
 	if err != nil {
 		logs.GetLogger().Error("get input stat information error:", err)
 	}
-	isDir := info.IsDir()
-	dataSize := info.Size()
-	downloadUrl := metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
-	sourceFile.DataList = append(sourceFile.DataList, metacli.DataItem{IsDirector: isDir, DataSize: dataSize, IpfsCid: ipfsCid, DownloadUrl: downloadUrl})
+	dataItem := metacli.DataItem{}
+	dataItem.IpfsCid = ipfsCid
+	dataItem.DataSize = info.Size()
+	dataItem.IsDirector = info.IsDir()
+	dataItem.DownloadUrl = metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
+	sourceFile.DataList = append(sourceFile.DataList, dataItem)
 	
 	err = metaClient.ReportMetaClientServer(sourceFile)
 	if err != nil {
@@ -144,7 +145,7 @@ To download files or directory from the IPFS gateway and Filecoin network, you c
 package main
 
 import (
-	metacli "github.com/FogMeta/meta-client-sdk/client"
+	metacli "github.com/FogMeta/go-mc-sdk/client"
 	"github.com/filswan/go-swan-lib/logs"
 )
 
@@ -158,12 +159,12 @@ func main() {
 
 	ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	outPath := "./output"
-	downUrl := "http://127.0.0.1:8080/ipfs/QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
+	downloadUrl := "http://127.0.0.1:8080/ipfs/QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	host := "127.0.0.1"
 	port := 6800
 	secret := "my_aria2_secret"
 	conf := &metacli.Aria2Conf{Host: host, Port: port, Secret: secret}
-	err := metaClient.DownloadFile(ipfsCid, outPath, downUrl, conf)
+	err := metaClient.DownloadFile(ipfsCid, outPath, downloadUrl, conf)
 	if err != nil {
 		logs.GetLogger().Error("download failed:", err)
 	}
@@ -179,7 +180,7 @@ To get the IPFS CID for a file by its filename, you can use the following method
 package main
 
 import (
-	metacli "github.com/FogMeta/meta-client-sdk/client"
+	metacli "github.com/FogMeta/go-mc-sdk/client"
 	"github.com/filswan/go-swan-lib/logs"
 )
 
@@ -208,7 +209,7 @@ To view a list of all files under the current user, or to query storage informat
 package main
 
 import (
-	metacli "github.com/FogMeta/meta-client-sdk/client"
+	metacli "github.com/FogMeta/go-mc-sdk/client"
 	"github.com/filswan/go-swan-lib/logs"
 )
 
@@ -239,7 +240,7 @@ Todo
 package main
 
 import (
-	metacli "github.com/FogMeta/meta-client-sdk/client"
+	metacli "github.com/FogMeta/go-mc-sdk/client"
 	"github.com/filswan/go-swan-lib/logs"
 )
 
@@ -268,8 +269,8 @@ For detailed API lists, please check out the [API Documentation](document/api.md
 
 ## Contributing
 
-Contributions to Meta-Client-SDK are welcome! If you find any errors or want to add new features, please submit an [Issue](https://github.com/FogMeta/meta-client-sdk/issues), or initiate a [Pull Request](https://github.com/FogMeta/meta-client-sdk/pulls).
+Contributions to go-mc-sdk are welcome! If you find any errors or want to add new features, please submit an [Issue](https://github.com/FogMeta/meta-client-sdk/issues), or initiate a [Pull Request](https://github.com/FogMeta/meta-client-sdk/pulls).
 
 ## License
 
-Meta-Client-SDK is licensed under the MIT License.
+go-mc-sdk is licensed under the MIT License.

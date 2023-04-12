@@ -1,4 +1,4 @@
-module github.com/FogMeta/meta-client-sdk
+module github.com/FogMeta/go-mc-sdk
 
 go 1.19
 

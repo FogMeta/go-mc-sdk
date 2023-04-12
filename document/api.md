@@ -1,4 +1,4 @@
-# meta-client-sdk
+# go-mc-sdk
 
 * [NewAPIClient](#NewAPIClient)
 * [UploadFile](#UploadFile)
@@ -83,7 +83,7 @@ Definition:
 Downloads the file or folder corresponding to the specified IPFS Cid from IPFS. If the Aria2 option is configured, Aria2 tool will be used for downloading. Otherwise, IPFS API will be used.
 
 ```shell
-func (m *MetaClient) DownloadFile(dataCid string, outPath string, downloadUrl string, conf *Aria2Conf) error
+func (m *MetaClient) DownloadFile(ipfsCid string, outPath string, downloadUrl string, conf *Aria2Conf) error
 ```
 
 Inputs:
@@ -108,7 +108,7 @@ Definition:
 Gets the file list from the Meta Server based on the specified page number and number of records per page.
 
 ```shell
-func (m *MetaClient) GetFileLists(pageNum int, limit int, opts ...ListOption) ([]FileDetails, error)
+func (m *MetaClient) GetFileLists(pageNum int, limit int, opts ...ListOption) ([]*SourceFile, error)
 ```
 
 Inputs:
@@ -116,13 +116,13 @@ Inputs:
 ```shell
 pageNum                # Which page to query
 limit                  # Number of records per page
-opts                   # Whether to return storage information,default ShowCar is WithShowCar(false)
+opts                   # Whether to return storage information,default showCar is WithShowCar(false)
 ```
 
 Outputs:
 
 ```shell
-[]FileDetails          # List of file descriptions returned
+[]*SourceFile          # List of file descriptions returned,including:SourceName, the source file name;DealFile, the deal file;TaskName, the task name;StorageList, a list of storage list;DataList, a list of IPFS data details.
 error                  # error or nil
 ```
 
@@ -168,6 +168,6 @@ ipfsCid                # IPFS Cid to be queried
 Outputs:
 
 ```shell
-*FileDetails           # Information corresponding to the queried Data Cid
+*FileDetails           # Information corresponding to the queried IPFS Cid
 error                  # error or nil
 ```

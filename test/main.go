@@ -1,7 +1,7 @@
 package main
 
 import (
-	metacli "github.com/FogMeta/meta-client-sdk/client"
+	metacli "github.com/FogMeta/go-mc-sdk/client"
 	"github.com/filswan/go-swan-lib/logs"
 	"os"
 )
@@ -34,10 +34,12 @@ func main() {
 		logs.GetLogger().Error("get input stat information error:", err)
 		return
 	}
-	isDir := info.IsDir()
-	dataSize := info.Size()
-	downloadUrl := metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
-	sourceFile.DataList = append(sourceFile.DataList, metacli.DataItem{IsDirector: isDir, DataSize: dataSize, IpfsCid: ipfsCid, DownloadUrl: downloadUrl})
+	dataItem := metacli.DataItem{}
+	dataItem.IpfsCid = ipfsCid
+	dataItem.DataSize = info.Size()
+	dataItem.IsDirector = info.IsDir()
+	dataItem.DownloadUrl = metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
+	sourceFile.DataList = append(sourceFile.DataList, dataItem)
 
 	err = metaClient.ReportMetaClientServer(sourceFile)
 	if err != nil {
@@ -48,7 +50,7 @@ func main() {
 
 	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	outPath := "./output"
-	downloadUrl = "http://127.0.0.1:8080/ipfs/QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
+	downloadUrl := "http://127.0.0.1:8080/ipfs/QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	host := "127.0.0.1"
 	port := 6800
 	secret := "my_aria2_secret"
