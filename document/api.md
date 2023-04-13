@@ -58,7 +58,7 @@ error                  # error or nil
 ## ReportMetaClientServer
 
 Definition:
-Report the Meta Server that the file or folder has been uploaded to the IPFS service.
+Report the Meta Client Server that the file or folder has been uploaded to the IPFS service.
 
 ```shell
 func (m *MetaClient) ReportMetaClientServer(datasetName string, ipfsData []IpfsData)   error 
@@ -117,7 +117,7 @@ error                  # error or nil
 ## GetDatasetList
 
 Definition:
-Gets the dataset list from the Meta Server based on the specified datasetName, page number and size of records per page.
+Gets the dataset list from the Meta Client Server based on the specified datasetName, page number and size of records per page.
 
 ```shell
 func (m *MetaClient) GetDatasetList(datasetName string, pageNum, size int) (*GetDatasetListPager, error) 
@@ -167,7 +167,7 @@ type IpfsDataDetail struct {
 ## GetSourceFileInfo
 
 Definition:
-Gets the IPFS data details corresponding to the specified IPFS cid from the Meta Server.
+Gets the source file information corresponding by the specified IPFS cid from the Meta Server.
 
 ```shell
 func (m *MetaClient) GetSourceFileInfo(ipfsCid string) ([]IpfsDataDetail, error)
@@ -253,7 +253,7 @@ type StorageProvider struct {
 Definition:
 
 ```shell
-func GetIpfsCidStat(ipfsApiUrl string, ipfsCid string) (IpfsCidInfo, error)
+func GetIpfsCidInfo(ipfsApiUrl string, ipfsCid string) (IpfsCidInfo, error)
 ```
 
 Inputs:

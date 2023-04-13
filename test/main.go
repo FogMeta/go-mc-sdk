@@ -29,7 +29,7 @@ func main() {
 	sourceName := inputPath
 	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 
-	info, err := metacli.GetIpfsCidStat(apiUrl, ipfsCid)
+	info, err := metacli.GetIpfsCidInfo(apiUrl, ipfsCid)
 	if err != nil {
 		logs.GetLogger().Error("get ipfs cid stat information error:", err)
 		return
@@ -85,9 +85,32 @@ func main() {
 
 	// get source file status
 	datasetName = "dataset-name"
-	ipfsCid = ""
+	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	pageNum = 0
 	size = 10
+	sourceFileStatusPager, err := metaClient.GetSourceFileStatus(datasetName, ipfsCid, pageNum, size)
+	if err != nil {
+		logs.GetLogger().Error("get source file status failed:", err)
+		return
+	}
+	logs.GetLogger().Infof("get source file status success: %+v", sourceFileStatusPager)
+
+	return
+}
+
+func demo() {
+	// Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings".
+	key := "V0schjjl_bxCtSNwBYXXXX"
+	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings".
+	token := "fca72014744019a949248874610fXXXX"
+	metaUrl := "http://{ip}:8099/rpc/v0"
+	metaClient := metacli.NewAPIClient(key, token, metaUrl)
+
+	// get source file status
+	datasetName := "dataset-name"
+	ipfsCid := ""
+	pageNum := 0
+	size := 10
 	sourceFileStatusPager, err := metaClient.GetSourceFileStatus(datasetName, ipfsCid, pageNum, size)
 	if err != nil {
 		logs.GetLogger().Error("get source file status failed:", err)

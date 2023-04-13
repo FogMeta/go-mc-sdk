@@ -26,7 +26,7 @@ func PathJoin(root string, parts ...string) string {
 	return url
 }
 
-func GetIpfsCidStat(ipfsApiUrl string, ipfsCid string) (IpfsCidInfo, error) {
+func GetIpfsCidInfo(ipfsApiUrl string, ipfsCid string) (IpfsCidInfo, error) {
 
 	info := IpfsCidInfo{IpfsCid: ipfsCid}
 

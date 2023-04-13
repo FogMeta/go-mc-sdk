@@ -298,7 +298,7 @@ func Report2MetaServerDemo(c *cli.Context) error {
 	gatewayUrl := c.String("gateway-url")
 	apiUrl := c.String("api-url")
 
-	info, err := sdk.GetIpfsCidStat(apiUrl, ipfsCid)
+	info, err := sdk.GetIpfsCidInfo(apiUrl, ipfsCid)
 	if err != nil {
 		logs.GetLogger().Error("get ipfs cid stat information error:", err)
 		return err
