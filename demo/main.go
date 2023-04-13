@@ -67,7 +67,7 @@ func main() {
 				Action: UploadDemo,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:     "input",
+						Name:     "source",
 						Usage:    "file or directory which will upload to IPFS server.",
 						Required: true,
 					},
@@ -128,6 +128,11 @@ func main() {
 					&cli.StringFlag{
 						Name:     "dataset",
 						Usage:    "Dataset name.",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "source",
+						Usage:    "Source name.",
 						Required: true,
 					},
 					&cli.StringFlag{
@@ -250,7 +255,7 @@ func UploadDemo(c *cli.Context) error {
 		return errors.New("create meta client failed")
 	}
 
-	input := c.String("input")
+	input := c.String("source")
 	apiUrl := c.String("api-url")
 	ipfsCid, err := metaClient.UploadFile(apiUrl, input)
 	if err != nil {
@@ -298,6 +303,7 @@ func Report2MetaServerDemo(c *cli.Context) error {
 	}
 
 	dataset := c.String("dataset")
+	sourceName := c.String("source")
 	ipfsCid := c.String("ipfs-cid")
 	gatewayUrl := c.String("gateway-url")
 	apiUrl := c.String("api-url")
@@ -309,6 +315,7 @@ func Report2MetaServerDemo(c *cli.Context) error {
 	}
 	oneItem := sdk.IpfsData{}
 	oneItem.IpfsCid = ipfsCid
+	oneItem.SourceName = sourceName
 	oneItem.DataSize = info.DataSize
 	oneItem.IsDirectory = info.IsDirectory
 	oneItem.DownloadUrl = sdk.PathJoin(gatewayUrl, "ipfs/", ipfsCid)
