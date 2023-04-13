@@ -3,7 +3,6 @@ package main
 import (
 	metacli "github.com/FogMeta/go-mc-sdk/client"
 	"github.com/filswan/go-swan-lib/logs"
-	"os"
 )
 
 func main() {
@@ -14,6 +13,7 @@ func main() {
 	metaUrl := "http://{ip}:8099/rpc/v0"
 	metaClient := metacli.NewAPIClient(key, token, metaUrl)
 
+	// update file(s) in testdata to IPFS server
 	apiUrl := "http://127.0.0.1:5001"
 	inputPath := "./testdata"
 	ipfsCid, err := metaClient.UploadFile(apiUrl, inputPath)
@@ -21,32 +21,34 @@ func main() {
 		logs.GetLogger().Error("upload failed:", err)
 		return
 	}
-	logs.GetLogger().Infoln("upload success, and data cid is: ", ipfsCid)
+	logs.GetLogger().Infoln("upload success, and ipfs cid is: ", ipfsCid)
 
+	// report ipfs cid to meta server
 	datasetName := "dataset-name"
 	ipfsGateway := "http://127.0.0.1:8080"
-	sourceName := "./testdata"
+	sourceName := inputPath
 	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-	info, err := os.Stat(sourceName)
+
+	info, err := metacli.GetIpfsCidStat(apiUrl, ipfsCid)
 	if err != nil {
-		logs.GetLogger().Error("get source file stat information error:", err)
+		logs.GetLogger().Error("get ipfs cid stat information error:", err)
 		return
 	}
 	oneItem := metacli.IpfsData{}
 	oneItem.SourceName = sourceName
 	oneItem.IpfsCid = ipfsCid
-	oneItem.DataSize = info.Size()
-	oneItem.IsDirectory = info.IsDir()
+	oneItem.DataSize = info.DataSize
+	oneItem.IsDirectory = info.IsDirectory
 	oneItem.DownloadUrl = metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
 	ipfsData := []metacli.IpfsData{oneItem}
 	err = metaClient.ReportMetaClientServer(datasetName, ipfsData)
-
 	if err != nil {
 		logs.GetLogger().Error("report meta client server  failed:", err)
 		return
 	}
 	logs.GetLogger().Infoln("report meta client server success")
 
+	// download file(s) from IPFS server
 	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	outPath := "./output"
 	downloadUrl := "http://127.0.0.1:8080/ipfs/QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
@@ -61,31 +63,37 @@ func main() {
 	}
 	logs.GetLogger().Infoln("download success")
 
-	fileName := "testdata"
-	ipfsCids, err := metaClient.GetIpfsCidByName(fileName)
-	if err != nil {
-		logs.GetLogger().Error("get ipfs cid failed:", err)
-		return
-	}
-	logs.GetLogger().Infof("get ipfs cid success: %+v", ipfsCids)
-
+	// get dataset list from meta server
+	datasetName = "dataset-name"
 	pageNum := 0
-	limit := 10
-	// sourceFileList, err := metaClient.GetFileLists(pageNum, limit, metacli.WithShowCar(true))
-	sourceFileList, err := metaClient.GetFileLists(pageNum, limit) //default show CAR option is false
+	size := 10
+	datasetListPager, err := metaClient.GetDatasetList(datasetName, pageNum, size)
 	if err != nil {
-		logs.GetLogger().Error("get file list failed:", err)
+		logs.GetLogger().Error("get dataset list failed:", err)
 		return
 	}
-	logs.GetLogger().Infof("get file list success: %+v", sourceFileList)
+	logs.GetLogger().Infof("get dataset list success: %+v", datasetListPager)
 
+	// get source file information
 	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-	sourceFileInfo, err := metaClient.GetFileInfoByIpfsCid(ipfsCid)
+	ipfsDataDetail, err := metaClient.GetSourceFileInfo(ipfsCid)
 	if err != nil {
-		logs.GetLogger().Error("get source file info failed:", err)
+		logs.GetLogger().Error("get source file information failed:", err)
 		return
 	}
-	logs.GetLogger().Infof("get source file info success: %+v", sourceFileInfo)
+	logs.GetLogger().Infof("get source file information success: %+v", ipfsDataDetail)
+
+	// get source file status
+	datasetName = "dataset-name"
+	ipfsCid = ""
+	pageNum = 0
+	size = 10
+	sourceFileStatusPager, err := metaClient.GetSourceFileStatus(datasetName, ipfsCid, pageNum, size)
+	if err != nil {
+		logs.GetLogger().Error("get source file status failed:", err)
+		return
+	}
+	logs.GetLogger().Infof("get source file status success: %+v", sourceFileStatusPager)
 
 	return
 }
