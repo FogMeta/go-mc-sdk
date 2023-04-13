@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	sdk "github.com/FogMeta/go-mc-sdk/client"
 	"github.com/FogMeta/go-mc-sdk/demo/config"
@@ -122,16 +123,16 @@ func main() {
 			{
 				Name:   "report",
 				Usage:  "report to meta server",
-				Action: Notify2MetaDemo,
+				Action: Report2MetaServerDemo,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:     "input",
-						Usage:    "file or directory which will upload to IPFS server.",
+						Name:     "dataset",
+						Usage:    "Dataset name.",
 						Required: true,
 					},
 					&cli.StringFlag{
-						Name:     "data-cid",
-						Usage:    "data cid which will be downloaded",
+						Name:     "ipfs-cid",
+						Usage:    "IPFS cid which will be reported",
 						Required: true,
 					},
 					&KeyFlag,
@@ -143,39 +144,22 @@ func main() {
 			},
 			{
 				Name:   "list",
-				Usage:  "get files list from meta server",
-				Action: GetFilesListDemo,
+				Usage:  "get dataset list from meta server",
+				Action: GetDatasetListDemo,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
+						Name:     "dataset",
+						Usage:    "",
+						Required: true,
+					},
+					&cli.IntFlag{
 						Name:     "page-num",
 						Usage:    "",
 						Required: true,
 					},
-					&cli.StringFlag{
-						Name:     "limit",
+					&cli.IntFlag{
+						Name:     "size",
 						Usage:    "",
-						Required: true,
-					},
-					&cli.BoolFlag{
-						Name:  "show-car",
-						Usage: "",
-						Value: true,
-					},
-					&KeyFlag,
-					&TokenFlag,
-					&ApiUrlFlag,
-					&GatewayUrlFlag,
-					&MetaUrlFlag,
-				},
-			},
-			{
-				Name:   "datacid",
-				Usage:  "get data cid from meta server",
-				Action: GetIpfsCidByNameDemo,
-				Flags: []cli.Flag{
-					&cli.StringFlag{
-						Name:     "name",
-						Usage:    "file or directory name which will be query from meta server.",
 						Required: true,
 					},
 					&KeyFlag,
@@ -187,12 +171,44 @@ func main() {
 			},
 			{
 				Name:   "info",
-				Usage:  "get detail info from  meta server",
-				Action: GetInfoByIpfsCidDemo,
+				Usage:  "get source file info from meta server",
+				Action: GetSourceFileInfoDemo,
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:     "data-cid",
-						Usage:    "data cid which will be query from meta server.",
+						Name:     "ipfs-cid",
+						Usage:    "IPFS cid which will be query from meta server.",
+						Required: true,
+					},
+					&KeyFlag,
+					&TokenFlag,
+					&ApiUrlFlag,
+					&GatewayUrlFlag,
+					&MetaUrlFlag,
+				},
+			},
+			{
+				Name:   "status",
+				Usage:  "get source file status from  meta server",
+				Action: GetSourceFileStatusDemo,
+				Flags: []cli.Flag{
+					&cli.StringFlag{
+						Name:     "dataset",
+						Usage:    "",
+						Required: true,
+					},
+					&cli.StringFlag{
+						Name:     "ipfs-cid",
+						Usage:    "IPFS cid which will be query from meta server.",
+						Required: true,
+					},
+					&cli.IntFlag{
+						Name:     "page-num",
+						Usage:    "",
+						Required: true,
+					},
+					&cli.IntFlag{
+						Name:     "size",
+						Usage:    "",
 						Required: true,
 					},
 					&KeyFlag,
@@ -227,6 +243,7 @@ func UploadDemo(c *cli.Context) error {
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+		return errors.New("create meta client failed")
 	}
 
 	input := c.String("input")
@@ -236,7 +253,7 @@ func UploadDemo(c *cli.Context) error {
 		logs.GetLogger().Error("upload error:", err)
 		return err
 	}
-	logs.GetLogger().Infoln("upload success, and data cid: ", ipfsCid)
+	logs.GetLogger().Infoln("upload success, and ipfs cid: ", ipfsCid)
 
 	return nil
 }
@@ -245,6 +262,7 @@ func DownloadDemo(c *cli.Context) error {
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+		return errors.New("create meta client failed")
 	}
 
 	ipfsCid := c.String("data-cid")
@@ -268,66 +286,70 @@ func DownloadDemo(c *cli.Context) error {
 	return nil
 }
 
-func Notify2MetaDemo(c *cli.Context) error {
+func Report2MetaServerDemo(c *cli.Context) error {
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+		return errors.New("create meta client failed")
 	}
 
 	dataset := c.String("dataset")
-	source := c.String("source")
 	ipfsCid := c.String("ipfs-cid")
 	gatewayUrl := c.String("gateway-url")
+	apiUrl := c.String("api-url")
 
-	info, err := os.Stat(source)
+	info, err := sdk.GetIpfsCidStat(apiUrl, ipfsCid)
 	if err != nil {
-		logs.GetLogger().Error("get input stat information error:", err)
+		logs.GetLogger().Error("get ipfs cid stat information error:", err)
 		return err
 	}
 	oneItem := sdk.IpfsData{}
-	oneItem.SourceName = source
 	oneItem.IpfsCid = ipfsCid
-	oneItem.DataSize = info.Size()
-	oneItem.IsDirectory = info.IsDir()
+	oneItem.DataSize = info.DataSize
+	oneItem.IsDirectory = info.IsDirectory
 	oneItem.DownloadUrl = sdk.PathJoin(gatewayUrl, "ipfs/", ipfsCid)
 	ipfsData := []sdk.IpfsData{oneItem}
+
 	err = metaClient.ReportMetaClientServer(dataset, ipfsData)
 	if err != nil {
-		logs.GetLogger().Error("report data cid to meta client server error:", err)
+		logs.GetLogger().Error("report ipfs cid to meta client server error:", err)
 		return err
 	}
-	logs.GetLogger().Infoln("report data cid to meta client server success")
+
+	logs.GetLogger().Infoln("report ipfs cid to meta client server success")
 
 	return nil
 }
 
-func GetFilesListDemo(c *cli.Context) error {
+func GetDatasetListDemo(c *cli.Context) error {
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+		return errors.New("create meta client failed")
 	}
 
+	datasetName := c.String("dataset")
 	pageNum := c.Int("page-num")
-	limit := c.Int("limit")
-	showCar := c.Bool("show-car")
-	_, err := metaClient.GetFileLists(pageNum, limit, showCar)
+	size := c.Int("size")
+	_, err := metaClient.GetDatasetList(datasetName, pageNum, size)
 	if err != nil {
-		logs.GetLogger().Error("get files list from meta server error:", err)
+		logs.GetLogger().Error("get dataset list from meta server error:", err)
 		return err
 	}
-	logs.GetLogger().Infoln("get files list from meta server success")
+	logs.GetLogger().Infoln("get dataset list from meta server success")
 
 	return nil
 }
 
-func GetIpfsCidByNameDemo(c *cli.Context) error {
+func GetSourceFileInfoDemo(c *cli.Context) error {
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+		return errors.New("create meta client failed")
 	}
 
-	name := c.String("name")
-	_, err := metaClient.GetIpfsCidByName(name)
+	ipfsCid := c.String("ipfs-cid")
+	_, err := metaClient.GetSourceFileInfo(ipfsCid)
 	if err != nil {
 		logs.GetLogger().Error("get data cid from meta server error:", err)
 		return err
@@ -337,19 +359,22 @@ func GetIpfsCidByNameDemo(c *cli.Context) error {
 	return nil
 }
 
-func GetInfoByIpfsCidDemo(c *cli.Context) error {
+func GetSourceFileStatusDemo(c *cli.Context) error {
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+		return errors.New("create meta client failed")
 	}
-
-	ipfsCid := c.String("data-cid")
-	_, err := metaClient.GetFileInfoByIpfsCid(ipfsCid)
+	datasetName := c.String("dataset")
+	ipfsCid := c.String("ipfs-cid")
+	pageNum := c.Int("page-num")
+	size := c.Int("size")
+	_, err := metaClient.GetSourceFileStatus(datasetName, ipfsCid, pageNum, size)
 	if err != nil {
-		logs.GetLogger().Error("get detail info from meta server error:", err)
+		logs.GetLogger().Error("get source file status from meta server error:", err)
 		return err
 	}
-	logs.GetLogger().Infoln("get detail info from meta server success")
+	logs.GetLogger().Infoln("get source file status from meta server success")
 
 	return nil
 }

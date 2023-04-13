@@ -26,11 +26,12 @@ func PathJoin(root string, parts ...string) string {
 	return url
 }
 
-func GetIpfsCidStat(sh *shell.Shell, ipfsCid string) (IpfsCidInfo, error) {
+func GetIpfsCidStat(ipfsApiUrl string, ipfsCid string) (IpfsCidInfo, error) {
+
 	info := IpfsCidInfo{IpfsCid: ipfsCid}
 
-	path := PathJoin("/ipfs/", ipfsCid)
-	stat, err := sh.FilesStat(context.Background(), path)
+	sh := shell.NewShell(ipfsApiUrl)
+	stat, err := sh.FilesStat(context.Background(), PathJoin("/ipfs/", ipfsCid))
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return info, err
