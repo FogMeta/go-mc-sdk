@@ -70,7 +70,7 @@ func (m *MetaClient) DownloadFile(ipfsCid, outPath string, downloadUrl string, c
 		}
 
 		downloadFile := PathJoin(outPath, filepath.Base(downInfo[0].SourceName))
-		if downInfo[0].IsDirector {
+		if downInfo[0].IsDirectory {
 			downloadFile = downloadFile + ".tar"
 		}
 
@@ -91,7 +91,7 @@ func (m *MetaClient) DownloadFile(ipfsCid, outPath string, downloadUrl string, c
 			}
 
 			downloadFile := PathJoin(outPath, filepath.Base(info.SourceName))
-			if info.IsDirector {
+			if info.IsDirectory {
 				realUrl = realUrl + "?format=tar"
 				downloadFile = downloadFile + ".tar"
 			}
@@ -136,15 +136,9 @@ func (m *MetaClient) ReportMetaClientServer(datasetName string, ipfsData []IpfsD
 	return nil
 }
 
-func (m *MetaClient) GetDatasetList(datasetName string, pageNum, size int) ([]*SourceFile, error) {
-	isCar := false
-	if len(showCar) >= 1 {
-		isCar = showCar[0]
-	}
-	logs.GetLogger().Info("with opts is:", isCar)
-
+func (m *MetaClient) GetDatasetList(datasetName string, pageNum, size int) (*GetDatasetListPager, error) {
 	var params []interface{}
-	params = append(params, SourceFilePageReq{pageNum, limit, isCar})
+	params = append(params, GetDatasetListReq{datasetName, pageNum, size})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
 		Method:  "meta.GetSourceFiles",
@@ -157,7 +151,7 @@ func (m *MetaClient) GetDatasetList(datasetName string, pageNum, size int) ([]*S
 		return nil, err
 	}
 
-	res := SourceFilePageResponse{}
+	res := GetDatasetListResponse{}
 	err = json.Unmarshal(response, &res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
@@ -165,59 +159,51 @@ func (m *MetaClient) GetDatasetList(datasetName string, pageNum, size int) ([]*S
 	}
 	logs.GetLogger().Info(res)
 
-	sources := res.Result.Data.Sources
-	for index, source := range sources {
-		logs.GetLogger().Infof("Index: %d, Source: %+v", index, source)
+	datasetList := res.Result.Data.DatasetList
+	for index, dataset := range datasetList {
+		logs.GetLogger().Infof("Index: %d, Dataset: %+v", index, dataset)
 
-		stores := source.StorageList
-		for i, store := range stores {
-			logs.GetLogger().Infof("Store-%d: %+v", i, store)
-			providers := store.StorageProviders
-			for ii, provider := range providers {
-				logs.GetLogger().Infof("Provider-%d: %+v", ii, provider)
-			}
-		}
-		dataList := source.DataList
-		for i, data := range dataList {
-			logs.GetLogger().Infof("Data-%d: %+v", i, data)
+		ipfsList := dataset.IpfsList
+		for i, ipfsDetail := range ipfsList {
+			logs.GetLogger().Infof("IPFS Detail-%d: %+v", i, ipfsDetail)
 		}
 	}
 
-	return res.Result.Data.Sources, nil
+	return &res.Result.Data, nil
 }
 
-func (m *MetaClient) GetIpfsCidByName(fileName string) ([]string, error) {
-	var params []interface{}
-	params = append(params, fileName)
-	jsonRpcParams := JsonRpcParams{
-		JsonRpc: "2.0",
-		Method:  "meta.GetIpfsCidByName",
-		Params:  params,
-		Id:      1,
-	}
-	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
-	if err != nil {
-		logs.GetLogger().Errorf("Get Response Error: %s", err)
-		return nil, err
-	}
-	res := IpfsCidResponse{}
-	err = json.Unmarshal(response, &res)
-	if err != nil {
-		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
-		return nil, err
-	}
-	logs.GetLogger().Info(res)
-
-	return nil, nil
-}
-
-func (m *MetaClient) GetFileInfoByIpfsCid(ipfsCid string) (*SourceFile, error) {
-
+func (m *MetaClient) GetSourceFileInfo(ipfsCid string) ([]IpfsDataDetail, error) {
 	var params []interface{}
 	params = append(params, ipfsCid)
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
-		Method:  "meta.GetSourceFileByIpfsCid",
+		Method:  "meta.GetSourceFileInfo",
+		Params:  params,
+		Id:      1,
+	}
+	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Errorf("Get Response Error: %s", err)
+		return nil, err
+	}
+	res := GetSourceFileInfoResponse{}
+	err = json.Unmarshal(response, &res)
+	if err != nil {
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
+		return nil, err
+	}
+	logs.GetLogger().Info(res)
+
+	return res.Result.Data, nil
+}
+
+func (m *MetaClient) GetSourceFileStatus(datasetName, ipfsCid string, pageNum, size int) (*GetSourceFileStatusPager, error) {
+
+	var params []interface{}
+	params = append(params, GetSourceFileStatusReq{datasetName, ipfsCid, pageNum, size})
+	jsonRpcParams := JsonRpcParams{
+		JsonRpc: "2.0",
+		Method:  "meta.GetSourceFileStatus",
 		Params:  params,
 		Id:      1,
 	}
@@ -227,7 +213,7 @@ func (m *MetaClient) GetFileInfoByIpfsCid(ipfsCid string) (*SourceFile, error) {
 		return nil, err
 	}
 
-	res := SourceFileResponse{}
+	res := GetSourceFileStatusResponse{}
 	err = json.Unmarshal(response, &res)
 	if err != nil {
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
@@ -235,18 +221,19 @@ func (m *MetaClient) GetFileInfoByIpfsCid(ipfsCid string) (*SourceFile, error) {
 	}
 	logs.GetLogger().Info(res)
 
-	source := res.Result.Data
-	logs.GetLogger().Infof("Source: %+v", source)
-	stores := source.StorageList
-	for _, store := range stores {
-		logs.GetLogger().Infof("Store: %+v", store)
-		providers := store.StorageProviders
+	sourceFileStatus := res.Result.Data
+	logs.GetLogger().Infof("Source File Status: %+v", sourceFileStatus)
+
+	carList := sourceFileStatus.CarList
+	for _, carDetail := range carList {
+		logs.GetLogger().Infof("CAR Detail: %+v", carDetail)
+		providers := carDetail.StorageProviders
 		for ii, provider := range providers {
 			logs.GetLogger().Infof("Provider-%d: %+v", ii, provider)
 		}
 	}
 
-	return nil, nil
+	return &res.Result.Data, nil
 }
 
 func (m *MetaClient) GetDownloadFileInfoByIpfsCid(ipfsCid string) ([]DownloadFileInfo, error) {

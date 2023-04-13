@@ -22,6 +22,9 @@ type JsonRpcParams struct {
 	Id      int           `json:"id"`
 }
 
+// StoreSourceFile
+// StoreSourceFile(ctx context.Context, datasetName string, ipfsData []IpfsData) APIResp
+
 type IpfsData struct {
 	IpfsCid     string `json:"ipfs_cid"`
 	SourceName  string `json:"source_name"`
@@ -41,6 +44,7 @@ type StoreSourceFileResponse struct {
 
 // GetDatasetList
 // GetDatasetList(ctx context.Context, req GetDatasetListReq) APIResp
+
 type GetDatasetListReq struct {
 	DatasetName string `json:"dataset_name"`
 	PageNum     int    `json:"page_num"`
@@ -79,52 +83,6 @@ type IpfsDataDetail struct {
 	DownloadUrl string `json:"download_url"`
 }
 
-//
-//type SourceFilePageReq struct {
-//	PageNum int  `json:"page_num"`
-//	Size    int  `json:"size"`
-//	ShowCar bool `json:"show_car"`
-//}
-//
-//type SourceFilePageResponse struct {
-//	JsonRpc string `json:"jsonrpc"`
-//	Result  struct {
-//		Code    string `json:"code"`
-//		Message string `json:"message"`
-//		Data    struct {
-//			Total     int64         `json:"total"`
-//			PageCount int64         `json:"pageCount"`
-//			Sources   []*SourceFile `json:"files"`
-//		} `json:"data"`
-//	} `json:"result"`
-//	Id int `json:"id"`
-//}
-//
-//type SourceFile struct {
-//	SourceName  string             `json:"source_name"`
-//	DealFile    string             `json:"deal_file"`
-//	TaskName    string             `json:"task_name"`
-//	StorageList []*SplitFileDetail `json:"storage_list"`
-//	DataList    []*IpfsDataDetail  `json:"data_list"`
-//}
-
-//
-//type IpfsDataDetail struct {
-//	DataId       int64  `json:"data_id"`
-//	SourceFileId int64  `json:"source_file_id"`
-//	IpfsCid      string `json:"ipfs_cid"`
-//	DataSize     int64  `json:"data_size"`
-//	IsDirector   bool   `json:"is_director"`
-//	DownloadUrl  string `json:"download_url"`
-//}
-
-//type SplitFileDetail struct {
-//	FileName         string            `json:"file_name"`
-//	DataCid          string            `json:"data_cid"`
-//	FileSize         int64             `json:"file_size"`
-//	StorageProviders []StorageProvider `json:"storage_providers"`
-//}
-
 // GetSourceFileInfo
 // func (api *ApiImpl) GetSourceFileInfo(ctx context.Context, ipfsCid string) APIResp
 
@@ -137,17 +95,6 @@ type GetSourceFileInfoResponse struct {
 	} `json:"result"`
 	Id int `json:"id"`
 }
-
-//
-//type IpfsCidResponse struct {
-//	JsonRpc string `json:"jsonrpc"`
-//	Result  struct {
-//		Code    string   `json:"code"`
-//		Message string   `json:"message,omitempty"`
-//		Data    []string `json:"data,omitempty"`
-//	} `json:"result"`
-//	Id int `json:"id"`
-//}
 
 // GetSourceFileStatus
 // func (api *ApiImpl) GetSourceFileStatus(ctx context.Context, req GetSourceFileStatusReq) APIResp
@@ -190,31 +137,6 @@ type StorageProvider struct {
 	DealId            int64  `json:"deal_id"`
 	DealCid           string `json:"deal_cid"` // proposal cid or uuid
 }
-
-//
-//type SourceFileResponse struct {
-//	JsonRpc string `json:"jsonrpc"`
-//	Result  struct {
-//		Code    string     `json:"code"`
-//		Message string     `json:"message,omitempty"`
-//		Data    SourceFile `json:"data,omitempty"`
-//	} `json:"result"`
-//	Id int `json:"id"`
-//}
-//
-//type SplitFile struct {
-//	FileName         string            `json:"file_name"`
-//	IpfsCid          string            `json:"data_cid"`
-//	FileSize         int64             `json:"file_size"`
-//	StorageProviders []StorageProvider `json:"storage_providers"`
-//}
-//
-//type StorageProvider struct {
-//	StorageProviderId string `json:"storage_provider_id"`
-//	StorageStatus     string `json:"storage_status"`
-//	DealId            int64  `json:"deal_id"`
-//	DealCid           string `json:"deal_cid"` // proposal cid or uuid
-//}
 
 // GetDownloadFileInfoByIpfsCid
 // func (api *ApiImpl) GetDownloadFileInfoByIpfsCid(ctx context.Context, ipfsCid string) APIResp
