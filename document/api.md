@@ -1,4 +1,4 @@
-# 
+# APIs
 
 * [NewAPIClient](#NewAPIClient)
 * [UploadFile](#UploadFile)
