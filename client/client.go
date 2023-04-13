@@ -161,7 +161,7 @@ func (m *MetaClient) GetDatasetList(datasetName string, pageNum, size int) (*Get
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
 		return nil, err
 	}
-	logs.GetLogger().Info(res)
+	logs.GetLogger().Infof("meta GetDatasetList response: %+v", res)
 
 	datasetList := res.Result.Data.DatasetList
 	for index, dataset := range datasetList {
@@ -196,7 +196,7 @@ func (m *MetaClient) GetSourceFileInfo(ipfsCid string) ([]IpfsDataDetail, error)
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
 		return nil, err
 	}
-	logs.GetLogger().Info(res)
+	logs.GetLogger().Infof("meta GetSourceFileInfo response: %+v", res)
 
 	return res.Result.Data, nil
 }
@@ -223,7 +223,7 @@ func (m *MetaClient) GetSourceFileStatus(datasetName, ipfsCid string, pageNum, s
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
 		return nil, err
 	}
-	logs.GetLogger().Info(res)
+	logs.GetLogger().Infof("meta GetSourceFileStatus response: %+v", res)
 
 	sourceFileStatus := res.Result.Data
 	logs.GetLogger().Infof("Source File Status: %+v", sourceFileStatus)
@@ -262,7 +262,7 @@ func (m *MetaClient) GetDownloadFileInfoByIpfsCid(ipfsCid string) ([]DownloadFil
 		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
 		return nil, err
 	}
-	logs.GetLogger().Info(res)
+	logs.GetLogger().Infof("meta GetDownloadFileInfoByIpfsCid response: %+v", res)
 
 	return res.Result.Data, nil
 }
