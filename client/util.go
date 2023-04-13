@@ -26,6 +26,24 @@ func PathJoin(root string, parts ...string) string {
 	return url
 }
 
+func GetIpfsCidStat(sh *shell.Shell, ipfsCid string) (IpfsCidInfo, error) {
+	info := IpfsCidInfo{IpfsCid: ipfsCid}
+
+	path := PathJoin("/ipfs/", ipfsCid)
+	stat, err := sh.FilesStat(context.Background(), path)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return info, err
+	}
+	info.DataSize = int64(stat.CumulativeSize)
+	info.IsDirectory = false
+	if stat.Type == "directory" {
+		info.IsDirectory = true
+	}
+
+	return info, nil
+}
+
 func downloadFileByAria2(conf *Aria2Conf, downUrl, outPath string) error {
 	aria2 := client.GetAria2Client(conf.Host, conf.Secret, conf.Port)
 	outDir := filepath.Dir(outPath)

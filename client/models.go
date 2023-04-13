@@ -22,6 +22,12 @@ type JsonRpcParams struct {
 	Id      int           `json:"id"`
 }
 
+type IpfsCidInfo struct {
+	IpfsCid     string `json:"ipfs_cid"`
+	DataSize    int64  `json:"data_size"`
+	IsDirectory bool   `json:"is_directory"`
+}
+
 // StoreSourceFile
 // StoreSourceFile(ctx context.Context, datasetName string, ipfsData []IpfsData) APIResp
 
