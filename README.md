@@ -127,7 +127,7 @@ func main() {
     sourceName := inputPath
     ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 
-    info, err := metacli.GetIpfsCidInfo(apiUrl, ipfsCid)
+    info, err := os.Stat(sourceName)
     if err != nil {
         logs.GetLogger().Error("Failed to get the file information, error:", err)
         return
@@ -135,8 +135,8 @@ func main() {
     oneItem := metacli.IpfsData{}
     oneItem.SourceName = sourceName
     oneItem.IpfsCid = ipfsCid
-    oneItem.DataSize = info.DataSize
-    oneItem.IsDirectory = info.IsDirectory
+    oneItem.DataSize = info.Size()
+    oneItem.IsDirectory = info.IsDir()
     oneItem.DownloadUrl = metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
     ipfsData := []metacli.IpfsData{oneItem}
     err = metaClient.ReportMetaClientServer(datasetName, ipfsData)
@@ -287,6 +287,30 @@ func main() {
     logs.GetLogger().Infof("get source file status successfully: %+v", sourceFileStatusPager)
 
     return
+}
+```
+
+
+### Get IPFS Cid Information
+To get IPFS CID information, you can use the following method:
+
+```
+package main
+
+import (
+    metacli "github.com/FogMeta/go-mc-sdk/client"
+    "github.com/filswan/go-swan-lib/logs"
+)
+
+func main() {
+    apiUrl := "http://127.0.0.1:5001"
+    ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
+    info, err := metacli.GetIpfsCidInfo(apiUrl, ipfsCid)
+    if err != nil {
+        logs.GetLogger().Error("Failed to get IPFS CID information:", err)
+        return
+    }
+    logs.GetLogger().Infof("Get information has been successfully, IPFS CID: %s, Data Size:%d, Is Directory:%t.", info.IpfsCid, info.DataSize, info.IsDirectory)
 }
 ```
 

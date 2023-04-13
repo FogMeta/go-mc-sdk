@@ -3,6 +3,7 @@ package main
 import (
 	metacli "github.com/FogMeta/go-mc-sdk/client"
 	"github.com/filswan/go-swan-lib/logs"
+	"os"
 )
 
 func main() {
@@ -29,7 +30,7 @@ func main() {
 	sourceName := inputPath
 	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 
-	info, err := metacli.GetIpfsCidInfo(apiUrl, ipfsCid)
+	info, err := os.Stat(sourceName)
 	if err != nil {
 		logs.GetLogger().Error("get ipfs cid stat information error:", err)
 		return
@@ -37,8 +38,8 @@ func main() {
 	oneItem := metacli.IpfsData{}
 	oneItem.SourceName = sourceName
 	oneItem.IpfsCid = ipfsCid
-	oneItem.DataSize = info.DataSize
-	oneItem.IsDirectory = info.IsDirectory
+	oneItem.DataSize = info.Size()
+	oneItem.IsDirectory = info.IsDir()
 	oneItem.DownloadUrl = metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
 	ipfsData := []metacli.IpfsData{oneItem}
 	err = metaClient.ReportMetaClientServer(datasetName, ipfsData)
