@@ -136,7 +136,7 @@ func (m *MetaClient) ReportMetaClientServer(datasetName string, ipfsData []IpfsD
 	return nil
 }
 
-func (m *MetaClient) GetFileLists(pageNum, limit int, showCar ...bool) ([]*SourceFile, error) {
+func (m *MetaClient) GetDatasetList(datasetName string, pageNum, size int) ([]*SourceFile, error) {
 	isCar := false
 	if len(showCar) >= 1 {
 		isCar = showCar[0]

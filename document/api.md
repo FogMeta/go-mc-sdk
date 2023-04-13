@@ -4,9 +4,9 @@
 * [UploadFile](#UploadFile)
 * [ReportMetaClientServer](#ReportMetaClientServer)
 * [DownloadFile](#DownloadFile)
-* [GetFileLists](#GetFileLists)
-* [GetIpfsCidByName](#GetIpfsCidByName)
-* [GetFileInfoByIpfsCid](#GetFileInfoByIpfsCid)
+* [GetDatasetList](#GetDatasetList)
+* [GetSourceFileInfo](#GetSourceFileInfo)
+* [GetSourceFileStatus](#GetSourceFileStatus)
 
 ## NewAPIClient
 
@@ -104,13 +104,13 @@ error                  # error or nil
 ```
 
 
-## GetFileLists
+## GetDatasetList
 
 Definition:
 Gets the file list from the Meta Server based on the specified page number and number of records per page.
 
 ```shell
-func (m *MetaClient) GetFileLists(pageNum int, limit int, showCar ...bool) ([]*SourceFile, error)
+func (m *MetaClient) GetDatasetList(pageNum int, limit int, showCar ...bool) ([]*SourceFile, error)
 ```
 
 Inputs:
@@ -129,13 +129,13 @@ error                  # error or nil
 ```
 
 
-## GetIpfsCidByName
+## GetSourceFileInfo
 
 Definition:
 Gets the IPFS Cid corresponding to the specified file or folder from the Meta Server.
 
 ```shell
-func (m *MetaClient) GetIpfsCidByName(fileName string) ([]string, error) 
+func (m *MetaClient) GetSourceFileInfo(fileName string) ([]string, error) 
 ```
 
 Inputs:
@@ -152,13 +152,13 @@ error                  # error or nil
 ```
 
 
-## GetFileInfoByIpfsCid
+## GetSourceFileStatus
 
 Definition:
 Gets detailed information about the file or folder corresponding to the IPFS Cid from the Meta Server.
 
 ```shell
-func (m *MetaClient) GetFileInfoByIpfsCid(ipfsCid string) (*SourceFile, error)
+func (m *MetaClient) GetSourceFileStatus(ipfsCid string) (*SourceFile, error)
 ```
 
 Inputs:
@@ -173,7 +173,6 @@ Outputs:
 *SourceFile            # Information corresponding to the queried IPFS Cid, refer to the `Structs` below for details.
 error                  # error or nil
 ```
-
 
 
 ## Structs
