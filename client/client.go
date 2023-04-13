@@ -133,6 +133,10 @@ func (m *MetaClient) ReportMetaClientServer(datasetName string, ipfsData []IpfsD
 	}
 	logs.GetLogger().Info(res)
 
+	if res.Result.Message != "save_source_file_success" {
+		return errors.New("failed message from meta server")
+	}
+
 	return nil
 }
 
@@ -141,7 +145,7 @@ func (m *MetaClient) GetDatasetList(datasetName string, pageNum, size int) (*Get
 	params = append(params, GetDatasetListReq{datasetName, pageNum, size})
 	jsonRpcParams := JsonRpcParams{
 		JsonRpc: "2.0",
-		Method:  "meta.GetSourceFiles",
+		Method:  "meta.GetDatasetList",
 		Params:  params,
 		Id:      1,
 	}

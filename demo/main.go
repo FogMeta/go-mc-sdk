@@ -155,11 +155,13 @@ func main() {
 					&cli.IntFlag{
 						Name:     "page-num",
 						Usage:    "",
+						Value:    0,
 						Required: true,
 					},
 					&cli.IntFlag{
 						Name:     "size",
 						Usage:    "",
+						Value:    10,
 						Required: true,
 					},
 					&KeyFlag,
@@ -204,11 +206,13 @@ func main() {
 					&cli.IntFlag{
 						Name:     "page-num",
 						Usage:    "",
+						Value:    0,
 						Required: true,
 					},
 					&cli.IntFlag{
 						Name:     "size",
 						Usage:    "",
+						Value:    10,
 						Required: true,
 					},
 					&KeyFlag,
