@@ -22,12 +22,20 @@ type JsonRpcParams struct {
 	Id      int           `json:"id"`
 }
 
+type IpfsCidInfo struct {
+	IpfsCid     string `json:"ipfs_cid"`
+	DataSize    int64  `json:"data_size"`
+	IsDirectory bool   `json:"is_directory"`
+}
+
 // StoreSourceFile
-type StoreSourceFileReq struct {
+// StoreSourceFile(ctx context.Context, datasetName string, ipfsData []IpfsData) APIResp
+
+type IpfsData struct {
+	IpfsCid     string `json:"ipfs_cid"`
 	SourceName  string `json:"source_name"`
-	IsDirector  bool   `json:"is_director"`
-	SourceSize  int64  `json:"source_size"`
-	DataCid     string `json:"data_cid"`
+	DataSize    int64  `json:"data_size"`
+	IsDirectory bool   `json:"is_directory"`
 	DownloadUrl string `json:"download_url"`
 }
 
@@ -36,69 +44,97 @@ type StoreSourceFileResponse struct {
 	Result  struct {
 		Code    string `json:"code"`
 		Message string `json:"message,omitempty"`
+		Data    string `json:"data,omitempty"`
 	} `json:"result"`
 	Id int `json:"id"`
 }
 
-//GetSourceFiles
+// GetDatasetList
+// GetDatasetList(ctx context.Context, req GetDatasetListReq) APIResp
 
-type SourceFilePageReq struct {
-	PageNum   int  `json:"page_num"`
-	Size      int  `json:"size"`
-	ShowStore bool `json:"show_store"`
+type GetDatasetListReq struct {
+	DatasetName string `json:"dataset_name"`
+	PageNum     int    `json:"page_num"`
+	Size        int    `json:"size"`
 }
 
-type SourceFilePageResponse struct {
+type GetDatasetListResponse struct {
 	JsonRpc string `json:"jsonrpc"`
 	Result  struct {
-		Code    string `json:"code"`
-		Message string `json:"message"`
-		Data    struct {
-			Total     int64         `json:"total"`
-			PageCount int64         `json:"pageCount"`
-			Sources   []*SourceFile `json:"files"`
-		} `json:"data"`
+		Code    string              `json:"code"`
+		Message string              `json:"message,omitempty"`
+		Data    GetDatasetListPager `json:"data,omitempty"`
 	} `json:"result"`
 	Id int `json:"id"`
 }
 
-type SourceFile struct {
-	SourceName  string       `json:"source_name"`
-	DataCid     string       `json:"data_cid"`
-	DownloadUrl string       `json:"download_url"`
-	StorageList []*SplitFile `json:"storage_list"`
-	SourceSize  int64        `json:"source_size"`
-	IsDirector  bool         `json:"is_director"`
+type GetDatasetListPager struct {
+	Total       int64            `json:"total"`
+	PageCount   int64            `json:"pageCount"`
+	DatasetList []*DatasetDetail `json:"dataset_list"`
 }
 
-//GetDataCidByName
+type DatasetDetail struct {
+	DataSetName   string            `json:"source_name"`
+	DealFile      string            `json:"deal_file"`
+	TaskName      string            `json:"task_name"`
+	DatasetStatus string            `json:"dataset_status"`
+	IpfsList      []*IpfsDataDetail `json:"ipfs_list"`
+}
 
-type DataCidResponse struct {
+type IpfsDataDetail struct {
+	DatasetName string `json:"dataset_name"`
+	IpfsCid     string `json:"ipfs_cid"`
+	DataSize    int64  `json:"data_size"`
+	IsDirectory bool   `json:"is_directory"`
+	DownloadUrl string `json:"download_url"`
+}
+
+// GetSourceFileInfo
+// func (api *ApiImpl) GetSourceFileInfo(ctx context.Context, ipfsCid string) APIResp
+
+type GetSourceFileInfoResponse struct {
 	JsonRpc string `json:"jsonrpc"`
 	Result  struct {
-		Code    string   `json:"code"`
-		Message string   `json:"message,omitempty"`
-		Data    []string `json:"data,omitempty"`
+		Code    string           `json:"code"`
+		Message string           `json:"message,omitempty"`
+		Data    []IpfsDataDetail `json:"data,omitempty"`
 	} `json:"result"`
 	Id int `json:"id"`
 }
 
-// GetSourceFileByDataCid
+// GetSourceFileStatus
+// func (api *ApiImpl) GetSourceFileStatus(ctx context.Context, req GetSourceFileStatusReq) APIResp
 
-type SourceFileResponse struct {
+type GetSourceFileStatusReq struct {
+	DatasetName string `json:"dataset_name"`
+	IpfsCid     string `json:"ipfs_cid"`
+	PageNum     int    `json:"page_num"`
+	Size        int    `json:"size"`
+}
+
+type GetSourceFileStatusResponse struct {
 	JsonRpc string `json:"jsonrpc"`
 	Result  struct {
-		Code    string     `json:"code"`
-		Message string     `json:"message,omitempty"`
-		Data    SourceFile `json:"data,omitempty"`
+		Code    string                   `json:"code"`
+		Message string                   `json:"message,omitempty"`
+		Data    GetSourceFileStatusPager `json:"data,omitempty"`
 	} `json:"result"`
 	Id int `json:"id"`
 }
 
-type SplitFile struct {
+type GetSourceFileStatusPager struct {
+	Total     int64              `json:"total"`
+	PageCount int64              `json:"pageCount"`
+	CarList   []*SplitFileDetail `json:"car_list"`
+}
+
+type SplitFileDetail struct {
 	FileName         string            `json:"file_name"`
 	DataCid          string            `json:"data_cid"`
 	FileSize         int64             `json:"file_size"`
+	PieceCid         string            `json:"piece_cid"`
+	DownloadUrl      string            `json:"download_url"`
 	StorageProviders []StorageProvider `json:"storage_providers"`
 }
 
@@ -109,7 +145,8 @@ type StorageProvider struct {
 	DealCid           string `json:"deal_cid"` // proposal cid or uuid
 }
 
-// GetDownloadFileInfoByDataCid
+// GetDownloadFileInfoByIpfsCid
+// func (api *ApiImpl) GetDownloadFileInfoByIpfsCid(ctx context.Context, ipfsCid string) APIResp
 
 type DownloadFileInfoResponse struct {
 	JsonRpc string `json:"jsonrpc"`
@@ -124,7 +161,7 @@ type DownloadFileInfoResponse struct {
 type DownloadFileInfo struct {
 	SourceName  string `json:"source_name"`
 	DownloadUrl string `json:"download_url"`
-	IsDirector  bool   `json:"is_director"`
+	IsDirectory bool   `json:"is_directory"`
 }
 
 type DagLink struct {
@@ -156,7 +193,7 @@ type TreeNode struct {
 
 // list option
 type listOption struct {
-	ShowStorage bool
+	ShowCar bool
 }
 
 type ListOption interface {
@@ -177,13 +214,13 @@ func showStorageOption(f func(*listOption)) *funcOption {
 	}
 }
 
-func WithShowStorage(show bool) ListOption {
+func WithShowCar(show bool) ListOption {
 	return showStorageOption(func(o *listOption) {
-		o.ShowStorage = show
+		o.ShowCar = show
 	})
 }
 func defaultOptions() listOption {
 	return listOption{
-		ShowStorage: false,
+		ShowCar: false,
 	}
 }
