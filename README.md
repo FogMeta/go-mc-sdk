@@ -50,7 +50,7 @@ go get github.com/FogMeta/go-mc-sdk
 
 First, you need to create a Meta Client object, which can be initialized as follows:
 
-```
+```go
 package main
 
 import (
@@ -69,7 +69,7 @@ func main() {
 ### [Upload files or directories](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#uploadfile) 
 To upload files or directories to the IPFS gateway and Filecoin network, you can use the following method:
 
-```
+```go
 package main
 
 import (
@@ -102,7 +102,7 @@ func main() {
 ### [Report the data information](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#reportmetaclientserver)
 To report data information to the Meta Client server, you can use the following method:
 
-```
+```go
 package main
 
 import (
@@ -153,7 +153,7 @@ func main() {
 ### [Download Files or Directories](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#downloadfile)
 To download files or directories from the IPFS gateway and Filecoin network, you can use the following method:
 
-```
+```go
 package main
 
 import (
@@ -191,7 +191,7 @@ func main() {
 ### [Get the dataset list by the dataset name](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#getdatasetlist)
 To get the dataset list by dataset name, you can use the following method:
 
-```
+```go
 package main
 
 import (
@@ -226,7 +226,7 @@ func main() {
 ### [Get the source file information by IPFS CID](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#getsourcefileinfo)
 To get the dataset file information by IPFS CID, you can use the following method:
 
-```
+```go
 package main
 
 import (
@@ -258,7 +258,7 @@ func main() {
 ### [Get source file status](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#getsourcefilestatus)
 To get the source file status by dataset name and IPFS CID, you can use the following method:
 
-```
+```go
 package main
 
 import (
@@ -294,7 +294,7 @@ func main() {
 ### [Get IPFS CID Information](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#getipfscidstat)
 To get file or directory information of IPFS CID, you can use the following method:
 
-```
+```go
 package main
 
 import (
