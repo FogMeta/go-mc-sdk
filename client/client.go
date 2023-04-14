@@ -3,6 +3,7 @@ package client
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/logs"
 	shell "github.com/ipfs/go-ipfs-api"
@@ -273,6 +274,18 @@ func (m *MetaClient) RebuildIpfsCid(fileName string) error {
 }
 
 func (m *MetaClient) GenCarByGroup(inputDir, outputDir string, groupSizeLimit, carSizeLimit int64, parallel int) error {
-	// TODO
+
+	groups := TalkativeGroup(inputDir, groupSizeLimit)
+	for i, group := range groups {
+		fmt.Printf("Index%d：\n", i+1)
+		var inputs []string
+		for _, fileInfo := range group {
+			fmt.Printf("%s - %d bytes\n", fileInfo.Name, fileInfo.Size)
+			inputs = append(inputs, fileInfo.Name)
+
+		}
+		CreateGoCarFilesByConfig(inputDir, &outputDir, parallel, carSizeLimit, true)
+	}
+
 	return nil
 }

@@ -70,8 +70,8 @@ func GetCmdGoCar(inputDir string, outputDir *string, parallel int, carFileSizeLi
 	return cmdGoCar
 }
 
-func CreateGoCarFilesByConfig(inputDir string, outputDir *string, parallel int, carFileSizeLimit int64, carFolderBased, importFlag bool) ([]*FileDesc, error) {
-	cmdGoCar := GetCmdGoCar(inputDir, outputDir, parallel, carFileSizeLimit, carFolderBased, importFlag)
+func CreateGoCarFilesByConfig(inputDir string, outputDir *string, parallel int, carFileSizeLimit int64, carFolderBased bool) ([]*FileDesc, error) {
+	cmdGoCar := GetCmdGoCar(inputDir, outputDir, parallel, carFileSizeLimit, carFolderBased, false)
 	fileDescs, err := cmdGoCar.CreateGoCarFiles()
 	if err != nil {
 		logs.GetLogger().Error(err)
