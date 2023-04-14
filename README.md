@@ -324,4 +324,4 @@ Contributions to go-mc-sdk are welcome! If you find any errors or want to add ne
 
 ## License
 
-go-mc-sdk is licensed under the MIT License.
+`go-mc-sdk` is licensed under the MIT License.

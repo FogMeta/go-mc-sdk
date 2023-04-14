@@ -291,7 +291,7 @@ func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error
 	for hash, info := range pins {
 		logs.GetLogger().Debug("Key:", hash, " Type:", info.Type)
 
-		path := pathJoin("/ipfs/", hash)
+		path := PathJoin("/ipfs/", hash)
 		stat, err := sh.FilesStat(context.Background(), path)
 		if err != nil {
 			logs.GetLogger().Error(err)
@@ -304,12 +304,12 @@ func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error
 			sh.DagGet(hash, &resp)
 			logs.GetLogger().Debugf("dag directory info resp:%+v", resp)
 
-			n := NewNode(hash, pathJoin(root.Path, hash), hash, stat.CumulativeSize, true)
+			n := NewNode(hash, PathJoin(root.Path, hash), hash, stat.CumulativeSize, true)
 			root.AddChild(n)
 			logs.GetLogger().Debugf("add node director of %s to root", hash)
 
 		} else if stat.Type == "file" {
-			n := NewNode(hash, pathJoin(root.Path, hash), hash, stat.CumulativeSize, false)
+			n := NewNode(hash, PathJoin(root.Path, hash), hash, stat.CumulativeSize, false)
 			root.AddChild(n)
 			logs.GetLogger().Debugf("add node file of %s to root", hash)
 		} else {
