@@ -9,6 +9,8 @@ import (
 	"github.com/filswan/go-swan-lib/logs"
 	shell "github.com/ipfs/go-ipfs-api"
 	"io/fs"
+	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -404,3 +406,58 @@ type TreeNodeDecrement []*TreeNode
 func (s TreeNodeDecrement) Len() int           { return len(s) }
 func (s TreeNodeDecrement) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s TreeNodeDecrement) Less(i, j int) bool { return s[i].Size > s[j].Size }
+
+type FileInfo struct {
+	Name string
+	Size int64
+}
+
+func TalkativeGroup(dirPath string, givenSize int64) [][]FileInfo {
+
+	files, err := ioutil.ReadDir(dirPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var fileInfos []FileInfo
+	for _, file := range files {
+		fileInfo := FileInfo{
+			Name: file.Name(),
+			Size: file.Size(),
+		}
+		fileInfos = append(fileInfos, fileInfo)
+	}
+
+	sort.Slice(fileInfos, func(i, j int) bool {
+		return fileInfos[i].Size < fileInfos[j].Size
+	})
+
+	var groups [][]FileInfo
+	currentGroup := []FileInfo{}
+	currentSize := int64(0)
+
+	for _, fileInfo := range fileInfos {
+		if currentSize+fileInfo.Size <= givenSize {
+			currentGroup = append(currentGroup, fileInfo)
+			currentSize += fileInfo.Size
+		} else {
+			groups = append(groups, currentGroup)
+			currentGroup = []FileInfo{fileInfo}
+			currentSize = fileInfo.Size
+		}
+	}
+
+	if len(currentGroup) > 0 {
+		groups = append(groups, currentGroup)
+	}
+
+	fmt.Printf("Group %d：\n", len(groups))
+	for i, group := range groups {
+		fmt.Printf("Index%d：\n", i+1)
+		for _, fileInfo := range group {
+			fmt.Printf("%s - %d bytes\n", fileInfo.Name, fileInfo.Size)
+		}
+	}
+
+	return groups
+}

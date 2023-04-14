@@ -274,6 +274,11 @@ func (m *MetaClient) RebuildIpfsCid(fileName string) error {
 	return nil
 }
 
+func (m *MetaClient) GenCar(ou string) error {
+	// TODO
+	return nil
+}
+
 func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error {
 	// Creates an IPFS Shell client.
 	sh := shell.NewShell(ipfsApiUrl)
