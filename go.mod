@@ -108,6 +108,6 @@ require (
 
 replace (
 	github.com/filecoin-project/filecoin-ffi => ./extern/filecoin-ffi
-	github.com/filedrive-team/go-graphsplit v0.5.0 => github.com/FogMeta/go-graphsplit v0.5.1
+	github.com/filedrive-team/go-graphsplit v0.5.0 => github.com/FogMeta/go-graphsplit v0.5.2
 	github.com/filswan/go-swan-lib v0.2.138 => github.com/qinghua8080/go-swan-lib v0.2.139-0.20230323064203-82f8e6ed92da
 )
