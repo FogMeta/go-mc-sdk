@@ -216,7 +216,7 @@ func NewNode(hash, path, name string, size uint64, dir bool) *TreeNode {
 }
 
 func NewNodeByDataCid(sh *shell.Shell, dataCid string, nodePath, name string) *TreeNode {
-	path := pathJoin("/ipfs/", dataCid)
+	path := PathJoin("/ipfs/", dataCid)
 	stat, err := sh.FilesStat(context.Background(), path)
 	if err != nil {
 		logs.GetLogger().Error(dataCid, " get dag directory info err:", err)
@@ -224,9 +224,9 @@ func NewNodeByDataCid(sh *shell.Shell, dataCid string, nodePath, name string) *T
 	}
 
 	if stat.Type == "directory" {
-		return NewNode(dataCid, pathJoin(nodePath, dataCid), name, stat.CumulativeSize, true)
+		return NewNode(dataCid, PathJoin(nodePath, dataCid), name, stat.CumulativeSize, true)
 	} else if stat.Type == "file" {
-		return NewNode(dataCid, pathJoin(nodePath, dataCid), name, stat.CumulativeSize, false)
+		return NewNode(dataCid, PathJoin(nodePath, dataCid), name, stat.CumulativeSize, false)
 	} else {
 		logs.GetLogger().Warn("unknown type in build node: ", stat.Type)
 	}
