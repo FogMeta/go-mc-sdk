@@ -3,3 +3,4 @@
 main
 logs/
 client.toml
+build/
