@@ -228,21 +228,40 @@ func main() {
 				},
 			},
 			{
-				Name:   "build",
-				Usage:  "Build directory tree from ipfs",
-				Action: BuildDirTreeDemo,
+				Name:      "car",
+				Usage:     "Generate CAR files of the specified size",
+				ArgsUsage: "[inputPath]",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:  "data-cid",
-						Usage: "data cid which will be start to build.",
-						Value: "",
+						Name:    "input-dir",
+						Aliases: []string{"i"},
+						Usage:   "directory where source file(s) is(are) in.",
 					},
-					&KeyFlag,
-					&TokenFlag,
-					&ApiUrlFlag,
-					&GatewayUrlFlag,
-					&MetaUrlFlag,
+					&cli.StringFlag{
+						Name:    "out-dir",
+						Aliases: []string{"o"},
+						Usage:   "directory where CAR file(s) will be generated.",
+						Value:   "/tmp/tasks",
+					},
+					&cli.IntFlag{
+						Name:  "parallel",
+						Usage: "number goroutines run when building ipld nodes",
+						Value: 5,
+					},
+					&cli.Int64Flag{
+						Name:    "slice-size",
+						Aliases: []string{"slice"},
+						Usage:   "bytes of each piece",
+						Value:   17179869184,
+					},
+					&cli.Int64Flag{
+						Name:    "group-size",
+						Aliases: []string{"group"},
+						Usage:   "bytes of each group",
+						Value:   1717986918400,
+					},
 				},
+				Action: BuildCarByGroupDemo,
 			},
 		},
 	}
@@ -407,20 +426,24 @@ func GetSourceFileStatusDemo(c *cli.Context) error {
 	return nil
 }
 
-func BuildDirTreeDemo(c *cli.Context) error {
+func BuildCarByGroupDemo(c *cli.Context) error {
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
+		return errors.New("create meta client failed")
 	}
 
-	apiUrl := c.String("api-url")
-	dataCid := c.String("data-cid")
-	err := metaClient.BuildDirectoryTree(apiUrl, dataCid)
+	inputDir := c.String("input-dir")
+	outputDir := c.String("out-dir")
+	carLimit := c.Int64("slice-size")
+	groupLimit := c.Int64("group-size")
+	parallel := c.Int("parallel")
+	err := metaClient.GenCarByGroup(inputDir, outputDir, groupLimit, carLimit, parallel)
 	if err != nil {
-		logs.GetLogger().Error("get detail info from meta server error:", err)
+		logs.GetLogger().Error("failed to  generate CAR by group:", err)
 		return err
 	}
-	logs.GetLogger().Infoln("get detail info from meta server success")
+	logs.GetLogger().Infoln("generate CAR by group successfully")
 
 	return nil
 }

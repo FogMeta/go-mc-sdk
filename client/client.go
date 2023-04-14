@@ -1,10 +1,8 @@
 package client
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/logs"
 	shell "github.com/ipfs/go-ipfs-api"
@@ -274,62 +272,7 @@ func (m *MetaClient) RebuildIpfsCid(fileName string) error {
 	return nil
 }
 
-func (m *MetaClient) GenCar(ou string) error {
+func (m *MetaClient) GenCarByGroup(inputDir, outputDir string, groupSizeLimit, carSizeLimit int64, parallel int) error {
 	// TODO
-	return nil
-}
-
-func (m *MetaClient) BuildDirectoryTree(ipfsApiUrl string, dataCid string) error {
-	// Creates an IPFS Shell client.
-	sh := shell.NewShell(ipfsApiUrl)
-
-	pins, err := sh.Pins()
-	if err != nil {
-		logs.GetLogger().Errorf("List pins error: %s", err)
-		return err
-	}
-
-	logs.GetLogger().Info(len(pins), " records to process ...")
-
-	//build root node
-	root := NewNode("/", "/", "/", 0, true)
-	for hash, info := range pins {
-		logs.GetLogger().Debug("Key:", hash, " Type:", info.Type)
-
-		path := PathJoin("/ipfs/", hash)
-		stat, err := sh.FilesStat(context.Background(), path)
-		if err != nil {
-			logs.GetLogger().Error(err)
-			continue
-		}
-		logs.GetLogger().Debugf("FileStat:%+v", stat)
-
-		if stat.Type == "directory" {
-			resp := DagGetResponse{}
-			sh.DagGet(hash, &resp)
-			logs.GetLogger().Debugf("dag directory info resp:%+v", resp)
-
-			n := NewNode(hash, PathJoin(root.Path, hash), hash, stat.CumulativeSize, true)
-			root.AddChild(n)
-			logs.GetLogger().Debugf("add node director of %s to root", hash)
-
-		} else if stat.Type == "file" {
-			n := NewNode(hash, PathJoin(root.Path, hash), hash, stat.CumulativeSize, false)
-			root.AddChild(n)
-			logs.GetLogger().Debugf("add node file of %s to root", hash)
-		} else {
-			logs.GetLogger().Warn("unknown type: ", stat.Type)
-		}
-	}
-
-	root.BuildChildTree(sh)
-	root.SortChild()
-	root.PrintAll()
-	fmt.Print("\n")
-
-	root.ReduceChildTree()
-	root.PrintAllTop()
-	fmt.Print("\n")
-
 	return nil
 }
