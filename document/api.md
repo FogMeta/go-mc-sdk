@@ -316,8 +316,8 @@ type StorageProvider struct {
 | StorageStatus | string | The status of the deal in the Filecoin network        |
 | DealId | int64 | The dealID in the filecoin network                    |
 | DealCid | string | The proposal CID or deal UUID in the filecoin network |
-| StartEpoch | int64 | The start epoch in the filecoin network               |
-| EndEpoch | int64 | The end epoch in the filecoin network                 |
+| StartEpoch | int64 | The start epoch of deal in the filecoin network       |
+| EndEpoch | int64 | The end epoch of deal in the filecoin network         |
 
 
 
