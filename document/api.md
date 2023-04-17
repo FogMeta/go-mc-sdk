@@ -305,15 +305,20 @@ type StorageProvider struct {
     StorageProviderId string `json:"storage_provider_id"`
     StorageStatus     string `json:"storage_status"`
     DealId            int64  `json:"deal_id"`
-    DealCid           string `json:"deal_cid"`               
+    DealCid           string `json:"deal_cid"`
+    StartEpoch        int64  `json:"start_epoch"`
+    EndEpoch          int64  `json:"end_epoch"`           
 }
 ```
-| Field Name | Data Type | Explanation |
-| --- | --- | --- |
-| StorageProviderId | string | The ID of the storage provider |
-| StorageStatus | string | The status of the deal in the Filecoin network |
-| DealId | int64 | The dealID in the filecoin network |
+| Field Name | Data Type | Explanation                                           |
+| --- | --- |-------------------------------------------------------|
+| StorageProviderId | string | The ID of the storage provider                        |
+| StorageStatus | string | The status of the deal in the Filecoin network        |
+| DealId | int64 | The dealID in the filecoin network                    |
 | DealCid | string | The proposal CID or deal UUID in the filecoin network |
+| StartEpoch | int64 | The start epoch in the filecoin network               |
+| EndEpoch | int64 | The end epoch in the filecoin network                 |
+
 
 
 ## GetIpfsCidStat

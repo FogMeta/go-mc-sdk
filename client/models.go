@@ -143,6 +143,8 @@ type StorageProvider struct {
 	StorageStatus     string `json:"storage_status"`
 	DealId            int64  `json:"deal_id"`
 	DealCid           string `json:"deal_cid"` // proposal cid or uuid
+	StartEpoch        int64  `json:"start_epoch"`
+	EndEpoch          int64  `json:"end_epoch"`
 }
 
 // GetDownloadFileInfoByIpfsCid
