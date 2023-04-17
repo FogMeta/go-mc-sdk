@@ -413,9 +413,9 @@ type FileInfo struct {
 }
 
 type Group struct {
-	Name      string
-	GroupSize int64
-	FileList  []FileInfo
+	Index int
+	Size  int64
+	Items []FileInfo
 }
 
 func (m *MetaClient) buildDirectoryTree(ipfsApiUrl string, dataCid string) error {
@@ -502,43 +502,40 @@ func GetFileInfoList(dirPath string) []FileInfo {
 	}
 	return infos
 }
-func TalkativeGroup(dirPath string, givenSize int64) [][]FileInfo {
 
-	fileInfos := GetFileInfoList(dirPath)
-	if fileInfos == nil {
+func TalkativeGroup(dirPath string, givenSize int64) []Group {
+
+	entrys := GetFileInfoList(dirPath)
+	if entrys == nil {
 		log.Fatal("failed to get files information")
 	}
 
-	sort.Slice(fileInfos, func(i, j int) bool {
-		return fileInfos[i].Size > fileInfos[j].Size
+	sort.Slice(entrys, func(i, j int) bool {
+		return entrys[i].Size > entrys[j].Size
 	})
 
-	var groups [][]FileInfo
-	currentGroup := []FileInfo{}
-	currentSize := int64(0)
-
-	for _, fileInfo := range fileInfos {
-		if currentSize+fileInfo.Size <= givenSize {
-			currentGroup = append(currentGroup, fileInfo)
-			currentSize += fileInfo.Size
+	var groups []Group
+	gIndex := 0
+	curGroup := Group{Index: gIndex, Size: 0}
+	for _, entry := range entrys {
+		if curGroup.Size+entry.Size <= givenSize {
+			curGroup.Size += entry.Size
+			curGroup.Items = append(curGroup.Items, entry)
 		} else {
-			groups = append(groups, currentGroup)
-			currentGroup = []FileInfo{fileInfo}
-			currentSize = fileInfo.Size
+			if len(curGroup.Items) != 0 {
+				groups = append(groups, curGroup)
+				gIndex = gIndex + 1
+				curGroup = Group{Index: gIndex, Size: 0}
+			}
+
+			curGroup.Size += entry.Size
+			curGroup.Items = append(curGroup.Items, entry)
 		}
 	}
 
-	if len(currentGroup) > 0 {
-		groups = append(groups, currentGroup)
+	if len(curGroup.Items) > 0 {
+		groups = append(groups, curGroup)
 	}
-
-	//fmt.Printf("Group %d：\n", len(groups))
-	//for i, group := range groups {
-	//	fmt.Printf("Index%d：\n", i+1)
-	//	for _, fileInfo := range group {
-	//		fmt.Printf("%s - %d bytes\n", fileInfo.Name, fileInfo.Size)
-	//	}
-	//}
 
 	return groups
 }

@@ -276,16 +276,10 @@ func (m *MetaClient) RebuildIpfsCid(fileName string) error {
 func (m *MetaClient) GenCarByGroup(inputDir, outputDir string, groupSizeLimit, carSizeLimit int64, parallel int) error {
 
 	groups := TalkativeGroup(inputDir, groupSizeLimit)
-	fmt.Printf("Group %d：\n", len(groups))
-	for i, group := range groups {
-		fmt.Printf("Index%d：\n", i+1)
-		var inputs []string
-		for _, fileInfo := range group {
-			fmt.Printf("%s - %d bytes\n", fileInfo.Name, fileInfo.Size)
-			inputs = append(inputs, fileInfo.Name)
-
-		}
-		// CreateGoCarFilesByConfig(inputDir, &outputDir, parallel, carSizeLimit, true)
+	fmt.Printf("Groups Count is %d：\n", len(groups))
+	for _, group := range groups {
+		fmt.Printf("Group Index=%d, Group Size=%d, Items Count=%d:\n", group.Index, group.Size, len(group.Items))
+		CreateGoCarFilesByConfig(group, &outputDir, parallel, carSizeLimit, true)
 	}
 
 	return nil

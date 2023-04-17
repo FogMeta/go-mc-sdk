@@ -27,11 +27,11 @@ const (
 )
 
 type CmdGoCar struct {
-	OutputDir          string //required
-	InputDir           string //required
-	GenerateMd5        bool   //required
-	GocarFileSizeLimit int64  //required
-	GocarFolderBased   bool   //required
+	OutputDir          string   //required
+	InputDir           []string //required
+	GenerateMd5        bool     //required
+	GocarFileSizeLimit int64    //required
+	GocarFolderBased   bool     //required
 	Parallel           int
 }
 
@@ -52,7 +52,7 @@ type FileDesc struct {
 	SourceId       *int
 }
 
-func GetCmdGoCar(inputDir string, outputDir *string, parallel int, carFileSizeLimit int64, carFolderBased, genMd5Flag bool) *CmdGoCar {
+func GetCmdGoCar(inputDir []string, outputDir *string, parallel int, carFileSizeLimit int64, carFolderBased, genMd5Flag bool) *CmdGoCar {
 	cmdGoCar := &CmdGoCar{
 		InputDir:           inputDir,
 		GocarFileSizeLimit: carFileSizeLimit,
@@ -70,8 +70,14 @@ func GetCmdGoCar(inputDir string, outputDir *string, parallel int, carFileSizeLi
 	return cmdGoCar
 }
 
-func CreateGoCarFilesByConfig(inputDir string, outputDir *string, parallel int, carFileSizeLimit int64, carFolderBased bool) ([]*FileDesc, error) {
-	cmdGoCar := GetCmdGoCar(inputDir, outputDir, parallel, carFileSizeLimit, carFolderBased, false)
+func CreateGoCarFilesByConfig(group Group, outputDir *string, parallel int, carFileSizeLimit int64, carFolderBased bool) ([]*FileDesc, error) {
+
+	var inputs []string
+	for _, fileInfo := range group.Items {
+		inputs = append(inputs, fileInfo.Name)
+	}
+
+	cmdGoCar := GetCmdGoCar(inputs, outputDir, parallel, carFileSizeLimit, carFolderBased, false)
 	fileDescs, err := cmdGoCar.CreateGoCarFiles()
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -81,7 +87,7 @@ func CreateGoCarFilesByConfig(inputDir string, outputDir *string, parallel int, 
 	return fileDescs, nil
 }
 
-func RestoreCarFilesByConfig(inputDir string, outputDir *string, parallel int) error {
+func RestoreCarFilesByConfig(inputDir []string, outputDir *string, parallel int) error {
 	cmdGoCar := GetCmdGoCar(inputDir, outputDir, parallel, 0, false, false)
 	err := cmdGoCar.RestoreCarToFiles()
 	if err != nil {
@@ -92,13 +98,13 @@ func RestoreCarFilesByConfig(inputDir string, outputDir *string, parallel int) e
 }
 
 func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
-	err := utils.CheckDirExists(cmdGoCar.InputDir, DIR_NAME_INPUT)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
+	//err := utils.CheckDirExists(cmdGoCar.InputDir, DIR_NAME_INPUT)
+	//if err != nil {
+	//	logs.GetLogger().Error(err)
+	//	return nil, err
+	//}
 
-	err = utils.CreateDirIfNotExists(cmdGoCar.OutputDir, DIR_NAME_OUTPUT)
+	err := utils.CreateDirIfNotExists(cmdGoCar.OutputDir, DIR_NAME_OUTPUT)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
@@ -161,13 +167,13 @@ func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 }
 
 func (cmdGoCar *CmdGoCar) RestoreCarToFiles() error {
-	err := utils.CheckDirExists(cmdGoCar.InputDir, DIR_NAME_INPUT)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return err
-	}
+	//err := utils.CheckDirExists(cmdGoCar.InputDir, DIR_NAME_INPUT)
+	//if err != nil {
+	//	logs.GetLogger().Error(err)
+	//	return err
+	//}
 
-	err = utils.CreateDirIfNotExists(cmdGoCar.OutputDir, DIR_NAME_OUTPUT)
+	err := utils.CreateDirIfNotExists(cmdGoCar.OutputDir, DIR_NAME_OUTPUT)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return err
