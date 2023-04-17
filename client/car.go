@@ -12,6 +12,7 @@ import (
 	"github.com/google/uuid"
 	"io/ioutil"
 	"os"
+	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -28,10 +29,12 @@ const (
 
 type CmdGoCar struct {
 	OutputDir          string   //required
-	InputDir           []string //required
+	Inputs             []string //required
+	ParentPath         string   //required
+	GraphName          string   //required
 	GenerateMd5        bool     //required
 	GocarFileSizeLimit int64    //required
-	GocarFolderBased   bool     //required
+	GocarFolderBased   bool     //required always true
 	Parallel           int
 }
 
@@ -52,12 +55,20 @@ type FileDesc struct {
 	SourceId       *int
 }
 
-func GetCmdGoCar(inputDir []string, outputDir *string, parallel int, carFileSizeLimit int64, carFolderBased, genMd5Flag bool) *CmdGoCar {
+func GetCmdGoCar(group Group, outputDir *string, parallel int, carFileSizeLimit int64) *CmdGoCar {
+
+	var inputs []string
+	for _, fileInfo := range group.Items {
+		inputs = append(inputs, fileInfo.Name)
+	}
+
 	cmdGoCar := &CmdGoCar{
-		InputDir:           inputDir,
+		Inputs:             inputs,
+		ParentPath:         group.Path,
+		GraphName:          path.Base(group.Path) + "-Group-" + strconv.FormatInt(int64(group.Index), 10),
 		GocarFileSizeLimit: carFileSizeLimit,
-		GenerateMd5:        genMd5Flag,
-		GocarFolderBased:   carFolderBased,
+		GenerateMd5:        false,
+		GocarFolderBased:   true,
 		Parallel:           parallel,
 	}
 
@@ -70,14 +81,9 @@ func GetCmdGoCar(inputDir []string, outputDir *string, parallel int, carFileSize
 	return cmdGoCar
 }
 
-func CreateGoCarFilesByConfig(group Group, outputDir *string, parallel int, carFileSizeLimit int64, carFolderBased bool) ([]*FileDesc, error) {
+func CreateGoCarFilesByConfig(group Group, outputDir *string, parallel int, carFileSizeLimit int64) ([]*FileDesc, error) {
 
-	var inputs []string
-	for _, fileInfo := range group.Items {
-		inputs = append(inputs, fileInfo.Name)
-	}
-
-	cmdGoCar := GetCmdGoCar(inputs, outputDir, parallel, carFileSizeLimit, carFolderBased, false)
+	cmdGoCar := GetCmdGoCar(group, outputDir, parallel, carFileSizeLimit)
 	fileDescs, err := cmdGoCar.CreateGoCarFiles()
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -87,8 +93,8 @@ func CreateGoCarFilesByConfig(group Group, outputDir *string, parallel int, carF
 	return fileDescs, nil
 }
 
-func RestoreCarFilesByConfig(inputDir []string, outputDir *string, parallel int) error {
-	cmdGoCar := GetCmdGoCar(inputDir, outputDir, parallel, 0, false, false)
+func RestoreCarFilesByConfig(group Group, outputDir *string, parallel int) error {
+	cmdGoCar := GetCmdGoCar(group, outputDir, parallel, 0)
 	err := cmdGoCar.RestoreCarToFiles()
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -98,11 +104,6 @@ func RestoreCarFilesByConfig(inputDir []string, outputDir *string, parallel int)
 }
 
 func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
-	//err := utils.CheckDirExists(cmdGoCar.InputDir, DIR_NAME_INPUT)
-	//if err != nil {
-	//	logs.GetLogger().Error(err)
-	//	return nil, err
-	//}
 
 	err := utils.CreateDirIfNotExists(cmdGoCar.OutputDir, DIR_NAME_OUTPUT)
 	if err != nil {
@@ -117,43 +118,24 @@ func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 		return nil, err
 	}
 
-	srcFiles, err := ioutil.ReadDir(cmdGoCar.InputDir)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-
 	carDir := cmdGoCar.OutputDir
 	Emptyctx := context.Background()
 	cb := graphsplit.CommPCallback(carDir, false, false)
 
 	if cmdGoCar.GocarFolderBased {
-		parentPath := cmdGoCar.InputDir
-		targetPath := parentPath
-		graphName := filepath.Base(parentPath)
+		parentPath := cmdGoCar.ParentPath
+		targetPaths := cmdGoCar.Inputs
+		graphName := cmdGoCar.GraphName
 
 		logs.GetLogger().Info("Creating car file for ", parentPath)
-		err = graphsplit.ChunkMulti(Emptyctx, sliceSize, parentPath, []string{targetPath}, carDir, graphName, cmdGoCar.Parallel, cb)
+		err = graphsplit.ChunkMulti(Emptyctx, sliceSize, parentPath, targetPaths, carDir, graphName, cmdGoCar.Parallel, cb)
 		if err != nil {
 			logs.GetLogger().Error(err)
 			return nil, err
 		}
 		logs.GetLogger().Info("Car file for ", parentPath, " created")
-	} else {
-		for _, srcFile := range srcFiles {
-			parentPath := filepath.Join(cmdGoCar.InputDir, srcFile.Name())
-			targetPath := parentPath
-			graphName := srcFile.Name()
-
-			logs.GetLogger().Info("Creating car file for ", parentPath)
-			err = graphsplit.ChunkMulti(Emptyctx, sliceSize, parentPath, []string{targetPath}, carDir, graphName, cmdGoCar.Parallel, cb)
-			if err != nil {
-				logs.GetLogger().Error(err)
-				return nil, err
-			}
-			logs.GetLogger().Info("Car file for ", parentPath, " created")
-		}
 	}
+
 	fileDescs, err := cmdGoCar.createFilesDescFromManifest()
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -179,7 +161,7 @@ func (cmdGoCar *CmdGoCar) RestoreCarToFiles() error {
 		return err
 	}
 
-	graphsplit.CarTo(cmdGoCar.InputDir, cmdGoCar.OutputDir, cmdGoCar.Parallel)
+	graphsplit.CarTo(cmdGoCar.Inputs[0], cmdGoCar.OutputDir, cmdGoCar.Parallel)
 	graphsplit.Merge(cmdGoCar.OutputDir, cmdGoCar.Parallel)
 
 	logs.GetLogger().Info("car files have been restored to directory:", cmdGoCar.OutputDir)
@@ -238,16 +220,12 @@ func (cmdGoCar *CmdGoCar) createFilesDescFromManifest() ([]*FileDesc, error) {
 			return nil, err
 		}
 
-		if cmdGoCar.GocarFolderBased {
-			fileDesc.SourceFileName = filepath.Base(cmdGoCar.InputDir)
-			fileDesc.SourceFilePath = cmdGoCar.InputDir
-			for _, link := range manifestDetail.Link {
-				fileDesc.SourceFileSize = fileDesc.SourceFileSize + link.Size
-			}
-		} else {
-			fileDesc.SourceFileName = manifestDetail.Link[0].Name
-			fileDesc.SourceFilePath = filepath.Join(cmdGoCar.InputDir, fileDesc.SourceFileName)
-			fileDesc.SourceFileSize = int64(manifestDetail.Link[0].Size)
+		//fileDesc.SourceFileName = filepath.Base(cmdGoCar.InputDirs)
+		//fileDesc.SourceFilePath = cmdGoCar.InputDirs
+		fileDesc.SourceFileName = cmdGoCar.GraphName
+		fileDesc.SourceFilePath = cmdGoCar.ParentPath
+		for _, link := range manifestDetail.Link {
+			fileDesc.SourceFileSize = fileDesc.SourceFileSize + link.Size
 		}
 
 		if cmdGoCar.GenerateMd5 {

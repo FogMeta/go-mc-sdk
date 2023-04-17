@@ -414,6 +414,7 @@ type FileInfo struct {
 
 type Group struct {
 	Index int
+	Path  string
 	Size  int64
 	Items []FileInfo
 }
@@ -516,7 +517,7 @@ func TalkativeGroup(dirPath string, givenSize int64) []Group {
 
 	var groups []Group
 	gIndex := 0
-	curGroup := Group{Index: gIndex, Size: 0}
+	curGroup := Group{Index: gIndex, Size: 0, Path: dirPath}
 	for _, entry := range entrys {
 		if curGroup.Size+entry.Size <= givenSize {
 			curGroup.Size += entry.Size
@@ -525,7 +526,7 @@ func TalkativeGroup(dirPath string, givenSize int64) []Group {
 			if len(curGroup.Items) != 0 {
 				groups = append(groups, curGroup)
 				gIndex = gIndex + 1
-				curGroup = Group{Index: gIndex, Size: 0}
+				curGroup = Group{Index: gIndex, Size: 0, Path: dirPath}
 			}
 
 			curGroup.Size += entry.Size

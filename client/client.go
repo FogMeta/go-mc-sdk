@@ -279,7 +279,7 @@ func (m *MetaClient) GenCarByGroup(inputDir, outputDir string, groupSizeLimit, c
 	fmt.Printf("Groups Count is %d：\n", len(groups))
 	for _, group := range groups {
 		fmt.Printf("Group Index=%d, Group Size=%d, Items Count=%d:\n", group.Index, group.Size, len(group.Items))
-		CreateGoCarFilesByConfig(group, &outputDir, parallel, carSizeLimit, true)
+		CreateGoCarFilesByConfig(group, &outputDir, parallel, carSizeLimit)
 	}
 
 	return nil
