@@ -307,17 +307,21 @@ type StorageProvider struct {
     DealId            int64  `json:"deal_id"`
     DealCid           string `json:"deal_cid"`
     StartEpoch        int64  `json:"start_epoch"`
-    EndEpoch          int64  `json:"end_epoch"`           
+    EndEpoch          int64  `json:"end_epoch"`
+    StartTime         string `json:"start_time"`
+    EndTime           string `json:"end_time"`       
 }
 ```
-| Field Name | Data Type | Explanation                                           |
-| --- | --- |-------------------------------------------------------|
+| Field Name        | Data Type | Explanation                                           |
+|-------------------| --- |-------------------------------------------------------|
 | StorageProviderId | string | The ID of the storage provider                        |
-| StorageStatus | string | The status of the deal in the Filecoin network        |
-| DealId | int64 | The dealID in the filecoin network                    |
-| DealCid | string | The proposal CID or deal UUID in the filecoin network |
-| StartEpoch | int64 | The start epoch of deal in the filecoin network       |
-| EndEpoch | int64 | The end epoch of deal in the filecoin network         |
+| StorageStatus     | string | The status of the deal in the Filecoin network        |
+| DealId            | int64 | The dealID in the filecoin network                    |
+| DealCid           | string | The proposal CID or deal UUID in the filecoin network |
+| StartEpoch        | int64 | The start epoch of deal in the filecoin network       |
+| EndEpoch          | int64 | The end epoch of deal in the filecoin network         |
+| StartTime         | string | The start UTC time of deal in the filecoin network    |
+| EndTime           | string | The end UTC time of deal in the filecoin network         |
 
 
 
