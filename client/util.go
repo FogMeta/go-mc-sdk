@@ -9,7 +9,6 @@ import (
 	"github.com/filswan/go-swan-lib/logs"
 	shell "github.com/ipfs/go-ipfs-api"
 	"io/fs"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -104,16 +103,16 @@ func isFile(dirFullPath string) (*bool, error) {
 	}
 }
 
-func dirSize(path string) int64 {
+func calcDirSize(dirPath string) int64 {
 	var size int64
-	entrys, err := os.ReadDir(path)
+	entrys, err := os.ReadDir(dirPath)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return 0
 	}
 	for _, entry := range entrys {
 		if entry.IsDir() {
-			size += dirSize(filepath.Join(path, entry.Name()))
+			size += calcDirSize(filepath.Join(dirPath, entry.Name()))
 		} else {
 			info, err := entry.Info()
 			if err == nil {
@@ -408,8 +407,15 @@ func (s TreeNodeDecrement) Swap(i, j int)      { s[i], s[j] = s[j], s[i] }
 func (s TreeNodeDecrement) Less(i, j int) bool { return s[i].Size > s[j].Size }
 
 type FileInfo struct {
-	Name string
-	Size int64
+	Name  string
+	Size  int64
+	IsDir bool
+}
+
+type Group struct {
+	Name      string
+	GroupSize int64
+	FileList  []FileInfo
 }
 
 func (m *MetaClient) buildDirectoryTree(ipfsApiUrl string, dataCid string) error {
@@ -467,24 +473,44 @@ func (m *MetaClient) buildDirectoryTree(ipfsApiUrl string, dataCid string) error
 	return nil
 }
 
-func TalkativeGroup(dirPath string, givenSize int64) [][]FileInfo {
-
-	files, err := ioutil.ReadDir(dirPath)
+func GetFileInfoList(dirPath string) []FileInfo {
+	entries, err := os.ReadDir(dirPath)
 	if err != nil {
-		log.Fatal(err)
+		return nil
 	}
 
-	var fileInfos []FileInfo
-	for _, file := range files {
-		fileInfo := FileInfo{
-			Name: file.Name(),
-			Size: file.Size(),
+	infos := make([]FileInfo, 0, len(entries))
+	for _, entry := range entries {
+		info, err := entry.Info()
+		if err != nil {
+			logs.GetLogger().Warnf("failed to get file %s info:%s", PathJoin(dirPath, entry.Name()), err)
+			continue
 		}
-		fileInfos = append(fileInfos, fileInfo)
+
+		dirSize := info.Size()
+		if info.IsDir() {
+			dirSize = calcDirSize(PathJoin(dirPath, info.Name()))
+		}
+
+		fileInfo := FileInfo{
+			Name:  info.Name(),
+			Size:  dirSize,
+			IsDir: info.IsDir(),
+		}
+
+		infos = append(infos, fileInfo)
+	}
+	return infos
+}
+func TalkativeGroup(dirPath string, givenSize int64) [][]FileInfo {
+
+	fileInfos := GetFileInfoList(dirPath)
+	if fileInfos == nil {
+		log.Fatal("failed to get files information")
 	}
 
 	sort.Slice(fileInfos, func(i, j int) bool {
-		return fileInfos[i].Size < fileInfos[j].Size
+		return fileInfos[i].Size > fileInfos[j].Size
 	})
 
 	var groups [][]FileInfo
@@ -506,13 +532,13 @@ func TalkativeGroup(dirPath string, givenSize int64) [][]FileInfo {
 		groups = append(groups, currentGroup)
 	}
 
-	fmt.Printf("Group %d：\n", len(groups))
-	for i, group := range groups {
-		fmt.Printf("Index%d：\n", i+1)
-		for _, fileInfo := range group {
-			fmt.Printf("%s - %d bytes\n", fileInfo.Name, fileInfo.Size)
-		}
-	}
+	//fmt.Printf("Group %d：\n", len(groups))
+	//for i, group := range groups {
+	//	fmt.Printf("Index%d：\n", i+1)
+	//	for _, fileInfo := range group {
+	//		fmt.Printf("%s - %d bytes\n", fileInfo.Name, fileInfo.Size)
+	//	}
+	//}
 
 	return groups
 }
