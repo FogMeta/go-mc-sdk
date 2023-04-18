@@ -136,14 +136,14 @@ func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 }
 
 type ManifestDetail struct {
-	Name string `json:"name"`
-	Hash string `json:"hash"`
-	Size int    `json:"size"`
+	Name string `json:"Name"`
+	Hash string `json:"Hash"`
+	Size int    `json:"Size"`
 	Link []struct {
-		Name string `json:"name"`
-		Hash string `json:"hash"`
-		Size int64  `json:"size"`
-	}
+		Name string `json:"Name"`
+		Hash string `json:"Hash"`
+		Size int64  `json:"Size"`
+	} `json:"Link"`
 }
 
 func (cmdGoCar *CmdGoCar) createFilesDescFromManifest() ([]*FileDesc, error) {
