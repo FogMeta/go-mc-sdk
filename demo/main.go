@@ -233,6 +233,11 @@ func main() {
 				ArgsUsage: "[inputPath]",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
+						Name:    "task-name",
+						Aliases: []string{"t"},
+						Usage:   "name of a task.",
+					},
+					&cli.StringFlag{
 						Name:    "input-dir",
 						Aliases: []string{"i"},
 						Usage:   "directory where source file(s) is(are) in.",
