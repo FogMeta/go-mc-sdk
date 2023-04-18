@@ -445,21 +445,16 @@ func BuildCarByGroupDemo(c *cli.Context) error {
 	groupLimit := c.Int64("group-size")
 	parallel := c.Int("parallel")
 
+	apiUrl := c.String("api-url")
+	gatewayUrl := c.String("gateway-url")
+
 	//
-	err := metaClient.GenCarByGroup(taskName, sdk.PathJoin(inputDir, "datastore"), outputDir, groupLimit, carLimit, parallel)
+	err := metaClient.GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewayUrl, groupLimit, carLimit, parallel)
 	if err != nil {
 		logs.GetLogger().Error("failed to  generate CAR for datastore:", err)
 		return err
 	}
 	logs.GetLogger().Infoln("generate CAR for datastore successfully")
-
-	//
-	err = metaClient.GenCarByGroup(taskName, sdk.PathJoin(inputDir, "blocks"), outputDir, groupLimit, carLimit, parallel)
-	if err != nil {
-		logs.GetLogger().Error("failed to  generate CAR for blocks:", err)
-		return err
-	}
-	logs.GetLogger().Infoln("generate CAR for blocks successfully")
 
 	return nil
 }

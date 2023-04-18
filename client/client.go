@@ -3,7 +3,6 @@ package client
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"github.com/filswan/go-swan-lib/client"
 	"github.com/filswan/go-swan-lib/logs"
 	shell "github.com/ipfs/go-ipfs-api"
@@ -268,47 +267,218 @@ func (m *MetaClient) GetDownloadFileInfoByIpfsCid(ipfsCid string) ([]DownloadFil
 	return res.Result.Data, nil
 }
 
+func (m *MetaClient) GetDatasetsByGroupName(groupName string) ([]GetDatasetsByGroupNameResp, error) {
+
+	var params []interface{}
+	params = append(params, groupName)
+	jsonRpcParams := JsonRpcParams{
+		JsonRpc: "2.0",
+		Method:  "meta.GetDatasetsByGroupName",
+		Params:  params,
+		Id:      1,
+	}
+	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Errorf("Get Response Error: %s", err)
+		return nil, err
+	}
+
+	res := GetDatasetsByGroupNameResponse{}
+	err = json.Unmarshal(response, &res)
+	if err != nil {
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
+		return nil, err
+	}
+	logs.GetLogger().Infof("meta GetDatasetsByGroupNameResponse response: %+v", res)
+
+	return res.Result.Data, nil
+}
+
+func (m *MetaClient) StoreSourceFileByGroup(groupName string, dataList [][]IpfsData) error {
+
+	var params []interface{}
+	params = append(params, groupName, dataList)
+	jsonRpcParams := JsonRpcParams{
+		JsonRpc: "2.0",
+		Method:  "meta.StoreSourceFileByGroup",
+		Params:  params,
+		Id:      1,
+	}
+	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Errorf("Get Response Error: %s", err)
+		return err
+	}
+
+	res := StoreSourceFileByGroupResponse{}
+	err = json.Unmarshal(response, &res)
+	if err != nil {
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
+		return err
+	}
+	logs.GetLogger().Infof("meta StoreSourceFileByGroup response: %+v", res)
+
+	if res.Result.Code != "success" {
+		return errors.New("StoreSourceFileByGroup not success from meta server")
+	}
+	return nil
+}
+
+func (m *MetaClient) StoreCarFiles(datasetId int64, carList []*CarInfo) error {
+
+	var params []interface{}
+	params = append(params, StoreCarFilesReq{DatasetId: datasetId, CarList: carList})
+	jsonRpcParams := JsonRpcParams{
+		JsonRpc: "2.0",
+		Method:  "meta.StoreCarFiles",
+		Params:  params,
+		Id:      1,
+	}
+	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
+	if err != nil {
+		logs.GetLogger().Errorf("Get Response Error: %s", err)
+		return err
+	}
+
+	res := StoreCarFilesResponse{}
+	err = json.Unmarshal(response, &res)
+	if err != nil {
+		logs.GetLogger().Errorf("Parse Response (%s) Error: %s", response, err)
+		return err
+	}
+	logs.GetLogger().Infof("meta StoreCarFiles response: %+v", res)
+
+	if res.Result.Code != "success" {
+		return errors.New("StoreCarFiles not success from meta server")
+	}
+	return nil
+}
+
 func (m *MetaClient) RebuildIpfsCid(fileName string) error {
 	// TODO
 	return nil
 }
 
-func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir string, groupSizeLimit, carSizeLimit int64, parallel int) error {
+func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewayUrl string, groupSizeLimit, carSizeLimit int64, parallel int) error {
 
-	// query last task by task name
+	var groups []Group
 	remainTasks := false
-	if remainTasks {
 
-	} else {
-		// split task to datasets
-		//datasets := GreedyDataSet(inputDir, groupSizeLimit)
-
-		// update task include all datasets to meta server
+	var todoSets []GetDatasetsByGroupNameResp
+	// query last task by task name
+	todoSets, err := m.GetDatasetsByGroupName(taskName)
+	if err != nil {
+		logs.GetLogger().Error("failed to get remained datasets from meta server:", err)
+	}
+	if len(todoSets) > 0 {
+		remainTasks = true
 	}
 
-	// query task status by task name
+	if remainTasks {
+		//
+	} else {
+		// split task to datasets
+		blocksGroup := GreedyDataSet(PathJoin(inputDir, "blocks"), groupSizeLimit)
+		datastoreGroup := GreedyDataSet(PathJoin(inputDir, "datastore"), groupSizeLimit)
+		groups = append(groups, blocksGroup...)
+		groups = append(groups, datastoreGroup...)
 
-	// query every dataset
-	//1. generate CAR
-	//2. upload to IPFS
-	//3. report to meta server
-	groups := GreedyDataSet(inputDir, groupSizeLimit)
-	fmt.Printf("Groups Count is %d：\n", len(groups))
-	for _, group := range groups {
-		fmt.Printf("DataSet Index=%d, DataSet Size=%d, Items Count=%d:\n", group.Index, group.Size, len(group.Items))
+		// update task include all datasets to meta server
+		var dataSets [][]IpfsData
+		for _, group := range groups {
+			var dataSet []IpfsData
+			for _, item := range group.Items {
+				dataSet = append(dataSet, IpfsData{
+					SourceName:  PathJoin(group.Path, item.Name),
+					DataSize:    item.Size,
+					IsDirectory: item.IsDir,
+				})
+			}
+			dataSets = append(dataSets, dataSet)
+		}
 
-		fileDescs, err := CreateGoCarFilesByConfig(group, &outputDir, parallel, carSizeLimit)
+		err := m.StoreSourceFileByGroup(taskName, dataSets)
+		if err != nil {
+			logs.GetLogger().Error("failed to store source file by group:", err)
+			return err
+		}
+
+		todoSets, err = m.GetDatasetsByGroupName(taskName)
+		if err != nil {
+			logs.GetLogger().Error("failed to get datasets from meta server:", err)
+			return err
+		}
+
+	}
+
+	for _, dataSet := range todoSets {
+		if dataSet.DatasetStatus != "ReadyForCarUpload" {
+			continue
+		}
+
+		//
+		datasetListPager, err := m.GetDatasetList(dataSet.DatasetName, 0, 100000)
+		if err != nil {
+			logs.GetLogger().Error("failed to get dataset list from meta server:", err)
+			continue
+		}
+
+		if len(datasetListPager.DatasetList) != 1 {
+			logs.GetLogger().Error("get dataset list count should only one from meta server")
+			continue
+		}
+
+		fileList := datasetListPager.DatasetList[0].IpfsList
+		group := Group{Size: 0}
+		for _, fl := range fileList {
+			group.Items = append(group.Items, FileInfo{
+				Name:  fl.SourceName,
+				Size:  fl.DataSize,
+				IsDir: fl.IsDirectory,
+			})
+			group.Size += fl.DataSize
+		}
+
+		if len(group.Items) > 0 {
+			group.Path = filepath.Dir(group.Items[0].Name)
+		}
+
+		// Create CAR
+		carDir := PathJoin(outputDir, dataSet.DatasetName)
+		fileDescs, err := CreateGoCarFilesByConfig(group, &carDir, parallel, carSizeLimit)
 		if err != nil {
 			logs.GetLogger().Error("failed to creat car:", err)
 			continue
 		}
 
+		// update all CAR to ipfs
+		sh := shell.NewShell(apiUrl)
+		var carList []*CarInfo
 		for i, desc := range fileDescs {
 			logs.GetLogger().Infof("File Desc Index %d: %+v", i, desc)
+			ipfsCid, err := uploadFileToIpfs(sh, PathJoin(desc.CarFilePath, desc.CarFileName))
+			if err != nil {
+				logs.GetLogger().Error("failed to upload CAR to IPFS:", err)
+				continue
+			}
+			carList = append(carList, &CarInfo{
+				FileName:    desc.CarFileName,
+				DataCid:     desc.PayloadCid,
+				SourceSize:  desc.SourceFileSize,
+				CarSize:     desc.CarFileSize,
+				PieceCid:    desc.PieceCid,
+				DownloadUrl: PathJoin(gatewayUrl, "ipfs/", ipfsCid),
+			})
 		}
 
-		// update all CAR to ipfs
 		// report to meta server
+		err = m.StoreCarFiles(dataSet.DatasetId, carList)
+		if err != nil {
+			logs.GetLogger().Error("failed to store CAR files to meta server:", err)
+		}
+
+		logs.GetLogger().Info("successfully process one dataset:", dataSet.DatasetName)
+
 	}
 
 	return nil

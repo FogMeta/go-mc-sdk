@@ -14,7 +14,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -146,39 +145,64 @@ type ManifestDetail struct {
 	} `json:"Link"`
 }
 
+const (
+	ColumnPayloadCID  = "payload_cid"
+	ColumnFilename    = "filename"
+	ColumnPieceCID    = "piece_cid"
+	ColumnPieceSize   = "piece_size"
+	ColumnDetail      = "detail"
+	ColumnPayloadSize = "payload_size"
+)
+
+var colums = []string{ColumnPayloadCID, ColumnFilename, ColumnPieceCID, ColumnPieceSize, ColumnDetail}
+
 func (cmdGoCar *CmdGoCar) createFilesDescFromManifest() ([]*FileDesc, error) {
 	manifestFilename := "manifest.csv"
-	lines, err := utils.ReadAllLines(cmdGoCar.OutputDir, manifestFilename)
+
+	fileFullPath := filepath.Join(cmdGoCar.OutputDir, manifestFilename)
+	file, err := os.Open(fileFullPath)
+	if err != nil {
+		logs.GetLogger().Error("failed opening file: ", fileFullPath)
+		return nil, err
+	}
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
+	//
+	//lines, err := utils.ReadAllLines(cmdGoCar.OutputDir, manifestFilename)
+	//if err != nil {
+	//	logs.GetLogger().Error(err)
+	//	return nil, err
+	//}
 
 	fileDescs := []*FileDesc{}
-	for i, line := range lines {
+	colMap := make(map[string]int)
+	for i, fields := range records {
 		if i == 0 {
+			for pos, col := range fields {
+				colMap[col] = pos
+			}
+
+			for _, col := range colums {
+				if _, ok := colMap[col]; !ok {
+					return nil, fmt.Errorf("column %s not found", col)
+				}
+			}
 			continue
 		}
-
-		fields := strings.Split(line, ",")
-		if len(fields) < 5 {
-			err := fmt.Errorf("not enough fields in %s", manifestFilename)
-			logs.GetLogger().Error(err)
-			return nil, err
-		}
-
 		fileDesc := FileDesc{}
-		fileDesc.PayloadCid = fields[0] // payload_cid
+		fileDesc.PayloadCid = fields[colMap[ColumnPayloadCID]]
 		fileDesc.CarFileName = fileDesc.PayloadCid + ".car"
 		fileDesc.CarFileUrl = fileDesc.CarFileName
 		fileDesc.CarFilePath = filepath.Join(cmdGoCar.OutputDir, fileDesc.CarFileName)
-		fileDesc.PieceCid = fields[2]                           //piece_cid
-		fileDesc.CarFileSize = utils.GetInt64FromStr(fields[3]) //payload_size
-		// utils.GetInt64FromStr(fields[4])  //piece_size
-		carFileDetail := fields[5]
-		for i := 5; i < len(fields); i++ {
-			carFileDetail = carFileDetail + "," + fields[i]
-		}
+		fileDesc.PieceCid = fields[colMap[ColumnPieceCID]]
+		fileDesc.CarFileSize = utils.GetInt64FromStr(fields[colMap[ColumnPieceCID]])
+
+		carFileDetail := fields[colMap[ColumnDetail]]
 
 		manifestDetail := ManifestDetail{}
 		err = json.Unmarshal([]byte(carFileDetail), &manifestDetail)
@@ -187,8 +211,6 @@ func (cmdGoCar *CmdGoCar) createFilesDescFromManifest() ([]*FileDesc, error) {
 			return nil, err
 		}
 
-		//fileDesc.SourceFileName = filepath.Base(cmdGoCar.InputDirs)
-		//fileDesc.SourceFilePath = cmdGoCar.InputDirs
 		fileDesc.SourceFileName = cmdGoCar.GraphName
 		fileDesc.SourceFilePath = cmdGoCar.ParentPath
 		for _, link := range manifestDetail.Link {

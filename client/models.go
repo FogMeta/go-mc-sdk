@@ -88,6 +88,7 @@ type IpfsDataDetail struct {
 	DataSize    int64  `json:"data_size"`
 	IsDirectory bool   `json:"is_directory"`
 	DownloadUrl string `json:"download_url"`
+	SourceName  string `json:"source_name"`
 }
 
 // GetSourceFileInfo
