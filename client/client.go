@@ -296,14 +296,15 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir string, groupSi
 	fmt.Printf("Groups Count is %d：\n", len(groups))
 	for _, group := range groups {
 		fmt.Printf("Group Index=%d, Group Size=%d, Items Count=%d:\n", group.Index, group.Size, len(group.Items))
-		fileDescs, err := CreateGoCarFilesByConfig(group, &outputDir, parallel, carSizeLimit)
-		if err != nil {
-			logs.GetLogger().Error("failed to creat car:", err)
-			continue
-		}
-		for i, desc := range fileDescs {
-			logs.GetLogger().Infof("Index %d: %+v", i, desc)
-		}
+
+		//fileDescs, err := CreateGoCarFilesByConfig(group, &outputDir, parallel, carSizeLimit)
+		//if err != nil {
+		//	logs.GetLogger().Error("failed to creat car:", err)
+		//	continue
+		//}
+		//for i, desc := range fileDescs {
+		//	logs.GetLogger().Infof("Index %d: %+v", i, desc)
+		//}
 
 		// update all CAR to ipfs
 
