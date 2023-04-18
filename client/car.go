@@ -136,13 +136,13 @@ func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 }
 
 type ManifestDetail struct {
-	Name string
-	Hash string
-	Size int
+	Name string `json:"name"`
+	Hash string `json:"hash"`
+	Size int    `json:"size"`
 	Link []struct {
-		Name string
-		Hash string
-		Size int64
+		Name string `json:"name"`
+		Hash string `json:"hash"`
+		Size int64  `json:"size"`
 	}
 }
 
@@ -168,14 +168,14 @@ func (cmdGoCar *CmdGoCar) createFilesDescFromManifest() ([]*FileDesc, error) {
 		}
 
 		fileDesc := FileDesc{}
-		fileDesc.PayloadCid = fields[0]
+		fileDesc.PayloadCid = fields[0] // payload_cid
 		fileDesc.CarFileName = fileDesc.PayloadCid + ".car"
 		fileDesc.CarFileUrl = fileDesc.CarFileName
 		fileDesc.CarFilePath = filepath.Join(cmdGoCar.OutputDir, fileDesc.CarFileName)
-		fileDesc.PieceCid = fields[2]
-		fileDesc.CarFileSize = utils.GetInt64FromStr(fields[3])
-
-		carFileDetail := fields[4]
+		fileDesc.PieceCid = fields[2]                           //piece_cid
+		fileDesc.CarFileSize = utils.GetInt64FromStr(fields[3]) //payload_size
+		// utils.GetInt64FromStr(fields[4])  //piece_size
+		carFileDetail := fields[5]
 		for i := 5; i < len(fields); i++ {
 			carFileDetail = carFileDetail + "," + fields[i]
 		}
