@@ -361,23 +361,17 @@ func (m *MetaClient) RebuildIpfsCid(fileName string) error {
 
 func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewayUrl string, groupSizeLimit, carSizeLimit int64, parallel int) error {
 
-	var groups []Group
-	remainTasks := false
-
 	var todoSets []GetDatasetsByGroupNameResp
 	// query last task by task name
 	todoSets, err := m.GetDatasetsByGroupName(taskName)
 	if err != nil {
 		logs.GetLogger().Error("failed to get remained datasets from meta server:", err)
-	}
-	if len(todoSets) > 0 {
-		remainTasks = true
+		return err
 	}
 
-	if remainTasks {
-		//
-	} else {
+	if len(todoSets) == 0 {
 		// split task to datasets
+		var groups []Group
 		blocksGroup := GreedyDataSet(PathJoin(inputDir, "blocks"), groupSizeLimit)
 		datastoreGroup := GreedyDataSet(PathJoin(inputDir, "datastore"), groupSizeLimit)
 		groups = append(groups, blocksGroup...)
@@ -403,6 +397,8 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 			return err
 		}
 
+		logs.GetLogger().Infof("report store source file")
+
 		todoSets, err = m.GetDatasetsByGroupName(taskName)
 		if err != nil {
 			logs.GetLogger().Error("failed to get datasets from meta server:", err)
@@ -411,20 +407,22 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 
 	}
 
+	logs.GetLogger().Info("start to do dataset count is: ", len(todoSets))
 	for _, dataSet := range todoSets {
 		if dataSet.DatasetStatus != "ReadyForCarUpload" {
+			logs.GetLogger().Warn("skip one dataset due to status is: ", dataSet.DatasetStatus)
 			continue
 		}
 
 		//
 		datasetListPager, err := m.GetDatasetList(dataSet.DatasetName, 0, 100000)
 		if err != nil {
-			logs.GetLogger().Error("failed to get dataset list from meta server:", err)
+			logs.GetLogger().Error("failed to get dataset list from meta server and continue:", err)
 			continue
 		}
 
 		if len(datasetListPager.DatasetList) != 1 {
-			logs.GetLogger().Error("get dataset list count should only one from meta server")
+			logs.GetLogger().Error("get dataset list count should only one from meta server and continue")
 			continue
 		}
 
@@ -480,6 +478,8 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 		logs.GetLogger().Info("successfully process one dataset:", dataSet.DatasetName)
 
 	}
+
+	logs.GetLogger().Info("all datasets done!")
 
 	return nil
 }
