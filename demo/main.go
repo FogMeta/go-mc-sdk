@@ -263,7 +263,7 @@ func main() {
 						Name:    "group-size",
 						Aliases: []string{"group"},
 						Usage:   "bytes of each group",
-						Value:   1717986918400,
+						Value:   171798691840,
 					},
 				},
 				Action: BuildCarByGroupDemo,

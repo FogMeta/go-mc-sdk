@@ -12,7 +12,6 @@ import (
 	"github.com/google/uuid"
 	"io/ioutil"
 	"os"
-	"path"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -65,7 +64,7 @@ func GetCmdGoCar(dataSet Group, outputDir *string, parallel int, carFileSizeLimi
 	cmdGoCar := &CmdGoCar{
 		Inputs:             inputs,
 		ParentPath:         dataSet.Path,
-		GraphName:          path.Base(dataSet.Path) + "-Group-" + strconv.FormatInt(int64(dataSet.Index), 10),
+		GraphName:          "Dataset-" + strconv.FormatInt(int64(dataSet.Index), 10),
 		GocarFileSizeLimit: carFileSizeLimit,
 		GenerateMd5:        false,
 		GocarFolderBased:   true,
@@ -112,19 +111,17 @@ func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 	Emptyctx := context.Background()
 	cb := graphsplit.CommPCallback(carDir, false, false)
 
-	if cmdGoCar.GocarFolderBased {
-		parentPath := cmdGoCar.ParentPath
-		targetPaths := cmdGoCar.Inputs
-		graphName := cmdGoCar.GraphName
-
-		logs.GetLogger().Info("Creating car file for ", parentPath)
-		err = graphsplit.ChunkMulti(Emptyctx, sliceSize, parentPath, targetPaths, carDir, graphName, cmdGoCar.Parallel, cb)
-		if err != nil {
-			logs.GetLogger().Error(err)
-			return nil, err
-		}
-		logs.GetLogger().Info("Car file for ", parentPath, " created")
+	parentPath := cmdGoCar.ParentPath
+	targetPaths := cmdGoCar.Inputs
+	graphName := cmdGoCar.GraphName
+	parallel := cmdGoCar.Parallel
+	logs.GetLogger().Info("Creating car file for ", parentPath)
+	err = graphsplit.ChunkMulti(Emptyctx, sliceSize, parentPath, targetPaths, carDir, graphName, parallel, cb)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
+	logs.GetLogger().Info("Car file for ", parentPath, " created")
 
 	fileDescs, err := cmdGoCar.createFilesDescFromManifest()
 	if err != nil {
