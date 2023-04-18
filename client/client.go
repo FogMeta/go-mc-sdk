@@ -273,13 +273,41 @@ func (m *MetaClient) RebuildIpfsCid(fileName string) error {
 	return nil
 }
 
-func (m *MetaClient) GenCarByGroup(inputDir, outputDir string, groupSizeLimit, carSizeLimit int64, parallel int) error {
+func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir string, groupSizeLimit, carSizeLimit int64, parallel int) error {
 
-	groups := TalkativeGroup(inputDir, groupSizeLimit)
+	// query last task by task name
+	remainTasks := false
+	if remainTasks {
+
+	} else {
+		// split task to datasets
+		//datasets := GreedyDataSet(inputDir, groupSizeLimit)
+
+		// update task include all datasets to meta server
+	}
+
+	// query task status by task name
+
+	// query every dataset
+	//1. generate CAR
+	//2. upload to IPFS
+	//3. report to meta server
+	groups := GreedyDataSet(inputDir, groupSizeLimit)
 	fmt.Printf("Groups Count is %d：\n", len(groups))
 	for _, group := range groups {
 		fmt.Printf("Group Index=%d, Group Size=%d, Items Count=%d:\n", group.Index, group.Size, len(group.Items))
-		CreateGoCarFilesByConfig(group, &outputDir, parallel, carSizeLimit)
+		fileDescs, err := CreateGoCarFilesByConfig(group, &outputDir, parallel, carSizeLimit)
+		if err != nil {
+			logs.GetLogger().Error("failed to creat car:", err)
+			continue
+		}
+		for i, desc := range fileDescs {
+			logs.GetLogger().Infof("Index %d: %+v", i, desc)
+		}
+
+		// update all CAR to ipfs
+
+		// report to meta server
 	}
 
 	return nil

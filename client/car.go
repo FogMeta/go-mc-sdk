@@ -55,17 +55,17 @@ type FileDesc struct {
 	SourceId       *int
 }
 
-func GetCmdGoCar(group Group, outputDir *string, parallel int, carFileSizeLimit int64) *CmdGoCar {
+func GetCmdGoCar(dataSet Group, outputDir *string, parallel int, carFileSizeLimit int64) *CmdGoCar {
 
 	var inputs []string
-	for _, fileInfo := range group.Items {
+	for _, fileInfo := range dataSet.Items {
 		inputs = append(inputs, fileInfo.Name)
 	}
 
 	cmdGoCar := &CmdGoCar{
 		Inputs:             inputs,
-		ParentPath:         group.Path,
-		GraphName:          path.Base(group.Path) + "-Group-" + strconv.FormatInt(int64(group.Index), 10),
+		ParentPath:         dataSet.Path,
+		GraphName:          path.Base(dataSet.Path) + "-Group-" + strconv.FormatInt(int64(dataSet.Index), 10),
 		GocarFileSizeLimit: carFileSizeLimit,
 		GenerateMd5:        false,
 		GocarFolderBased:   true,
@@ -81,9 +81,9 @@ func GetCmdGoCar(group Group, outputDir *string, parallel int, carFileSizeLimit 
 	return cmdGoCar
 }
 
-func CreateGoCarFilesByConfig(group Group, outputDir *string, parallel int, carFileSizeLimit int64) ([]*FileDesc, error) {
+func CreateGoCarFilesByConfig(dataSet Group, outputDir *string, parallel int, carFileSizeLimit int64) ([]*FileDesc, error) {
 
-	cmdGoCar := GetCmdGoCar(group, outputDir, parallel, carFileSizeLimit)
+	cmdGoCar := GetCmdGoCar(dataSet, outputDir, parallel, carFileSizeLimit)
 	fileDescs, err := cmdGoCar.CreateGoCarFiles()
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -91,16 +91,6 @@ func CreateGoCarFilesByConfig(group Group, outputDir *string, parallel int, carF
 	}
 
 	return fileDescs, nil
-}
-
-func RestoreCarFilesByConfig(group Group, outputDir *string, parallel int) error {
-	cmdGoCar := GetCmdGoCar(group, outputDir, parallel, 0)
-	err := cmdGoCar.RestoreCarToFiles()
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return err
-	}
-	return nil
 }
 
 func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
@@ -146,26 +136,6 @@ func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 	logs.GetLogger().Info("Please upload car files to web server or ipfs server.")
 
 	return fileDescs, nil
-}
-
-func (cmdGoCar *CmdGoCar) RestoreCarToFiles() error {
-	//err := utils.CheckDirExists(cmdGoCar.InputDir, DIR_NAME_INPUT)
-	//if err != nil {
-	//	logs.GetLogger().Error(err)
-	//	return err
-	//}
-
-	err := utils.CreateDirIfNotExists(cmdGoCar.OutputDir, DIR_NAME_OUTPUT)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return err
-	}
-
-	graphsplit.CarTo(cmdGoCar.Inputs[0], cmdGoCar.OutputDir, cmdGoCar.Parallel)
-	graphsplit.Merge(cmdGoCar.OutputDir, cmdGoCar.Parallel)
-
-	logs.GetLogger().Info("car files have been restored to directory:", cmdGoCar.OutputDir)
-	return nil
 }
 
 type ManifestDetail struct {

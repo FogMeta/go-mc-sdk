@@ -504,7 +504,7 @@ func GetFileInfoList(dirPath string) []FileInfo {
 	return infos
 }
 
-func TalkativeGroup(dirPath string, givenSize int64) []Group {
+func GreedyDataSet(dirPath string, givenSize int64) []Group {
 
 	entrys := GetFileInfoList(dirPath)
 	if entrys == nil {

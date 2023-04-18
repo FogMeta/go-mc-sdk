@@ -433,12 +433,13 @@ func BuildCarByGroupDemo(c *cli.Context) error {
 		return errors.New("create meta client failed")
 	}
 
+	taskName := c.String("task-name")
 	inputDir := c.String("input-dir")
 	outputDir := c.String("out-dir")
 	carLimit := c.Int64("slice-size")
 	groupLimit := c.Int64("group-size")
 	parallel := c.Int("parallel")
-	err := metaClient.GenCarByGroup(inputDir, outputDir, groupLimit, carLimit, parallel)
+	err := metaClient.GenCarByGroup(taskName, inputDir, outputDir, groupLimit, carLimit, parallel)
 	if err != nil {
 		logs.GetLogger().Error("failed to  generate CAR by group:", err)
 		return err
