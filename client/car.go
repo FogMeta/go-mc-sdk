@@ -64,7 +64,7 @@ func GetCmdGoCar(dataSet Group, outputDir *string, parallel int, carFileSizeLimi
 	cmdGoCar := &CmdGoCar{
 		Inputs:             inputs,
 		ParentPath:         dataSet.Path,
-		GraphName:          "Dataset-" + strconv.FormatInt(int64(dataSet.Index), 10),
+		GraphName:          filepath.Base(dataSet.Path) + "-" + strconv.FormatInt(int64(dataSet.Index), 10),
 		GocarFileSizeLimit: carFileSizeLimit,
 		GenerateMd5:        false,
 		GocarFolderBased:   true,
