@@ -115,7 +115,7 @@ func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 	targetPaths := cmdGoCar.Inputs
 	graphName := cmdGoCar.GraphName
 	parallel := cmdGoCar.Parallel
-	logs.GetLogger().Info("Creating car file for ", parentPath)
+	logs.GetLogger().Info("Creating car file for ", parentPath, " ", graphName)
 	err = graphsplit.ChunkMulti(Emptyctx, sliceSize, parentPath, targetPaths, carDir, graphName, parallel, cb)
 	if err != nil {
 		logs.GetLogger().Error(err)

@@ -304,7 +304,7 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir string, groupSi
 		}
 
 		for i, desc := range fileDescs {
-			logs.GetLogger().Infof("Index %d: %+v", i, desc)
+			logs.GetLogger().Infof("File Desc Index %d: %+v", i, desc)
 		}
 
 		// update all CAR to ipfs
