@@ -58,7 +58,7 @@ func GetCmdGoCar(dataSet Group, outputDir *string, parallel int, carFileSizeLimi
 
 	var inputs []string
 	for _, fileInfo := range dataSet.Items {
-		inputs = append(inputs, fileInfo.Name)
+		inputs = append(inputs, PathJoin(dataSet.Path, fileInfo.Name))
 	}
 
 	cmdGoCar := &CmdGoCar{
