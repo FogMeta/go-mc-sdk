@@ -24,17 +24,15 @@ func init() {
 	Conf = config.GetConfig("./client.toml")
 
 	KeyFlag = cli.StringFlag{
-		Name:    "key",
-		Aliases: []string{"k"},
-		Usage:   "key from meta swan",
-		Value:   Conf.Key,
+		Name:  "key",
+		Usage: "key from meta swan",
+		Value: Conf.Key,
 	}
 
 	TokenFlag = cli.StringFlag{
-		Name:    "token",
-		Aliases: []string{"t"},
-		Usage:   "token from meta swan",
-		Value:   Conf.Token,
+		Name:  "token",
+		Usage: "token from meta swan",
+		Value: Conf.Token,
 	}
 
 	ApiUrlFlag = cli.StringFlag{
@@ -233,20 +231,17 @@ func main() {
 				ArgsUsage: "[inputPath]",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:    "task-name",
-						Aliases: []string{"t"},
-						Usage:   "name of a task.",
+						Name:  "task-name",
+						Usage: "name of a task.",
 					},
 					&cli.StringFlag{
-						Name:    "input-dir",
-						Aliases: []string{"i"},
-						Usage:   "directory where source file(s) is(are) in.",
+						Name:  "input-dir",
+						Usage: "directory where source file(s) is(are) in.",
 					},
 					&cli.StringFlag{
-						Name:    "out-dir",
-						Aliases: []string{"o"},
-						Usage:   "directory where CAR file(s) will be generated.",
-						Value:   "/tmp/tasks",
+						Name:  "out-dir",
+						Usage: "directory where CAR file(s) will be generated.",
+						Value: "/tmp/tasks",
 					},
 					&cli.IntFlag{
 						Name:  "parallel",
@@ -254,16 +249,14 @@ func main() {
 						Value: 5,
 					},
 					&cli.Int64Flag{
-						Name:    "slice-size",
-						Aliases: []string{"slice"},
-						Usage:   "bytes of each piece",
-						Value:   17179869184,
+						Name:  "slice-size",
+						Usage: "bytes of each piece",
+						Value: 17179869184,
 					},
 					&cli.Int64Flag{
-						Name:    "group-size",
-						Aliases: []string{"group"},
-						Usage:   "bytes of each group",
-						Value:   171798691840,
+						Name:  "group-size",
+						Usage: "bytes of each group",
+						Value: 171798691840,
 					},
 					&KeyFlag,
 					&TokenFlag,

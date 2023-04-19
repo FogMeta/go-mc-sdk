@@ -277,7 +277,7 @@ func (m *MetaClient) GetDatasetsByGroupName(groupName string) ([]GetDatasetsByGr
 		Params:  params,
 		Id:      1,
 	}
-	logs.GetLogger().Infof("GetDatasetsByGroupName MetaUrl:%s ApiKey:%s ApiToken:%s Params:%+v", m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
+	//logs.GetLogger().Infof("GetDatasetsByGroupName MetaUrl:%s ApiKey:%s ApiToken:%s Params:%+v", m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
 	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
 	if err != nil {
 		logs.GetLogger().Errorf("Get Response Error: %s", err)
