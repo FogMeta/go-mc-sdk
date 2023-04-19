@@ -277,6 +277,7 @@ func (m *MetaClient) GetDatasetsByGroupName(groupName string) ([]GetDatasetsByGr
 		Params:  params,
 		Id:      1,
 	}
+	logs.GetLogger().Infof("GetDatasetsByGroupName MetaUrl:%s ApiKey:%s ApiToken:%s Params:%+v", m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
 	response, err := httpPost(m.MetaUrl, m.ApiKey, m.ApiToken, jsonRpcParams)
 	if err != nil {
 		logs.GetLogger().Errorf("Get Response Error: %s", err)
@@ -406,7 +407,6 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 		}
 
 	}
-
 	logs.GetLogger().Info("start to do dataset count is: ", len(todoSets))
 	for _, dataSet := range todoSets {
 		if dataSet.DatasetStatus != "ReadyForCarUpload" {
