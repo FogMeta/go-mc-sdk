@@ -163,15 +163,15 @@ func (m *MetaClient) GetDatasetList(datasetName string, pageNum, size int) (*Get
 	}
 	logs.GetLogger().Infof("meta GetDatasetList response: %+v", res)
 
-	datasetList := res.Result.Data.DatasetList
-	for index, dataset := range datasetList {
-		logs.GetLogger().Infof("Index: %d, Dataset: %+v", index, dataset)
-
-		ipfsList := dataset.IpfsList
-		for i, ipfsDetail := range ipfsList {
-			logs.GetLogger().Infof("IPFS Detail-%d: %+v", i, ipfsDetail)
-		}
-	}
+	//datasetList := res.Result.Data.DatasetList
+	//for index, dataset := range datasetList {
+	//	logs.GetLogger().Infof("Index: %d, Dataset: %+v", index, dataset)
+	//
+	//	ipfsList := dataset.IpfsList
+	//	for i, ipfsDetail := range ipfsList {
+	//		logs.GetLogger().Infof("IPFS Detail-%d: %+v", i, ipfsDetail)
+	//	}
+	//}
 
 	return &res.Result.Data, nil
 }
@@ -372,12 +372,15 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 
 	if len(todoSets) == 0 {
 		// split task to datasets
+		logs.GetLogger().Infof("start to group %s subdirectory of blocks and datastore", inputDir)
+
 		var groups []Group
 		blocksGroup := GreedyDataSet(PathJoin(inputDir, "blocks"), groupSizeLimit)
 		datastoreGroup := GreedyDataSet(PathJoin(inputDir, "datastore"), groupSizeLimit)
 		groups = append(groups, blocksGroup...)
 		groups = append(groups, datastoreGroup...)
 
+		logs.GetLogger().Infof("task dataset group count is %d", len(groups))
 		// update task include all datasets to meta server
 		var dataSets [][]IpfsData
 		for _, group := range groups {
@@ -398,7 +401,7 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 			return err
 		}
 
-		logs.GetLogger().Infof("report store source file")
+		logs.GetLogger().Infof("report store source file dataset count is %d", len(dataSets))
 
 		todoSets, err = m.GetDatasetsByGroupName(taskName)
 		if err != nil {
@@ -415,6 +418,7 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 		}
 
 		//
+		logs.GetLogger().Infof("Do dataset %+v: ", dataSet)
 		datasetListPager, err := m.GetDatasetList(dataSet.DatasetName, 0, 100000)
 		if err != nil {
 			logs.GetLogger().Error("failed to get dataset list from meta server and continue:", err)
@@ -427,6 +431,7 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 		}
 
 		fileList := datasetListPager.DatasetList[0].IpfsList
+		logs.GetLogger().Infof("get list count is %d", len(fileList))
 		group := Group{Size: 0}
 		for _, fl := range fileList {
 			group.Items = append(group.Items, FileInfo{
@@ -443,11 +448,15 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 
 		// Create CAR
 		carDir := PathJoin(outputDir, dataSet.DatasetName)
+		logs.GetLogger().Infof("to create car path:%s item count:%d, output:%s", group.Path, len(group.Items), carDir)
 		fileDescs, err := CreateGoCarFilesByConfig(group, &carDir, parallel, carSizeLimit)
 		if err != nil {
 			logs.GetLogger().Error("failed to creat car:", err)
 			continue
 		}
+
+		logs.GetLogger().Infof("CAR count is :%d", len(fileDescs))
+		break
 
 		// update all CAR to ipfs
 		sh := shell.NewShell(apiUrl)
