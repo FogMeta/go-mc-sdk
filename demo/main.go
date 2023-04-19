@@ -283,6 +283,7 @@ func buildClient(c *cli.Context) *sdk.MetaClient {
 	token := c.String("token")
 	metaUrl := c.String("meta-url")
 
+	logs.GetLogger().Infof("buildClient MetaUrl:%s ApiKey:%s ApiToken:%s", key, token, metaUrl)
 	metaClient := sdk.NewAPIClient(key, token, metaUrl)
 
 	return metaClient
