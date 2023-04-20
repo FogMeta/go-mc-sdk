@@ -456,8 +456,8 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 		}
 
 		logs.GetLogger().Infof("CAR count is :%d", len(fileDescs))
-		break
 
+		//break
 		// update all CAR to ipfs
 		sh := shell.NewShell(apiUrl)
 		var carList []*CarInfo
@@ -468,14 +468,16 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 				logs.GetLogger().Error("failed to upload CAR to IPFS:", err)
 				continue
 			}
-			carList = append(carList, &CarInfo{
+			carInfo := &CarInfo{
 				FileName:    desc.CarFileName,
 				DataCid:     desc.PayloadCid,
 				SourceSize:  desc.SourceFileSize,
 				CarSize:     desc.CarFileSize,
 				PieceCid:    desc.PieceCid,
 				DownloadUrl: PathJoin(gatewayUrl, "ipfs/", ipfsCid),
-			})
+			}
+			carList = append(carList, carInfo)
+			logs.GetLogger().Infof("upload CAR to IPFS:%+v", carInfo)
 		}
 
 		// report to meta server
@@ -485,6 +487,8 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 		}
 
 		logs.GetLogger().Info("successfully process one dataset:", dataSet.DatasetName)
+
+		break
 
 	}
 
