@@ -431,7 +431,7 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 		}
 
 		fileList := datasetListPager.DatasetList[0].IpfsList
-		logs.GetLogger().Infof("get list count is %d", len(fileList))
+		logs.GetLogger().Debugf("get list count is %d", len(fileList))
 		group := Group{Size: 0}
 		for _, fl := range fileList {
 			group.Items = append(group.Items, FileInfo{
@@ -448,21 +448,21 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 
 		// Create CAR
 		carDir := PathJoin(outputDir, dataSet.DatasetName)
-		logs.GetLogger().Infof("to create car path:%s item count:%d, output:%s", group.Path, len(group.Items), carDir)
+		logs.GetLogger().Debugf("to create car path:%s item count:%d, output:%s", group.Path, len(group.Items), carDir)
 		fileDescs, err := CreateGoCarFilesByConfig(group, &carDir, parallel, carSizeLimit)
 		if err != nil {
 			logs.GetLogger().Error("failed to creat car:", err)
 			continue
 		}
 
-		logs.GetLogger().Infof("CAR count is :%d", len(fileDescs))
+		logs.GetLogger().Infof("created CAR count is :%d", len(fileDescs))
 
 		//break
 		// update all CAR to ipfs
 		sh := shell.NewShell(apiUrl)
 		var carList []*CarInfo
 		for i, desc := range fileDescs {
-			logs.GetLogger().Infof("File Desc Index %d: %+v", i, desc)
+			logs.GetLogger().Debugf("File Desc Index %d: %+v", i, desc)
 			ipfsCid, err := uploadFileToIpfs(sh, desc.CarFilePath)
 			if err != nil {
 				logs.GetLogger().Errorf("failed to upload CAR %s to IPFS: %s", desc.CarFilePath, err)
@@ -477,7 +477,8 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 				DownloadUrl: PathJoin(gatewayUrl, "ipfs/", ipfsCid),
 			}
 			carList = append(carList, carInfo)
-			logs.GetLogger().Infof("upload CAR to IPFS:%+v", carInfo)
+			logs.GetLogger().Debugf("upload CAR to IPFS:%+v", carInfo)
+			logs.GetLogger().Infof("has upload %s to IPFS, and IPFS CID is %s", carInfo.FileName, ipfsCid)
 		}
 		if len(carList) != len(fileDescs) {
 			logs.GetLogger().Errorf("failed to upload dataset %s ALL CAR (%d/%d) to IPFS", dataSet.DatasetName, len(carList), len(fileDescs))
