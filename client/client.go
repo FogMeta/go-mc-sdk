@@ -418,7 +418,7 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 		}
 
 		//
-		logs.GetLogger().Infof("Do dataset %+v: ", dataSet)
+		logs.GetLogger().Infof("======== do dataset ======== %+v", dataSet)
 		datasetListPager, err := m.GetDatasetList(dataSet.DatasetName, 0, 100000)
 		if err != nil {
 			logs.GetLogger().Error("failed to get dataset list from meta server and continue:", err)
