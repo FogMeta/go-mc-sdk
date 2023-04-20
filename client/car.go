@@ -93,6 +93,7 @@ func CreateGoCarFilesByConfig(dataSet Group, outputDir *string, parallel int, ca
 
 func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 
+	os.RemoveAll(cmdGoCar.OutputDir)
 	err := utils.CreateDirIfNotExists(cmdGoCar.OutputDir, DIR_NAME_OUTPUT)
 	if err != nil {
 		logs.GetLogger().Error(err)
