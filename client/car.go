@@ -200,7 +200,7 @@ func (cmdGoCar *CmdGoCar) createFilesDescFromManifest() ([]*FileDesc, error) {
 		fileDesc.CarFileUrl = fileDesc.CarFileName
 		fileDesc.CarFilePath = filepath.Join(cmdGoCar.OutputDir, fileDesc.CarFileName)
 		fileDesc.PieceCid = fields[colMap[ColumnPieceCID]]
-		fileDesc.CarFileSize = utils.GetInt64FromStr(fields[colMap[ColumnPieceCID]])
+		fileDesc.CarFileSize = utils.GetInt64FromStr(fields[colMap[ColumnPieceSize]])
 
 		carFileDetail := fields[colMap[ColumnDetail]]
 
