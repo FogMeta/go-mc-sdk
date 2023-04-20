@@ -146,7 +146,7 @@ type ManifestDetail struct {
 }
 
 const (
-	ColumnPayloadCID  = "payload_cid"
+	ColumnPayloadCID  = "playload_cid"
 	ColumnFilename    = "filename"
 	ColumnPieceCID    = "piece_cid"
 	ColumnPieceSize   = "piece_size"
