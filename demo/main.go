@@ -226,17 +226,16 @@ func main() {
 				},
 			},
 			{
-				Name:      "car",
-				Usage:     "Generate CAR files of the specified size",
-				ArgsUsage: "[inputPath]",
+				Name:  "backup",
+				Usage: "Generate CAR files from IPFS data to backup",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
 						Name:  "task-name",
 						Usage: "name of a task.",
 					},
 					&cli.StringFlag{
-						Name:  "input-dir",
-						Usage: "directory where source file(s) is(are) in.",
+						Name:  "ipfs_repo",
+						Usage: "directory which IPFS repo is.",
 					},
 					&cli.StringFlag{
 						Name:  "out-dir",
@@ -254,8 +253,8 @@ func main() {
 						Value: 17179869184,
 					},
 					&cli.Int64Flag{
-						Name:  "group-size",
-						Usage: "bytes of each group",
+						Name:  "dataset-size",
+						Usage: "bytes of each dataset",
 						Value: 171798691840,
 					},
 					&KeyFlag,
@@ -264,7 +263,7 @@ func main() {
 					&GatewayUrlFlag,
 					&MetaUrlFlag,
 				},
-				Action: BuildCarByGroupDemo,
+				Action: BackupIpfsDataDemo,
 			},
 		},
 	}
@@ -430,7 +429,7 @@ func GetSourceFileStatusDemo(c *cli.Context) error {
 	return nil
 }
 
-func BuildCarByGroupDemo(c *cli.Context) error {
+func BackupIpfsDataDemo(c *cli.Context) error {
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
@@ -438,17 +437,17 @@ func BuildCarByGroupDemo(c *cli.Context) error {
 	}
 
 	taskName := c.String("task-name")
-	inputDir := c.String("input-dir")
+	repoDir := c.String("ipfs_repo")
 	outputDir := c.String("out-dir")
 	carLimit := c.Int64("slice-size")
-	groupLimit := c.Int64("group-size")
+	dataSetLimit := c.Int64("dataset-size")
 	parallel := c.Int("parallel")
 
 	apiUrl := c.String("api-url")
 	gatewayUrl := c.String("gateway-url")
 
 	//
-	err := metaClient.GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewayUrl, groupLimit, carLimit, parallel)
+	err := metaClient.BackupIpfsData(taskName, repoDir, outputDir, apiUrl, gatewayUrl, dataSetLimit, carLimit, parallel)
 	if err != nil {
 		logs.GetLogger().Error("failed to  generate CAR for datastore:", err)
 		return err

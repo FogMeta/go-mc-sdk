@@ -412,8 +412,9 @@ type FileInfo struct {
 	IsDir bool
 }
 
-type Group struct {
+type DataSet struct {
 	Index int
+	Name  string
 	Path  string
 	Size  int64
 	Items []FileInfo
@@ -504,7 +505,7 @@ func GetFileInfoList(dirPath string) []FileInfo {
 	return infos
 }
 
-func GreedyDataSet(dirPath string, givenSize int64) []Group {
+func GreedyDataSets(dirPath string, givenSize int64) []DataSet {
 
 	entrys := GetFileInfoList(dirPath)
 	if entrys == nil {
@@ -515,28 +516,28 @@ func GreedyDataSet(dirPath string, givenSize int64) []Group {
 		return entrys[i].Size > entrys[j].Size
 	})
 
-	var groups []Group
+	var groupDataSets []DataSet
 	gIndex := 0
-	curGroup := Group{Index: gIndex, Size: 0, Path: dirPath}
+	curDataSet := DataSet{Index: gIndex, Size: 0, Path: dirPath}
 	for _, entry := range entrys {
-		if curGroup.Size+entry.Size <= givenSize {
-			curGroup.Size += entry.Size
-			curGroup.Items = append(curGroup.Items, entry)
+		if curDataSet.Size+entry.Size <= givenSize {
+			curDataSet.Size += entry.Size
+			curDataSet.Items = append(curDataSet.Items, entry)
 		} else {
-			if len(curGroup.Items) != 0 {
-				groups = append(groups, curGroup)
+			if len(curDataSet.Items) != 0 {
+				groupDataSets = append(groupDataSets, curDataSet)
 				gIndex = gIndex + 1
-				curGroup = Group{Index: gIndex, Size: 0, Path: dirPath}
+				curDataSet = DataSet{Index: gIndex, Size: 0, Path: dirPath}
 			}
 
-			curGroup.Size += entry.Size
-			curGroup.Items = append(curGroup.Items, entry)
+			curDataSet.Size += entry.Size
+			curDataSet.Items = append(curDataSet.Items, entry)
 		}
 	}
 
-	if len(curGroup.Items) > 0 {
-		groups = append(groups, curGroup)
+	if len(curDataSet.Items) > 0 {
+		groupDataSets = append(groupDataSets, curDataSet)
 	}
 
-	return groups
+	return groupDataSets
 }

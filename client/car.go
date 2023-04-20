@@ -53,7 +53,7 @@ type FileDesc struct {
 	SourceId       *int
 }
 
-func GetCmdGoCar(dataSet Group, outputDir *string, parallel int, carFileSizeLimit int64) *CmdGoCar {
+func GetCmdGoCar(dataSet DataSet, outputDir *string, parallel int, carFileSizeLimit int64) *CmdGoCar {
 
 	var inputs []string
 	for _, fileInfo := range dataSet.Items {
@@ -63,7 +63,7 @@ func GetCmdGoCar(dataSet Group, outputDir *string, parallel int, carFileSizeLimi
 	cmdGoCar := &CmdGoCar{
 		Inputs:             inputs,
 		ParentPath:         dataSet.Path,
-		GraphName:          filepath.Base(dataSet.Path) + "-" + strconv.FormatInt(int64(dataSet.Index), 10),
+		GraphName:          filepath.Base(dataSet.Path) + "-" + dataSet.Name,
 		GocarFileSizeLimit: carFileSizeLimit,
 		GenerateMd5:        false,
 		GocarFolderBased:   true,
@@ -79,7 +79,7 @@ func GetCmdGoCar(dataSet Group, outputDir *string, parallel int, carFileSizeLimi
 	return cmdGoCar
 }
 
-func CreateGoCarFilesByConfig(dataSet Group, outputDir *string, parallel int, carFileSizeLimit int64) ([]*FileDesc, error) {
+func CreateGoCarFilesByConfig(dataSet DataSet, outputDir *string, parallel int, carFileSizeLimit int64) ([]*FileDesc, error) {
 
 	cmdGoCar := GetCmdGoCar(dataSet, outputDir, parallel, carFileSizeLimit)
 	fileDescs, err := cmdGoCar.CreateGoCarFiles()
@@ -121,7 +121,7 @@ func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
-	logs.GetLogger().Info("Car file for ", parentPath, " created")
+	logs.GetLogger().Infof("Car file for %s dataset %s created", parentPath, graphName)
 
 	fileDescs, err := cmdGoCar.createFilesDescFromManifest()
 	if err != nil {
