@@ -492,7 +492,7 @@ func (m *MetaClient) BackupIpfsData(taskName, repoDir, outputDir, apiUrl, gatewa
 		}
 		logs.GetLogger().Info("successfully process one dataset:", dataSet.DatasetName)
 
-		break
+		// break
 
 	}
 

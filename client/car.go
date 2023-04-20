@@ -130,7 +130,7 @@ func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 	}
 
 	logs.GetLogger().Info(len(fileDescs), " car files have been created to directory:", carDir)
-	logs.GetLogger().Info("Please upload car files to web server or ipfs server.")
+	// logs.GetLogger().Info("Please upload car files to web server or ipfs server.")
 
 	return fileDescs, nil
 }
