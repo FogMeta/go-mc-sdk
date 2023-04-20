@@ -463,7 +463,7 @@ func (m *MetaClient) GenCarByGroup(taskName, inputDir, outputDir, apiUrl, gatewa
 		var carList []*CarInfo
 		for i, desc := range fileDescs {
 			logs.GetLogger().Infof("File Desc Index %d: %+v", i, desc)
-			ipfsCid, err := uploadFileToIpfs(sh, PathJoin(desc.CarFilePath, desc.CarFileName))
+			ipfsCid, err := uploadFileToIpfs(sh, desc.CarFilePath)
 			if err != nil {
 				logs.GetLogger().Error("failed to upload CAR to IPFS:", err)
 				continue
