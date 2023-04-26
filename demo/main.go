@@ -24,17 +24,15 @@ func init() {
 	Conf = config.GetConfig("./client.toml")
 
 	KeyFlag = cli.StringFlag{
-		Name:    "key",
-		Aliases: []string{"k"},
-		Usage:   "key from meta swan",
-		Value:   Conf.Key,
+		Name:  "key",
+		Usage: "key from meta swan",
+		Value: Conf.Key,
 	}
 
 	TokenFlag = cli.StringFlag{
-		Name:    "token",
-		Aliases: []string{"t"},
-		Usage:   "token from meta swan",
-		Value:   Conf.Token,
+		Name:  "token",
+		Usage: "token from meta swan",
+		Value: Conf.Token,
 	}
 
 	ApiUrlFlag = cli.StringFlag{
@@ -228,20 +226,21 @@ func main() {
 				},
 			},
 			{
-				Name:      "car",
-				Usage:     "Generate CAR files of the specified size",
-				ArgsUsage: "[inputPath]",
+				Name:  "backup",
+				Usage: "Generate CAR files from IPFS data to backup",
 				Flags: []cli.Flag{
 					&cli.StringFlag{
-						Name:    "input-dir",
-						Aliases: []string{"i"},
-						Usage:   "directory where source file(s) is(are) in.",
+						Name:  "task-name",
+						Usage: "name of a task.",
 					},
 					&cli.StringFlag{
-						Name:    "out-dir",
-						Aliases: []string{"o"},
-						Usage:   "directory where CAR file(s) will be generated.",
-						Value:   "/tmp/tasks",
+						Name:  "ipfs_repo",
+						Usage: "directory which IPFS repo is.",
+					},
+					&cli.StringFlag{
+						Name:  "out-dir",
+						Usage: "directory where CAR file(s) will be generated.",
+						Value: "/tmp/tasks",
 					},
 					&cli.IntFlag{
 						Name:  "parallel",
@@ -249,19 +248,22 @@ func main() {
 						Value: 5,
 					},
 					&cli.Int64Flag{
-						Name:    "slice-size",
-						Aliases: []string{"slice"},
-						Usage:   "bytes of each piece",
-						Value:   17179869184,
+						Name:  "slice-size",
+						Usage: "bytes of each piece",
+						Value: 17179869184,
 					},
 					&cli.Int64Flag{
-						Name:    "group-size",
-						Aliases: []string{"group"},
-						Usage:   "bytes of each group",
-						Value:   1717986918400,
+						Name:  "dataset-size",
+						Usage: "bytes of each dataset",
+						Value: 171798691840,
 					},
+					&KeyFlag,
+					&TokenFlag,
+					&ApiUrlFlag,
+					&GatewayUrlFlag,
+					&MetaUrlFlag,
 				},
-				Action: BuildCarByGroupDemo,
+				Action: BackupIpfsDataDemo,
 			},
 		},
 	}
@@ -278,6 +280,7 @@ func buildClient(c *cli.Context) *sdk.MetaClient {
 	token := c.String("token")
 	metaUrl := c.String("meta-url")
 
+	// logs.GetLogger().Debugf("buildClient MetaUrl:%s ApiKey:%s ApiToken:%s", key, token, metaUrl)
 	metaClient := sdk.NewAPIClient(key, token, metaUrl)
 
 	return metaClient
@@ -426,24 +429,30 @@ func GetSourceFileStatusDemo(c *cli.Context) error {
 	return nil
 }
 
-func BuildCarByGroupDemo(c *cli.Context) error {
+func BackupIpfsDataDemo(c *cli.Context) error {
 	metaClient := buildClient(c)
 	if metaClient == nil {
 		logs.GetLogger().Error("create meta client failed, please check the input parameters")
 		return errors.New("create meta client failed")
 	}
 
-	inputDir := c.String("input-dir")
+	taskName := c.String("task-name")
+	repoDir := c.String("ipfs_repo")
 	outputDir := c.String("out-dir")
 	carLimit := c.Int64("slice-size")
-	groupLimit := c.Int64("group-size")
+	dataSetLimit := c.Int64("dataset-size")
 	parallel := c.Int("parallel")
-	err := metaClient.GenCarByGroup(inputDir, outputDir, groupLimit, carLimit, parallel)
+
+	apiUrl := c.String("api-url")
+	gatewayUrl := c.String("gateway-url")
+
+	//
+	err := metaClient.BackupIpfsData(taskName, repoDir, outputDir, apiUrl, gatewayUrl, dataSetLimit, carLimit, parallel)
 	if err != nil {
-		logs.GetLogger().Error("failed to  generate CAR by group:", err)
+		logs.GetLogger().Error("failed to  generate CAR for datastore:", err)
 		return err
 	}
-	logs.GetLogger().Infoln("generate CAR by group successfully")
+	logs.GetLogger().Infoln("generate CAR for datastore successfully")
 
 	return nil
 }

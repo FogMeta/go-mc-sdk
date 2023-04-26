@@ -88,6 +88,7 @@ type IpfsDataDetail struct {
 	DataSize    int64  `json:"data_size"`
 	IsDirectory bool   `json:"is_directory"`
 	DownloadUrl string `json:"download_url"`
+	SourceName  string `json:"source_name"`
 }
 
 // GetSourceFileInfo
@@ -163,6 +164,67 @@ type DownloadFileInfo struct {
 	DownloadUrl string `json:"download_url"`
 	IsDirectory bool   `json:"is_directory"`
 }
+
+// StoreSourceFileByGroup
+// func (api *ApiImpl) StoreSourceFileByGroup(ctx context.Context, groupName string, dataList [][]IpfsData) APIResp
+//type IpfsData struct {
+//	IpfsCid     string `json:"ipfs_cid"`
+//	SourceName  string `json:"source_name"`
+//	DataSize    int64  `json:"data_size"`
+//	IsDirectory bool   `json:"is_directory"`
+//	DownloadUrl string `json:"download_url"`
+//}
+
+type StoreSourceFileByGroupResponse struct {
+	JsonRpc string `json:"jsonrpc"`
+	Result  struct {
+		Code string `json:"code"` //success
+	} `json:"result"`
+	Id int `json:"id"`
+}
+
+// GetDatasetsByGroupName
+// func (api *ApiImpl) GetDatasetsByGroupName(ctx context.Context, groupName string) APIResp
+
+type GetDatasetsByGroupNameResponse struct {
+	JsonRpc string `json:"jsonrpc"`
+	Result  struct {
+		Code string                       `json:"code"`
+		Data []GetDatasetsByGroupNameResp `json:"data,omitempty"`
+	} `json:"result"`
+	Id int `json:"id"`
+}
+type GetDatasetsByGroupNameResp struct {
+	DatasetId     int64  `json:"dataset_id"`
+	DatasetName   string `json:"dataset_name"`
+	DatasetStatus string `json:"dataset_status"`
+}
+
+// StoreCarFiles
+// func (api *ApiImpl) StoreCarFiles(ctx context.Context, req StoreCarFilesReq) APIResp
+type StoreCarFilesReq struct {
+	DatasetId int64      `json:"dataset_id"`
+	CarList   []*CarInfo `json:"car_list"`
+}
+
+type CarInfo struct {
+	FileName    string `json:"file_name"`
+	DataCid     string `json:"data_cid"`
+	SourceSize  int64  `json:"source_size"`
+	CarSize     int64  `json:"car_size"`
+	PieceCid    string `json:"piece_cid"`
+	DownloadUrl string `json:"download_url"`
+}
+
+type StoreCarFilesResponse struct {
+	JsonRpc string `json:"jsonrpc"`
+	Result  struct {
+		Code string `json:"code"` //success
+	} `json:"result"`
+	Id int `json:"id"`
+}
+
+//////////////////////////////////////////
 
 type DagLink struct {
 	Hash struct {

@@ -18,6 +18,7 @@ all: build
 
 
 ffi:
+	git submodule update --init --recursive
 	./extern/filecoin-ffi/install-filcrypto
 .PHONY: ffi
 

@@ -14,7 +14,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"time"
 )
 
@@ -28,10 +27,12 @@ const (
 
 type CmdGoCar struct {
 	OutputDir          string   //required
-	InputDir           []string //required
+	Inputs             []string //required
+	ParentPath         string   //required
+	GraphName          string   //required
 	GenerateMd5        bool     //required
 	GocarFileSizeLimit int64    //required
-	GocarFolderBased   bool     //required
+	GocarFolderBased   bool     //required always true
 	Parallel           int
 }
 
@@ -52,12 +53,20 @@ type FileDesc struct {
 	SourceId       *int
 }
 
-func GetCmdGoCar(inputDir []string, outputDir *string, parallel int, carFileSizeLimit int64, carFolderBased, genMd5Flag bool) *CmdGoCar {
+func GetCmdGoCar(dataSet DataSet, outputDir *string, parallel int, carFileSizeLimit int64) *CmdGoCar {
+
+	var inputs []string
+	for _, fileInfo := range dataSet.Items {
+		inputs = append(inputs, fileInfo.Name)
+	}
+
 	cmdGoCar := &CmdGoCar{
-		InputDir:           inputDir,
+		Inputs:             inputs,
+		ParentPath:         dataSet.Path,
+		GraphName:          filepath.Base(dataSet.Path) + "-" + dataSet.Name,
 		GocarFileSizeLimit: carFileSizeLimit,
-		GenerateMd5:        genMd5Flag,
-		GocarFolderBased:   carFolderBased,
+		GenerateMd5:        false,
+		GocarFolderBased:   true,
 		Parallel:           parallel,
 	}
 
@@ -70,14 +79,9 @@ func GetCmdGoCar(inputDir []string, outputDir *string, parallel int, carFileSize
 	return cmdGoCar
 }
 
-func CreateGoCarFilesByConfig(group Group, outputDir *string, parallel int, carFileSizeLimit int64, carFolderBased bool) ([]*FileDesc, error) {
+func CreateGoCarFilesByConfig(dataSet DataSet, outputDir *string, parallel int, carFileSizeLimit int64) ([]*FileDesc, error) {
 
-	var inputs []string
-	for _, fileInfo := range group.Items {
-		inputs = append(inputs, fileInfo.Name)
-	}
-
-	cmdGoCar := GetCmdGoCar(inputs, outputDir, parallel, carFileSizeLimit, carFolderBased, false)
+	cmdGoCar := GetCmdGoCar(dataSet, outputDir, parallel, carFileSizeLimit)
 	fileDescs, err := cmdGoCar.CreateGoCarFiles()
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -87,23 +91,9 @@ func CreateGoCarFilesByConfig(group Group, outputDir *string, parallel int, carF
 	return fileDescs, nil
 }
 
-func RestoreCarFilesByConfig(inputDir []string, outputDir *string, parallel int) error {
-	cmdGoCar := GetCmdGoCar(inputDir, outputDir, parallel, 0, false, false)
-	err := cmdGoCar.RestoreCarToFiles()
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return err
-	}
-	return nil
-}
-
 func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
-	//err := utils.CheckDirExists(cmdGoCar.InputDir, DIR_NAME_INPUT)
-	//if err != nil {
-	//	logs.GetLogger().Error(err)
-	//	return nil, err
-	//}
 
+	os.RemoveAll(cmdGoCar.OutputDir)
 	err := utils.CreateDirIfNotExists(cmdGoCar.OutputDir, DIR_NAME_OUTPUT)
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -117,43 +107,22 @@ func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 		return nil, err
 	}
 
-	srcFiles, err := ioutil.ReadDir(cmdGoCar.InputDir)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return nil, err
-	}
-
 	carDir := cmdGoCar.OutputDir
 	Emptyctx := context.Background()
 	cb := graphsplit.CommPCallback(carDir, false, false)
 
-	if cmdGoCar.GocarFolderBased {
-		parentPath := cmdGoCar.InputDir
-		targetPath := parentPath
-		graphName := filepath.Base(parentPath)
-
-		logs.GetLogger().Info("Creating car file for ", parentPath)
-		err = graphsplit.ChunkMulti(Emptyctx, sliceSize, parentPath, []string{targetPath}, carDir, graphName, cmdGoCar.Parallel, cb)
-		if err != nil {
-			logs.GetLogger().Error(err)
-			return nil, err
-		}
-		logs.GetLogger().Info("Car file for ", parentPath, " created")
-	} else {
-		for _, srcFile := range srcFiles {
-			parentPath := filepath.Join(cmdGoCar.InputDir, srcFile.Name())
-			targetPath := parentPath
-			graphName := srcFile.Name()
-
-			logs.GetLogger().Info("Creating car file for ", parentPath)
-			err = graphsplit.ChunkMulti(Emptyctx, sliceSize, parentPath, []string{targetPath}, carDir, graphName, cmdGoCar.Parallel, cb)
-			if err != nil {
-				logs.GetLogger().Error(err)
-				return nil, err
-			}
-			logs.GetLogger().Info("Car file for ", parentPath, " created")
-		}
+	parentPath := cmdGoCar.ParentPath
+	targetPaths := cmdGoCar.Inputs
+	graphName := cmdGoCar.GraphName
+	parallel := cmdGoCar.Parallel
+	logs.GetLogger().Info("Creating car file for ", parentPath, " ", graphName)
+	err = graphsplit.ChunkMulti(Emptyctx, sliceSize, parentPath, targetPaths, carDir, graphName, parallel, cb)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
 	}
+	logs.GetLogger().Infof("Car file for %s dataset %s created", parentPath, graphName)
+
 	fileDescs, err := cmdGoCar.createFilesDescFromManifest()
 	if err != nil {
 		logs.GetLogger().Error(err)
@@ -161,75 +130,80 @@ func (cmdGoCar *CmdGoCar) CreateGoCarFiles() ([]*FileDesc, error) {
 	}
 
 	logs.GetLogger().Info(len(fileDescs), " car files have been created to directory:", carDir)
-	logs.GetLogger().Info("Please upload car files to web server or ipfs server.")
+	// logs.GetLogger().Info("Please upload car files to web server or ipfs server.")
 
 	return fileDescs, nil
 }
 
-func (cmdGoCar *CmdGoCar) RestoreCarToFiles() error {
-	//err := utils.CheckDirExists(cmdGoCar.InputDir, DIR_NAME_INPUT)
-	//if err != nil {
-	//	logs.GetLogger().Error(err)
-	//	return err
-	//}
-
-	err := utils.CreateDirIfNotExists(cmdGoCar.OutputDir, DIR_NAME_OUTPUT)
-	if err != nil {
-		logs.GetLogger().Error(err)
-		return err
-	}
-
-	graphsplit.CarTo(cmdGoCar.InputDir, cmdGoCar.OutputDir, cmdGoCar.Parallel)
-	graphsplit.Merge(cmdGoCar.OutputDir, cmdGoCar.Parallel)
-
-	logs.GetLogger().Info("car files have been restored to directory:", cmdGoCar.OutputDir)
-	return nil
-}
-
 type ManifestDetail struct {
-	Name string
-	Hash string
-	Size int
+	Name string `json:"Name"`
+	Hash string `json:"Hash"`
+	Size int    `json:"Size"`
 	Link []struct {
-		Name string
-		Hash string
-		Size int64
-	}
+		Name string `json:"Name"`
+		Hash string `json:"Hash"`
+		Size int64  `json:"Size"`
+	} `json:"Link"`
 }
+
+const (
+	ColumnPayloadCID  = "playload_cid"
+	ColumnFilename    = "filename"
+	ColumnPieceCID    = "piece_cid"
+	ColumnPieceSize   = "piece_size"
+	ColumnDetail      = "detail"
+	ColumnPayloadSize = "payload_size"
+)
+
+var colums = []string{ColumnPayloadCID, ColumnFilename, ColumnPieceCID, ColumnPieceSize, ColumnDetail}
 
 func (cmdGoCar *CmdGoCar) createFilesDescFromManifest() ([]*FileDesc, error) {
 	manifestFilename := "manifest.csv"
-	lines, err := utils.ReadAllLines(cmdGoCar.OutputDir, manifestFilename)
+
+	fileFullPath := filepath.Join(cmdGoCar.OutputDir, manifestFilename)
+	file, err := os.Open(fileFullPath)
+	if err != nil {
+		logs.GetLogger().Error("failed opening file: ", fileFullPath)
+		return nil, err
+	}
+	defer file.Close()
+	reader := csv.NewReader(file)
+	records, err := reader.ReadAll()
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
+	//
+	//lines, err := utils.ReadAllLines(cmdGoCar.OutputDir, manifestFilename)
+	//if err != nil {
+	//	logs.GetLogger().Error(err)
+	//	return nil, err
+	//}
 
 	fileDescs := []*FileDesc{}
-	for i, line := range lines {
+	colMap := make(map[string]int)
+	for i, fields := range records {
 		if i == 0 {
+			for pos, col := range fields {
+				colMap[col] = pos
+			}
+
+			for _, col := range colums {
+				if _, ok := colMap[col]; !ok {
+					return nil, fmt.Errorf("column %s not found", col)
+				}
+			}
 			continue
 		}
-
-		fields := strings.Split(line, ",")
-		if len(fields) < 5 {
-			err := fmt.Errorf("not enough fields in %s", manifestFilename)
-			logs.GetLogger().Error(err)
-			return nil, err
-		}
-
 		fileDesc := FileDesc{}
-		fileDesc.PayloadCid = fields[0]
+		fileDesc.PayloadCid = fields[colMap[ColumnPayloadCID]]
 		fileDesc.CarFileName = fileDesc.PayloadCid + ".car"
 		fileDesc.CarFileUrl = fileDesc.CarFileName
 		fileDesc.CarFilePath = filepath.Join(cmdGoCar.OutputDir, fileDesc.CarFileName)
-		fileDesc.PieceCid = fields[2]
-		fileDesc.CarFileSize = utils.GetInt64FromStr(fields[3])
+		fileDesc.PieceCid = fields[colMap[ColumnPieceCID]]
+		fileDesc.CarFileSize = utils.GetInt64FromStr(fields[colMap[ColumnPieceSize]])
 
-		carFileDetail := fields[4]
-		for i := 5; i < len(fields); i++ {
-			carFileDetail = carFileDetail + "," + fields[i]
-		}
+		carFileDetail := fields[colMap[ColumnDetail]]
 
 		manifestDetail := ManifestDetail{}
 		err = json.Unmarshal([]byte(carFileDetail), &manifestDetail)
@@ -238,16 +212,10 @@ func (cmdGoCar *CmdGoCar) createFilesDescFromManifest() ([]*FileDesc, error) {
 			return nil, err
 		}
 
-		if cmdGoCar.GocarFolderBased {
-			fileDesc.SourceFileName = filepath.Base(cmdGoCar.InputDir)
-			fileDesc.SourceFilePath = cmdGoCar.InputDir
-			for _, link := range manifestDetail.Link {
-				fileDesc.SourceFileSize = fileDesc.SourceFileSize + link.Size
-			}
-		} else {
-			fileDesc.SourceFileName = manifestDetail.Link[0].Name
-			fileDesc.SourceFilePath = filepath.Join(cmdGoCar.InputDir, fileDesc.SourceFileName)
-			fileDesc.SourceFileSize = int64(manifestDetail.Link[0].Size)
+		fileDesc.SourceFileName = cmdGoCar.GraphName
+		fileDesc.SourceFilePath = cmdGoCar.ParentPath
+		for _, link := range manifestDetail.Link {
+			fileDesc.SourceFileSize = fileDesc.SourceFileSize + link.Size
 		}
 
 		if cmdGoCar.GenerateMd5 {
