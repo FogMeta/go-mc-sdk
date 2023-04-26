@@ -133,7 +133,7 @@ func (m *MetaClient) ReportMetaClientServer(datasetName string, ipfsData []IpfsD
 	}
 	logs.GetLogger().Infof("meta StoreSourceFile response: %+v", res)
 
-	if res.Result.Code != "save_source_file_success" {
+	if res.Result.Code != "success" {
 		return errors.New("failed message from meta server")
 	}
 
