@@ -44,7 +44,7 @@ type StoreSourceFileResponse struct {
 	Result  struct {
 		Code    string `json:"code"`
 		Message string `json:"message,omitempty"`
-		Data    string `json:"data,omitempty"`
+		Data    int    `json:"data,omitempty"`
 	} `json:"result"`
 	Id int `json:"id"`
 }
