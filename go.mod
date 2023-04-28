@@ -4,7 +4,7 @@ go 1.19
 
 require (
 	github.com/BurntSushi/toml v1.2.1
-	github.com/filswan/go-swan-lib v0.2.138
+	github.com/filswan/go-swan-lib v0.2.139
 	github.com/ipfs/go-ipfs-api v0.4.0
 	github.com/urfave/cli/v2 v2.25.1
 )
@@ -32,7 +32,7 @@ require (
 	github.com/multiformats/go-base36 v0.2.0 // indirect
 	github.com/multiformats/go-multiaddr v0.8.0 // indirect
 	github.com/multiformats/go-multibase v0.1.1 // indirect
-	github.com/multiformats/go-multicodec v0.7.0 // indirect
+	github.com/multiformats/go-multicodec v0.8.0 // indirect
 	github.com/multiformats/go-multihash v0.2.1 // indirect
 	github.com/multiformats/go-varint v0.0.7 // indirect
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5 // indirect
@@ -48,5 +48,3 @@ require (
 	golang.org/x/sys v0.3.0 // indirect
 	lukechampine.com/blake3 v1.1.7 // indirect
 )
-
-replace github.com/filswan/go-swan-lib v0.2.138 => github.com/qinghua8080/go-swan-lib v0.2.139-0.20230323064203-82f8e6ed92da

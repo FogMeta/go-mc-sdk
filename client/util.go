@@ -1,14 +1,17 @@
 package client
 
 import (
+	"bytes"
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/filswan/go-swan-lib/client"
-	"github.com/filswan/go-swan-lib/client/web"
 	"github.com/filswan/go-swan-lib/logs"
 	shell "github.com/ipfs/go-ipfs-api"
+	"io"
 	"io/fs"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -71,12 +74,81 @@ func downloadFileByAria2(conf *Aria2Conf, downUrl, outPath string) error {
 }
 
 func httpPost(uri, key, token string, params interface{}) ([]byte, error) {
-	response, err := web.HttpRequestWithKey(http.MethodPost, uri, key, token, params)
+	response, err := HttpRequestWithKey(http.MethodPost, uri, key, token, params)
 	if err != nil {
 		logs.GetLogger().Error(err)
 		return nil, err
 	}
 	return response, nil
+}
+
+const HTTP_CONTENT_TYPE_FORM = "application/x-www-form-urlencoded"
+const HTTP_CONTENT_TYPE_JSON = "application/json; charset=UTF-8"
+
+func HttpRequestWithKey(httpMethod, uri, key, token string, params interface{}) ([]byte, error) {
+	var request *http.Request
+	var err error
+
+	switch params := params.(type) {
+	case io.Reader:
+		request, err = http.NewRequest(httpMethod, uri, params)
+		if err != nil {
+			logs.GetLogger().Error(err)
+			return nil, err
+		}
+		request.Header.Set("Content-Type", HTTP_CONTENT_TYPE_FORM)
+	default:
+		jsonReq, errJson := json.Marshal(params)
+		if errJson != nil {
+			logs.GetLogger().Error(errJson)
+			return nil, errJson
+		}
+
+		request, err = http.NewRequest(httpMethod, uri, bytes.NewBuffer(jsonReq))
+		if err != nil {
+			logs.GetLogger().Error(err)
+			return nil, err
+		}
+		request.Header.Set("Content-Type", HTTP_CONTENT_TYPE_JSON)
+	}
+
+	if len(strings.Trim(key, " ")) > 0 {
+		request.Header.Set("api_key", key)
+	}
+
+	if len(strings.Trim(token, " ")) > 0 {
+		request.Header.Set("api_token", token)
+	}
+
+	client := &http.Client{}
+	response, err := client.Do(request)
+
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	defer response.Body.Close()
+
+	if response.StatusCode != http.StatusOK {
+		err := fmt.Errorf("http status: %s, code:%d, url:%s", response.Status, response.StatusCode, uri)
+		logs.GetLogger().Error(err)
+		switch response.StatusCode {
+		case http.StatusNotFound:
+			logs.GetLogger().Error("please check your url:", uri)
+		case http.StatusUnauthorized:
+			logs.GetLogger().Error("Please check your key:", key, " and token:", token)
+		}
+		return nil, err
+	}
+
+	responseBody, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		logs.GetLogger().Error(err)
+		return nil, err
+	}
+
+	return responseBody, nil
 }
 
 func isFile(dirFullPath string) (*bool, error) {
