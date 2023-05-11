@@ -1,9 +1,9 @@
 package main
 
 import (
+	"log"
+
 	metacli "github.com/FogMeta/go-mc-sdk/client"
-	"github.com/filswan/go-swan-lib/logs"
-	"os"
 )
 
 func main() {
@@ -12,89 +12,68 @@ func main() {
 	// Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". It can be ignored if `[sender].offline_swan=true`.
 	token := "fca72014744019a949248874610fXXXX"
 	metaUrl := "http://{ip}:8099/rpc/v0"
-	metaClient := metacli.NewAPIClient(key, token, metaUrl)
+	apiUrl := "http://127.0.0.1:5001"
+	ipfsGateway := "http://127.0.0.1:8080"
+	aria2conf := &metacli.Aria2Conf{Host: "127.0.0.1", Port: 6800, Secret: "my_aria2_secret"}
+	metaClient := metacli.NewClient(key, token, &metacli.MetaConf{
+		MetaServer:  metaUrl,
+		IpfsApi:     apiUrl,
+		IpfsGateway: ipfsGateway,
+		Aria2Conf:   aria2conf,
+	})
 
 	// update file(s) in testdata to IPFS server
-	apiUrl := "http://127.0.0.1:5001"
 	inputPath := "./testdata"
-	ipfsCid, err := metaClient.UploadFile(apiUrl, inputPath)
+	ipfsData, err := metaClient.Upload(inputPath)
 	if err != nil {
-		logs.GetLogger().Error("upload failed:", err)
+		log.Println("upload failed:", err)
 		return
 	}
-	logs.GetLogger().Infoln("upload success, and ipfs cid is: ", ipfsCid)
+	log.Println("upload success, and ipfs data: ", ipfsData)
 
 	// report ipfs cid to meta server
 	datasetName := "dataset-name"
-	ipfsGateway := "http://127.0.0.1:8080"
-	sourceName := inputPath
-	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-
-	info, err := os.Stat(sourceName)
+	err = metaClient.Backup(datasetName, ipfsData)
 	if err != nil {
-		logs.GetLogger().Error("get ipfs cid stat information error:", err)
+		log.Println("report meta client server  failed:", err)
 		return
 	}
-	oneItem := metacli.IpfsData{}
-	oneItem.SourceName = sourceName
-	oneItem.IpfsCid = ipfsCid
-	oneItem.DataSize = info.Size()
-	oneItem.IsDirectory = info.IsDir()
-	oneItem.DownloadUrl = metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
-	ipfsData := []metacli.IpfsData{oneItem}
-	err = metaClient.ReportMetaClientServer(datasetName, ipfsData)
-	if err != nil {
-		logs.GetLogger().Error("report meta client server  failed:", err)
-		return
-	}
-	logs.GetLogger().Infoln("report meta client server success")
+	log.Println("report meta client server success")
 
 	// download file(s) from IPFS server
-	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
 	outPath := "./output"
 	downloadUrl := "http://127.0.0.1:8080/ipfs/QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-	host := "127.0.0.1"
-	port := 6800
-	secret := "my_aria2_secret"
-	conf := &metacli.Aria2Conf{Host: host, Port: port, Secret: secret}
-	err = metaClient.DownloadFile(ipfsCid, outPath, downloadUrl, conf)
+
+	err = metaClient.Download(ipfsData.IpfsCid, outPath, downloadUrl)
 	if err != nil {
-		logs.GetLogger().Error("download failed:", err)
+		log.Println("download failed:", err)
 		return
 	}
-	logs.GetLogger().Infoln("download success")
+	log.Println("download success")
 
 	// get dataset list from meta server
-	datasetName = "dataset-name"
-	pageNum := 0
-	size := 10
-	datasetListPager, err := metaClient.GetDatasetList(datasetName, pageNum, size)
+	datasetListPager, err := metaClient.List(datasetName, 0, 10)
 	if err != nil {
-		logs.GetLogger().Error("get dataset list failed:", err)
+		log.Println("get dataset list failed:", err)
 		return
 	}
-	logs.GetLogger().Infof("get dataset list success: %+v", datasetListPager)
+	log.Printf("get dataset list success: %+v\n", datasetListPager)
 
 	// get source file information
-	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-	ipfsDataDetail, err := metaClient.GetSourceFileInfo(ipfsCid)
+	ipfsDataDetail, err := metaClient.SourceFileInfo(ipfsData.IpfsCid)
 	if err != nil {
-		logs.GetLogger().Error("get source file information failed:", err)
+		log.Println("get source file information failed:", err)
 		return
 	}
-	logs.GetLogger().Infof("get source file information success: %+v", ipfsDataDetail)
+	log.Printf("get source file information success: %+v\n", ipfsDataDetail)
 
 	// get source file status
-	datasetName = "dataset-name"
-	ipfsCid = "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-	pageNum = 0
-	size = 10
-	sourceFileStatusPager, err := metaClient.GetSourceFileStatus(datasetName, ipfsCid, pageNum, size)
+	sourceFileStatusPager, err := metaClient.ListStatus(datasetName, ipfsData.IpfsCid, 0, 10)
 	if err != nil {
-		logs.GetLogger().Error("get source file status failed:", err)
+		log.Println("get source file status failed:", err)
 		return
 	}
-	logs.GetLogger().Infof("get source file status success: %+v", sourceFileStatusPager)
+	log.Printf("get source file status success: %+v\n", sourceFileStatusPager)
 
 	return
 }

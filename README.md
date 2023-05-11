@@ -26,11 +26,10 @@ Meta-Client is a Web3 data service that securely stores data backups and enables
 
 Before using `go-mc-sdk`, you need to install the following services:
 
-- Aria2 service
+- Aria2 service (used to download file)
 
 ```
-sudo apt install aria2
-
+sudo apt install aria2 
 ```
 - [IPFS service](https://docs.ipfs.tech/install/command-line/#install-official-binary-distributions)
 - [Go](https://golang.org/dl/) (1.16 or later)
@@ -46,277 +45,75 @@ go get github.com/FogMeta/go-mc-sdk
 
 ## Usage
 
-### [Initialization](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#newapiclient)
-
-First, you need to create a Meta Client object, which can be initialized as follows:
+### [New client](document/api.md#newclient)
 
 ```
-package main
-
-import (
-    metacli "github.com/FogMeta/go-mc-sdk/client"
-)
-
-func main() {
-    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
     key := "V0schjjl_bxCtSNwBYXXXX"
-    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
     token := "fca72014744019a949248874610fXXXX"
-    metaUrl := "http://{ip}:8099/rpc/v0"
-    metaClient := metacli.NewAPIClient(key, token, metaUrl)
-}
+    metaClient := client.NewClient(key, token, &client.MetaConf{
+        MetaServer: "", // client server
+        IpfsApi:"",     // for upload
+        IpfsGateway:"", // for download
+        Aria2Conf:&client.Aria2Conf{ // for download
+            Host:"",
+            Port:"",
+            Secret:""
+        }
+    })
 ```
-### [Upload files or directories](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#uploadfile) 
-To upload files or directories to the IPFS gateway and Filecoin network, you can use the following method:
+>`key` : Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 
-```
-package main
+>`token`: Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 
-import (
-    metacli "github.com/FogMeta/go-mc-sdk/client"
-    "github.com/filswan/go-swan-lib/logs"
-)
+### [Upload](document/api.md#upload) 
 
-func main() {
-    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings".
-    key := "V0schjjl_bxCtSNwBYXXXX"
-    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings".
-    token := "fca72014744019a949248874610fXXXX"
-    metaUrl := "http://{ip}:8099/rpc/v0"
-    metaClient := metacli.NewAPIClient(key, token, metaUrl)
+`UploadFile` uploads file to the IPFS server, support file & directory
 
-    // upload files in testdata to the IPFS server
-    apiUrl := "http://127.0.0.1:5001"
-    inputPath := "./testdata"
-    ipfsCid, err := metaClient.UploadFile(apiUrl, inputPath)
-    if err != nil {
-        logs.GetLogger().Error("upload failed:", err)
-        return
-    }
-    logs.GetLogger().Infoln("upload successful, IPFS CID: ", ipfsCid)
-
-    return
-}
-```
-
-### [Report the data information](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#reportmetaclientserver)
-To report data information to the Meta Client server, you can use the following method:
 
 ```
-package main
-
-import (
-    metacli "github.com/FogMeta/go-mc-sdk/client"
-    "github.com/filswan/go-swan-lib/logs"
-)
-
-func main() {
-    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
-    key := "V0schjjl_bxCtSNwBYXXXX"
-    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
-    token := "fca72014744019a949248874610fXXXX"
-    metaUrl := "http://{ip}:8099/rpc/v0"
-    metaClient := metacli.NewAPIClient(key, token, metaUrl)
-
-    // report ipfs cid to meta server
-    apiUrl := "http://127.0.0.1:5001"
-    inputPath := "./testdata"
-	
-    datasetName := "dataset-name"
-    ipfsGateway := "http://127.0.0.1:8080"
-    sourceName := inputPath
-    ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-
-    info, err := os.Stat(sourceName)
-    if err != nil {
-        logs.GetLogger().Error("Failed to get the file information, error:", err)
-        return
-    }
-    oneItem := metacli.IpfsData{}
-    oneItem.SourceName = sourceName
-    oneItem.IpfsCid = ipfsCid
-    oneItem.DataSize = info.Size()
-    oneItem.IsDirectory = info.IsDir()
-    oneItem.DownloadUrl = metacli.PathJoin(ipfsGateway, "ipfs/", ipfsCid)
-    ipfsData := []metacli.IpfsData{oneItem}
-    err = metaClient.ReportMetaClientServer(datasetName, ipfsData)
-    if err != nil {
-        logs.GetLogger().Error("failed to report the dataset info to the server, error:", err)
-        return
-    }
-    logs.GetLogger().Infoln("the dataset has been successfully reported to the server., dataset name:", datasetName)
-
-    return
-}
+    ipfsData, err := metaClient.Upload("./testdata")
 ```
 
-### [Download Files or Directories](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#downloadfile)
-To download files or directories from the IPFS gateway and Filecoin network, you can use the following method:
+### [Backup](document/api.md#backup)
+
+`BackupFile` backups uploaded files with the given `datasetName`
 
 ```
-package main
-
-import (
-    metacli "github.com/FogMeta/go-mc-sdk/client"
-    "github.com/filswan/go-swan-lib/logs"
-)
-
-func main() {
-    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
-    key := "V0schjjl_bxCtSNwBYXXXX"
-    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
-    token := "fca72014744019a949248874610fXXXX"
-    metaUrl := "http://{ip}:8099/rpc/v0"
-    metaClient := metacli.NewAPIClient(key, token, metaUrl)
-
-    // download the file from IPFS gateway to your local
-    ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-    outPath := "./output"
-    downloadUrl := "http://127.0.0.1:8080/ipfs/QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-    host := "127.0.0.1"
-    port := 6800
-    secret := "my_aria2_secret"
-    conf := &metacli.Aria2Conf{Host: host, Port: port, Secret: secret}
-    err := metaClient.DownloadFile(ipfsCid, outPath, downloadUrl, conf)
-    if err != nil {
-        logs.GetLogger().Error("failed to download the file", err)
-        return
-    }
-    logs.GetLogger().Infoln("the file has been downloaded successfully")
-    
-    return
-}
+    err = metaClient.Backup("dataset-name", ipfsData)
 ```
 
-### [Get the dataset list by the dataset name](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#getdatasetlist)
-To get the dataset list by dataset name, you can use the following method:
+### [Download](document/api.md#download)
+
+`Download` downloads files related with ipfsCid to `outPath`, support download specific url to `outPath`
 
 ```
-package main
-
-import (
-    metacli "github.com/FogMeta/go-mc-sdk/client"
-    "github.com/filswan/go-swan-lib/logs"
-)
-
-func main() {
-    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
-    key := "V0schjjl_bxCtSNwBYXXXX"
-    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
-    token := "fca72014744019a949248874610fXXXX"
-    metaUrl := "http://{ip}:8099/rpc/v0"
-    metaClient := metacli.NewAPIClient(key, token, metaUrl)
-
-    // get the dataset list from meta server
-    datasetName := "dataset-name"
-    pageNum := 0
-    size := 10
-    datasetListPager, err := metaClient.GetDatasetList(datasetName, pageNum, size)
-    if err != nil {
-        logs.GetLogger().Error("failed to get the dataset list:", err)
-        return
-    }
-    logs.GetLogger().Infof("get the dataset list successfully: %+v", datasetListPager)
-
-    return
-}
-
+    err := metaClient.Download(ipfsCid, outPath)              // download all files related with ipfsCid to outPath
+    err := metaClient.Download(ipfsCid, outPath, downloadUrl) // download specific url to outPath
 ```
 
-### [Get the source file information by IPFS CID](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#getsourcefileinfo)
-To get the dataset file information by IPFS CID, you can use the following method:
+### [List](document/api.md#list)
+
+`List` lists files related with the `backup` `datasetName`
 
 ```
-package main
-
-import (
-    metacli "github.com/FogMeta/go-mc-sdk/client"
-    "github.com/filswan/go-swan-lib/logs"
-)
-
-func main() {
-    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
-    key := "V0schjjl_bxCtSNwBYXXXX"
-    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
-    token := "fca72014744019a949248874610fXXXX"
-    metaUrl := "http://{ip}:8099/rpc/v0"
-    metaClient := metacli.NewAPIClient(key, token, metaUrl)
-	
-    // get source file information
-    ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-    ipfsDataDetail, err := metaClient.GetSourceFileInfo(ipfsCid)
-    if err != nil {
-        logs.GetLogger().Error("get source file information failed:", err)
-        return
-    }
-    logs.GetLogger().Infof("get source file information successfully: %+v", ipfsDataDetail)
-
-    return
-}
+    pageNum := 0 // start from 0
+    pageSize := 10
+    datasetListPager, err := metaClient.GetDatasetList("dataset-name", pageNum, pageSize)
 ```
 
-### [Get source file status](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#getsourcefilestatus)
-To get the source file status by dataset name and IPFS CID, you can use the following method:
+### [ListStatus](document/api.md#liststatus)
+
+`ListStatus` lists the status of files related with the `backup` `datasetName` & `ipfsCid`
 
 ```
-package main
-
-import (
-    metacli "github.com/FogMeta/go-mc-sdk/client"
-    "github.com/filswan/go-swan-lib/logs"
-)
-
-func main() {
-    // Swan API key. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
-    key := "V0schjjl_bxCtSNwBYXXXX"
-    // Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings".
-    token := "fca72014744019a949248874610fXXXX"
-    metaUrl := "http://{ip}:8099/rpc/v0"
-    metaClient := metacli.NewAPIClient(key, token, metaUrl)
-
-    // get source file status
-    datasetName := "dataset-name"
-    ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-    pageNum := 0
-    size := 10
-    sourceFileStatusPager, err := metaClient.GetSourceFileStatus(datasetName, ipfsCid, pageNum, size)
-    if err != nil {
-        logs.GetLogger().Error("failed to get the status of source file:", err)
-        return
-    }
-    logs.GetLogger().Infof("get source file status successfully: %+v", sourceFileStatusPager)
-
-    return
-}
-```
-
-
-### [Get IPFS CID Information](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#getipfscidstat)
-To get file or directory information of IPFS CID, you can use the following method:
-
-```
-package main
-
-import (
-    metacli "github.com/FogMeta/go-mc-sdk/client"
-    "github.com/filswan/go-swan-lib/logs"
-)
-
-func main() {
-    apiUrl := "http://127.0.0.1:5001"
-    ipfsCid := "QmQgM2tGEduvYmgYy54jZaZ9D7qtsNETcog8EHR8XoeyEp"
-    info, err := metacli.GetIpfsCidInfo(apiUrl, ipfsCid)
-    if err != nil {
-        logs.GetLogger().Error("Failed to get IPFS CID information:", err)
-        return
-    }
-    logs.GetLogger().Infof("get information successfully, IPFS CID: %s, Data Size:%d, Is Directory:%t.", info.IpfsCid, info.DataSize, info.IsDirectory)
-}
+    pageNum := 0 // start from 0
+    pageSize := 10
+    datasetListPager, err := metaClient.ListStatus("dataset-name", ipfsCid, pageNum, pageSize)
 ```
 
 ## API Documentation
 
-For detailed API lists, please check out the [API Documentation](document/api.md ':include').
+For more details, please check out the [API Documentation](document/api.md ':include').
 
 ## Contributing
 

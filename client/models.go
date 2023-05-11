@@ -1,12 +1,10 @@
 package client
 
-type ClientConf struct {
-	Key            string    `toml:"key"`
-	Token          string    `toml:"token"`
-	IpfsApiUrl     string    `toml:"ipfs_api_url"`
-	IpfsGatewayUrl string    `toml:"ipfs_gateway_url"`
-	MetaServerUrl  string    `toml:"meta_server_url"`
-	Aria2          Aria2Conf `toml:"aria2"`
+type MetaConf struct {
+	MetaServer  string
+	IpfsApi     string     // for upload
+	IpfsGateway string     // for download
+	Aria2Conf   *Aria2Conf // for download
 }
 
 type Aria2Conf struct {
@@ -52,23 +50,23 @@ type StoreSourceFileResponse struct {
 // GetDatasetList
 // GetDatasetList(ctx context.Context, req GetDatasetListReq) APIResp
 
-type GetDatasetListReq struct {
+type DatasetListReq struct {
 	DatasetName string `json:"dataset_name"`
 	PageNum     int    `json:"page_num"`
 	Size        int    `json:"size"`
 }
 
-type GetDatasetListResponse struct {
+type DatasetListResponse struct {
 	JsonRpc string `json:"jsonrpc"`
 	Result  struct {
-		Code    string              `json:"code"`
-		Message string              `json:"message,omitempty"`
-		Data    GetDatasetListPager `json:"data,omitempty"`
+		Code    string           `json:"code"`
+		Message string           `json:"message,omitempty"`
+		Data    DatasetListPager `json:"data,omitempty"`
 	} `json:"result"`
 	Id int `json:"id"`
 }
 
-type GetDatasetListPager struct {
+type DatasetListPager struct {
 	Total       int64            `json:"total"`
 	PageCount   int64            `json:"pageCount"`
 	DatasetList []*DatasetDetail `json:"dataset_list"`
@@ -93,12 +91,12 @@ type IpfsDataDetail struct {
 // GetSourceFileInfo
 // func (api *ApiImpl) GetSourceFileInfo(ctx context.Context, ipfsCid string) APIResp
 
-type GetSourceFileInfoResponse struct {
+type SourceFileInfoResponse struct {
 	JsonRpc string `json:"jsonrpc"`
 	Result  struct {
-		Code    string           `json:"code"`
-		Message string           `json:"message,omitempty"`
-		Data    []IpfsDataDetail `json:"data,omitempty"`
+		Code    string            `json:"code"`
+		Message string            `json:"message,omitempty"`
+		Data    []*IpfsDataDetail `json:"data,omitempty"`
 	} `json:"result"`
 	Id int `json:"id"`
 }
@@ -106,24 +104,24 @@ type GetSourceFileInfoResponse struct {
 // GetSourceFileStatus
 // func (api *ApiImpl) GetSourceFileStatus(ctx context.Context, req GetSourceFileStatusReq) APIResp
 
-type GetSourceFileStatusReq struct {
+type SourceFileStatusReq struct {
 	DatasetName string `json:"dataset_name"`
 	IpfsCid     string `json:"ipfs_cid"`
 	PageNum     int    `json:"page_num"`
 	Size        int    `json:"size"`
 }
 
-type GetSourceFileStatusResponse struct {
+type SourceFileStatusResponse struct {
 	JsonRpc string `json:"jsonrpc"`
 	Result  struct {
-		Code    string                   `json:"code"`
-		Message string                   `json:"message,omitempty"`
-		Data    GetSourceFileStatusPager `json:"data,omitempty"`
+		Code    string                `json:"code"`
+		Message string                `json:"message,omitempty"`
+		Data    SourceFileStatusPager `json:"data,omitempty"`
 	} `json:"result"`
 	Id int `json:"id"`
 }
 
-type GetSourceFileStatusPager struct {
+type SourceFileStatusPager struct {
 	Total     int64              `json:"total"`
 	PageCount int64              `json:"pageCount"`
 	CarList   []*SplitFileDetail `json:"car_list"`
@@ -155,9 +153,9 @@ type StorageProvider struct {
 type DownloadFileInfoResponse struct {
 	JsonRpc string `json:"jsonrpc"`
 	Result  struct {
-		Code    string             `json:"code"`
-		Message string             `json:"message,omitempty"`
-		Data    []DownloadFileInfo `json:"data,omitempty"`
+		Code    string              `json:"code"`
+		Message string              `json:"message,omitempty"`
+		Data    []*DownloadFileInfo `json:"data,omitempty"`
 	} `json:"result"`
 	Id int `json:"id"`
 }
