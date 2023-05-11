@@ -45,7 +45,7 @@ go get github.com/FogMeta/go-mc-sdk
 
 ## Usage
 
-### [New client](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#newapiclient)
+### [New client](document/api.md#newapiclient)
 
 ```
     key := "V0schjjl_bxCtSNwBYXXXX"
@@ -65,7 +65,7 @@ go get github.com/FogMeta/go-mc-sdk
 
 >`token`: Swan API access token. Acquire from [Swan Platform](https://console.filswan.com/#/dashboard) -> "My Profile"->"Developer Settings". 
 
-### [Upload](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#upload) 
+### [Upload](document/api.md#upload) 
 
 `UploadFile` uploads file to the IPFS server, support file & directory
 
@@ -74,7 +74,7 @@ go get github.com/FogMeta/go-mc-sdk
     ipfsData, err := metaClient.Upload("./testdata")
 ```
 
-### [Backup](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#backup)
+### [Backup](document/api.md#backup)
 
 `BackupFile` backups uploaded files with the given `datasetName`
 
@@ -82,7 +82,7 @@ go get github.com/FogMeta/go-mc-sdk
     err = metaClient.Backup("dataset-name", ipfsData)
 ```
 
-### [Download](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#download)
+### [Download](document/api.md#download)
 
 `Download` downloads files related with ipfsCid to `outPath`, support download specific url to `outPath`
 
@@ -91,7 +91,7 @@ go get github.com/FogMeta/go-mc-sdk
     err := metaClient.Download(ipfsCid, outPath, downloadUrl) // download specific url to outPath
 ```
 
-### [List](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#list)
+### [List](document/api.md#list)
 
 `List` lists files related with the `backup` `datasetName`
 
@@ -101,7 +101,7 @@ go get github.com/FogMeta/go-mc-sdk
     datasetListPager, err := metaClient.GetDatasetList("dataset-name", pageNum, pageSize)
 ```
 
-### [ListStatus](https://github.com/FogMeta/go-mc-sdk/blob/main/document/api.md#list)
+### [ListStatus](document/api.md#list)
 
 `ListStatus` lists the status of files related with the `backup` `datasetName` & `ipfsCid`
 
