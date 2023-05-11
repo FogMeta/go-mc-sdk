@@ -45,7 +45,7 @@ go get github.com/FogMeta/go-mc-sdk
 
 ## Usage
 
-### [New client](document/api.md#newapiclient)
+### [New client](document/api.md#newclient)
 
 ```
     key := "V0schjjl_bxCtSNwBYXXXX"
@@ -101,7 +101,7 @@ go get github.com/FogMeta/go-mc-sdk
     datasetListPager, err := metaClient.GetDatasetList("dataset-name", pageNum, pageSize)
 ```
 
-### [ListStatus](document/api.md#list)
+### [ListStatus](document/api.md#liststatus)
 
 `ListStatus` lists the status of files related with the `backup` `datasetName` & `ipfsCid`
 
